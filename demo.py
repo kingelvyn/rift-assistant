@@ -28,21 +28,20 @@ def build_mulligan_state_from_db() -> GameState:
     # You can grab them from /cards or directly from DotGG's JSON.
     my_hand_ids = [
         "OGN-179",  # Acceptable Losses (example)
-        "OGN-007",  # Fury Rune (will be skipped unless included)
-        "OGN-001",  # some unit
-        "OGN-002",  # some spell
-        "OGN-003",  # some gear
+        "OGN-045",  # some unit
+        "OGN-185",  # some spell
+        "OGN-192",  # some gear
     ]
 
     hand = make_hand_from_ids(my_hand_ids)
 
     me = PlayerState(
         name="elyvn",
-        leader_id="KaiSa",
+        leader_id="Yasuo",
         mana_total=0,
         mana_by_rune={
-            Rune.FURY: 0,
-            Rune.CALM: 0,
+            Rune.CHAOS: 1,
+            Rune.CALM: 1,
         },
         deck_size=35,
         hand_size=len(hand),

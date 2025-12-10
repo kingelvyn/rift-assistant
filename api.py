@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 
-from advisor import get_simple_advice
+from advisor import get_simple_advice, get_mulligan_advice, MulliganAdvice, MulliganCardDecision
 from game_state import GameState, Rune, CardType
 from card_db import init_db, CardRecord, get_card, list_cards, upsert_card, count_cards
 
@@ -14,6 +14,10 @@ def on_startup() -> None:
 
 class AdviceResponse(BaseModel):
     advice: str
+
+class MulliganAdviceResponse(BaseModel):
+    decisions: List[MulliganCardDecision]
+    summary: str
 
 class CardResponse(CardRecord):
     pass
@@ -39,6 +43,22 @@ def health() -> dict:
 def advice_endpoint(state: GameState) -> AdviceResponse:
     text = get_simple_advice(state)
     return AdviceResponse(advice=text)
+
+@app.post("/advice/mulligan", response_model=MulliganAdviceResponse)
+def mulligan_advice_endpoint(state: GameState) -> MulliganAdviceResponse:
+    """
+    Given a GameState in mulligan phase, return which cards to keep vs. mulligan.
+
+    Expects:
+    - state.phase == "mulligan"
+    - state.me.hand populated with CardInHand objects
+    """
+    advice = get_mulligan_advice(state)
+    return MulliganAdviceResponse(
+        decisions=advice.decisions,
+        summary=advice.summary,
+    )
+
 
 @app.get("/cards", response_model=List[CardResponse])
 def list_cards_endpoint(
