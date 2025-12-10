@@ -21,8 +21,8 @@ A Python-based assistant for the Riftbound card game by Riot Games. This project
 
 1. Clone this repository:
 ```bash
-git clone <your-github-repo-url>
-cd riftbound-assistant
+git clone https://github.com/kingelvyn/rift-assistant.git
+cd rift-assistant
 ```
 
 2. Create a virtual environment:
@@ -151,9 +151,8 @@ The card database stores:
 
 ## License
 
-[Add your license here]
+See [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-[Add contribution guidelines if needed]
-
+Contributions are welcome! Please feel free to submit a Pull Request.
