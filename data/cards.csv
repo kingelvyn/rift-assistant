@@ -1,0 +1,703 @@
+card_id,name,card_type,domain,energy_cost,power_cost,might,tags,keywords,rules_text,set_name
+OGN-179,Acceptable Losses,spell,chaos,1,0,,,,ACTION (Play on your turn or in showdowns.) Each player kills one of their gear.,Origins
+OGN-056,Adaptatron,unit,calm,4,0,3,"Mech, Piltover",,"When I conquer, you may kill a gear. If you do, buff me. (If I don't have a buff, I get a +1 [might] buff.)",Origins
+SFD-001,Against the Odds,spell,fury,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)Give a friendly unit at a battlefield +2 :rb_might: this turn for each enemy unit there.",Spiritforged
+OGN-066,Ahri - Alluring,unit,calm,5,0,4,"Ahri, Ionia",,"When I hold, you score 1 point.",Origins
+OGN-066-p,Ahri - Alluring,unit,calm,5,0,4,"Ahri, Ionia",,"When I hold, you score 1 point.",Origins
+OGN-066a,Ahri - Alluring,unit,calm,5,0,4,"Ahri, Ionia",,"When I hold, you score 1 point.",Origins
+OGN-119,Ahri - Inquisitive,unit,mind,3,0,3,"Ahri, Ionia",,"When I attack or defend, give an enemy unit here -2 [might] this turn, to a minimum of 1 [might].",Origins
+OGN-119a,Ahri - Inquisitive,unit,mind,3,0,3,"Ahri, Ionia",,"When I attack or defend, give an enemy unit here -2 [might] this turn, to a minimum of 1 [might].",Origins
+SFD-227,Ahri - Inquisitive,unit,mind,3,0,3,Ahri,,"When I attack or defend, give an enemy unit here -2 :rb_might: this turn, to a minimum of 1 :rb_might:.",Spiritforged
+SFD-227-STAR,Ahri - Inquisitive,unit,mind,3,0,3,Ahri,,"When I attack or defend, give an enemy unit here -2 :rb_might: this turn, to a minimum of 1 :rb_might:.",Spiritforged
+OGN-255,Ahri - Nine-Tailed Fox,unit,calm,0,0,,Ahri,,"When an enemy unit attacks a battlefield you control, give it -1 [might] this turn, to a minimum of 1 [might]",Origins
+OGN-255-P,Ahri - Nine-Tailed Fox,unit,calm,0,0,,Ahri,,"When an enemy unit attacks a battlefield you control, give it -1 [might] this turn, to a minimum of 1 [might]",Origins
+OGN-303,Ahri - Nine-Tailed Fox,unit,calm,0,0,,Ahri,,"When an enemy unit attacks a battlefield you control, give it -1 [might] this turn, to a minimum of 1 [might]",Origins
+OGN-303-STAR,Ahri - Nine-Tailed Fox,unit,calm,0,0,,Ahri,,"When an enemy unit attacks a battlefield you control, give it -1 :rb_might: this turn, to a minimum of 1 :rb_might:.",Origins
+SFD-109,Akshan - Mischievous,unit,body,4,0,4,"Akshan, Shurima, Sentinel",,"[Weaponmaster]You may pay :rb_rune_body::rb_rune_body: as an additional cost to play me.When you play me, if you paid the additional cost, move an enemy gear to your base. You control it until I leave the board. If it's an Equipment, attach it to me.",Spiritforged
+OGN-230,Albus Ferros,unit,order,4,0,3,Piltover,,"When you play me, spend any number of buffs. For each buff spent, channel 1 rune exhausted.",Origins
+SFD-169,Altar of Memories,gear,order,2,0,,,,"When a friendly unit dies, you may exhaust me to draw 1, then put a card from your hand on the top or bottom of your Main Deck.",Spiritforged
+OGN-275,Altar to Unity,battlefield,colorless,0,0,,,,"When you hold here, play a 1 [might] Recruit unit token in your base.",Origins
+SFD-117,Ancient Henge,gear,body,2,0,,,,:rb_exhaust:: [Reaction] — Pay any amount of Energy to [Add] that much :rb_rune_rainbow:. (Abilities that add resources can't be reacted to.),Spiritforged
+SFD-131,Ancient Warmonger,unit,chaos,5,0,4,"Spirit, Noxus",,[Accelerate] _(Y_ou may pay :rb_energy_1::rb_rune_chaos: as an additional cost to have me enter ready.)I have [Assault] equal to the number of enemy units here. (+1 :rb_might: while I'm an attacker for each instance of Assault.),Spiritforged
+SFD-011,Angle Shot,spell,fury,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)Choose a unit and an Equipment with the same controller. Attach that Equipment to that unit or detach that Equipment from that unit. Draw 1.",Spiritforged
+OGN-148,Anivia - Primal,unit,body,7,0,8,"Bird, Anivia, Freljord",,"When I attack, deal 3 to all enemy units here.",Origins
+OGS-017,Annie - Dark Child - Starter,unit,fury,0,0,,Annie,,"At the end of your turn, ready up to 2 runes.",Proving Grounds
+OGS-001,Annie - Fiery,unit,fury,5,0,4,"Annie, Noxus",,Your spells and abilities deal 1 Bonus Damage. (Each instance of damage they deal is increased by 1.),Proving Grounds
+OGS-010,Annie - Stubborn,unit,chaos,4,0,3,"Annie, Noxus",,"When you play me, return a spell from your trash to your hand.",Proving Grounds
+SFD-049,Aphelios - Exalted,unit,calm,4,0,4,"Aphelios, Mount Targon",,"When you attach an Equipment to me, choose one that hasn't been chosen this turn —Ready 2 runes.Channel 1 rune exhausted.Buff a friendly unit.",Spiritforged
+SFD-224,Aphelios - Exalted,unit,calm,4,0,4,"Aphelios, Mount Targon",,"When you attach an Equipment to me, choose one that hasn't been chosen this turn —Ready 2 runes.Channel 1 rune exhausted.Buff a friendly unit.",Spiritforged
+SFD-224-STAR,Aphelios - Exalted,unit,calm,4,0,4,"Aphelios, Mount Targon",,"When you attach an Equipment to me, choose one that hasn't been chosen this turn —Ready 2 runes.Channel 1 rune exhausted.Buff a friendly unit.",Spiritforged
+SFD-041,Apprentice Smith,unit,calm,2,0,2,Freljord,,"When I move, reveal the top card of your Main Deck. If it's a gear, draw it. Otherwise, recycle it.",Spiritforged
+SFD-200,Arcane Shift,spell,mind,3,0,,Ezreal,,"[Action] (Play on your turn or in showdowns.)Banish a friendly unit, then its owner plays it, ignoring its cost. Deal 3 to an enemy unit at a battlefield. Banish this.",Spiritforged
+OGN-124,Arena Bar,gear,body,3,0,,,,"[tap]: Buff an exhausted friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+SFD-198,Arise!,spell,calm,6,0,,Azir,,Play a 2 :rb_might: Sand Soldier unit token for each Equipment you control. Then ready two of them.,Spiritforged
+SFD-002,Armed Assailant,unit,fury,6,0,6,Noxus,,"[Accelerate] (You may pay :rb_energy_1::rb_rune_fury: as an additional cost to have me enter ready.)[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)",Spiritforged
+OGN-276,Aspirant's Climb,battlefield,colorless,0,0,,,,Increase the points needed to win the game by 1.,Origins
+SFD-061,Aspiring Engineer,unit,mind,3,0,3,Piltover,,"When you play me, return a gear from your trash to your hand.",Spiritforged
+SFD-019,Assembly Rig,gear,fury,4,0,,,,":rb_energy_1::rb_rune_fury:, Recycle a unit from your trash, :rb_exhaust:: Play a 3 :rb_might: Mech unit token to your base.",Spiritforged
+OGN-107,Ava Achiever,unit,mind,5,0,4,Yordle,,"When I attack, you may pay [mind] to play a card with HIDDEN from your hand, ignoring its cost. If it’s a unit, play it here.",Origins
+SFD-050,Azir - Ascendant,unit,calm,6,0,6,"Bird, Azir, Shurima",,":rb_rune_calm:: [Action] — Choose a unit you control. Move me to its location and it to my original location. If it's equipped, you may attach one of its Equipment to me. Use only once per turn.",Spiritforged
+SFD-050A,Azir - Ascendant,unit,calm,6,0,6,"Bird, Azir, Shurima",,":rb_rune_calm:: [Action] — Choose a unit you control. Move me to its location and it to my original location. If it's equipped, you may attach one of its Equipment to me. Use only once per turn.",Spiritforged
+SFD-197,Azir - Emperor of the Sands,unit,calm,0,0,,Azir,,"Your Sand Soldiers have [Weaponmaster].:rb_energy_1:, :rb_exhaust:: Play a 2 :rb_might: Sand Soldier unit token to your base. Use only if you've played an Equipment this turn.",Spiritforged
+SFD-247,Azir - Emperor of the Sands,unit,calm,0,0,,Azir,,"Sand Soldiers you play have [Weaponmaster]. (When they're played, you may [Equip] one of your Equipment to them for :rb_rune_rainbow: less.):rb_energy_1:, :rb_exhaust:: Play a 2 :rb_might: Sand Soldier unit token to your base. Use only if you've played an Equipment this turn.",Spiritforged
+SFD-177,Azir - Sovereign,unit,order,4,0,4,"Bird, Azir, Shurima",,"[Accelerate] (You may pay :rb_energy_1::rb_rune_order: as an additional cost to have me enter ready.)When I attack, you may move any number of your token units to this battlefield.",Spiritforged
+SFD-177A,Azir - Sovereign,unit,order,4,0,4,"Bird, Azir, Shurima",,"[Accelerate] (You may pay :rb_energy_1::rb_rune_order: as an additional cost to have me enter ready.)When I attack, you may move any number of your token units to this battlefield.",Spiritforged
+SFD-161,B.F. Sword,gear,order,4,0,3,Equipment,,[Equip] :rb_rune_order: (:rb_rune_order:: Attach this to a unit you control.),Spiritforged
+OGN-206,Back to Back,spell,order,3,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Give two friendly units each +2 [might] this turn.",Origins
+OGN-277,Back-Alley Bar,battlefield,colorless,0,0,,,,"When a unit moves from here, give it +1 [might] this turn.",Origins
+OGN-242,Baited Hook,gear,order,3,0,,,,"[1] [Order] [Tap]: Kill a friendly unit. Look at the top 5 cards of your Main Deck. You may banish a unit from among them that has Might up to 1 more than the killed unit and play it, ignoring its cost. Then recycle the rest.",Origins
+OGN-278,Bandle Tree,battlefield,colorless,0,0,,,,You may hide an additional card here.,Origins
+SFD-079,Bard - Mercurial,unit,mind,4,0,4,Bard,,"You may exhaust your legend as an additional cost to play me.When you play me, if you paid the additional cost, move any number of your units to an open battlefield.",Spiritforged
+SFD-228,Bard - Mercurial,unit,mind,4,0,4,Bard,,"You may exhaust your legend as an additional cost to play me.When you play me, if you paid the additional cost, move any number of your units to an open battlefield.",Spiritforged
+SFD-228-STAR,Bard - Mercurial,unit,mind,4,0,4,Bard,,"You may exhaust your legend as an additional cost to play me.When you play me, if you paid the additional cost, move any number of your units to an open battlefield.",Spiritforged
+SFD-012,Battering Ram,unit,fury,5,0,5,"Trifarian, Noxus",,"I cost :rb_energy_1: less for each card you've played this turn, to a minimum of :rb_energy_1:.",Spiritforged
+SFD-132,Beast Below,unit,chaos,7,0,8,Bilgewater,,"When you play me, return another friendly unit and an enemy unit to their owners' hands.",Spiritforged
+SFD-080,Bellows Breath,spell,mind,1,0,,,,[Action] (Play on your turn or in showdowns.)[Repeat] :rb_energy_1::rb_rune_mind: (You may pay the additional cost to repeat this spell's effect.)Deal 1 to up to three units at the same location.,Spiritforged
+OGN-125,Bilgewater Bully,unit,body,6,0,6,Bilgewater,,"While I'm buffed, I have GANKING. (I can move from battlefield to battlefield.)",Origins
+SFD-121,Black Market Broker,unit,chaos,3,0,3,Zaun,,"When you play a card from face down, play a Gold gear token exhausted.",Spiritforged
+SFD-178,Blade of the Ruined King,gear,order,3,0,4,Equipment,,"[Equip] — :rb_rune_order:, Kill a friendly unit (Pay the cost: Attach this to a unit you control.)",Spiritforged
+SFD-013,Blast Corps Cadet,unit,fury,2,0,2,Piltover,,"You may pay :rb_energy_1::rb_rune_fury: as an additional cost to play me.When you play me, if you paid the additional cost, deal 2 to a unit at a battlefield.",Spiritforged
+OGS-012,Blast of Power,spell,order,6,0,,,,ACTION (Play on your turn or in showdowns.) Kill a unit at a battlefield.,Proving Grounds
+OGN-097,Blastcone Fae,unit,mind,2,0,2,"Fae, Bandle City",,"HIDDEN (Hide now for [rune] to react with later for [0].) When you play me, give a unit -2 [might] this turn, to a minimum of 1 [might]",Origins
+OGN-001,Blazing Scorcher,unit,fury,5,0,5,"Dragon, Noxus",,ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.),Origins
+OGN-001-P,Blazing Scorcher,unit,fury,5,0,5,"Dragon, Noxus",,ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.),Nexus Night
+OGN-025,Blind Fury,spell,fury,4,0,,,,"ACTION (Play on your turn or in showdowns.) Each opponent reveals the top card of their Main Deck. Choose one and banish it, then play it, ignoring its cost.  Then recycle the rest.",Origins
+OGN-067,Blitzcrank - Impassive,unit,calm,5,0,5,"Mech, Blitzcrank, Zaun",,"TANK (I must be assigned combat damage first.) When you play me to a battlefield, you may move an enemy unit to here. When i hold, return me to my owner's hand.",Origins
+OGN-067-p,"Blitzcrank, Impassive",unit,calm,5,0,5,"Mech, Blitzcrank, Zaun",,"TANK (I must be assigned combat damage first.) When you play me to a battlefield, you may move an enemy unit to here. When i hold, return me to my owner's hand.",Origins
+OGN-057,Block,spell,calm,2,0,,,,HIDDEN (Hide now for [rune] to react with later for [0].) ACTION (Play on your turn or in showdowns.) Give a unit SHIELD 3 and TANK this turn. (+3 [might] while it's a defender. It must be assigned combat damage first.),Origins
+SFD-162,Blood Money,spell,order,2,0,,,,"[Action] (Play on your turn or in showdowns.)Kill a unit at a battlefield with 2 :rb_might: or less. If it was an enemy unit, play a Gold gear token exhausted. If it was a friendly unit, play two Gold gear tokens exhausted.",Spiritforged
+SFD-003,Blood Rush,spell,fury,1,0,,,,[Action] (Play on your turn or in showdowns.)[Repeat] :rb_energy_1: (You may pay the additional cost to repeat this spell's effect.)Give a unit [Assault 2]. (+2 :rb_might: while it's an attacker.),Spiritforged
+SFD-151,Bonds of Strength,spell,order,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)[Repeat] :rb_energy_2: (You may pay the additional cost to repeat this spell's effect.)Give two friendly units each +1 :rb_might: this turn.",Spiritforged
+SFD-118,Boneshiver,gear,body,3,0,2,Equipment,,[Equip] :rb_energy_1::rb_rune_body: (:rb_energy_1::rb_rune_body:: Attach this to a unit you control.),Spiritforged
+SFD-133,Boots of Swiftness,gear,chaos,3,0,2,Equipment,,[Equip] :rb_rune_chaos: (:rb_rune_chaos:: Attach this to a unit you control.),Spiritforged
+OGN-002,Brazen Buccaneer,unit,fury,6,0,5,"Pirate, Bilgewater",,"As you play me, you may discard a card as an additional cost. If you do, reduce my cost by [2] .",Origins
+SFD-071,Breakneck Mech,unit,mind,8,0,7,"Mech, Yordle, Bandle City",,Your Mechs have [Deflect] and [Ganking]. (Opponents must pay :rb_rune_rainbow: to choose us with a spell or ability. We can move from battlefield to battlefield.)I enter ready if you control another Mech.,Spiritforged
+SFD-042,Brutalizer,gear,calm,2,0,1,Equipment,,[Equip] :rb_rune_calm: (:rb_rune_calm:: Attach this to a unit you control.),Spiritforged
+OGN-026,Brynhir Thundersong,unit,fury,6,0,5,Freljord,,"When you play me, opponents can't play cards this turn.",Origins
+SFD-062,Bubble Bot,unit,mind,3,0,3,"Mech, Yordle, Bandle City",,"When you play me, ready another friendly Mech.",Spiritforged
+SFD-091,Buhru Captain,unit,body,3,0,3,Bilgewater,,"When you play me, you may draw 1 or buff me. (To buff a unit, give it a +1 :rb_might: buff if it doesn't already have one.)",Spiritforged
+OGN-268,Bullet Time,spell,body,1,0,,Miss Fortune,,ACTION (Play on your turn or showdowns.) Pay an amount of [rune] to deal that much damage to all enemy units at a battlefield.,Origins
+SFD-004,Bushwhack,spell,fury,2,0,,,,[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)Friendly units enter ready this turn. Play a Gold gear token exhausted.,Spiritforged
+ARC-002,Caitlyn - Patrolling,unit,calm,3,0,3,,,I must be assigned combat damage last. [tap]: Deal damage equal to my Might to a unit at a battlefield. Use this ability only while I'm at a battlefield.,Arcane Box Set
+OGN-068,Caitlyn - Patrolling,unit,calm,3,0,3,"Caitlyn, Piltover",,I must be assigned combat damage last. [tap]: Deal damage equal to my Might to a unit at a battlefield. Use this ability only while I'm at a battlefield.,Origins
+OGN-207,Call to Glory,spell,order,3,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) As you play this, you may spend a buff as an additional cost. If you do, ignore this spell's cost. Give a unit +3 [might] this turn.",Origins
+SFD-122,Called Shot,spell,chaos,0,0,,,,[Action] (Play on your turn or in showdowns.)[Repeat] :rb_rune_chaos: (You may pay the additional cost to repeat this spell's effect.)Look at the top 2 cards of your Main Deck. Draw one and recycle the other.,Spiritforged
+OGN-127,Cannon Barrage,spell,body,2,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Deal 2 to all enemy units in combat.",Origins
+OGN-015,Captain Farron,unit,fury,4,0,5,"Trifarian, Noxus",,Other friendly units here have ASSAULT. (+1 [might] while they're attackers.),Origins
+SFD-081,Card Sharp,unit,mind,3,0,3,Bilgewater,,"When you play me, you and each opponent may play a Gold gear token exhausted. For each opponent who did, you play a Gold gear token exhausted.",Spiritforged
+OGN-149,Carnivorous Snapvine,unit,body,5,0,6,Shadow Isles,,"When you play me, choose a unit at a battlefield. We deal damage equal to our Mights to each other.",Origins
+OGN-138,Catalyst of Aeons,spell,body,4,0,,,,"Channel 2 rune exhausted. If you couldn't channel 2 runes this way, draw 1.",Origins
+OGN-165,Cemetery Attendant,unit,chaos,3,0,3,"Dog, Shadow Isles",,"When you play me, return a unit from your trash to your hand.",Origins
+OGN-128,Challenge,spell,body,2,0,,,,ACTION (Play on your turn or in showdowns.) Choose a friendly unit and an enemy unit. They deal damage equal to their Mights to each other.,Origins
+OGN-128-P,Challenge,spell,body,2,0,,,,ACTION (Play on your turn or in showdowns.) Choose a friendly unit and an enemy unit. They deal damage equal to their Mights to each other.,Origins
+OGN-043,Charm,spell,calm,1,0,,,,Move an enemy unit.,Origins
+SFD-063,Chemtech Cask,gear,mind,1,0,,,,"When you play a spell on an opponent's turn, you may exhaust me to play a Gold gear token exhausted.",Spiritforged
+OGN-003,Chemtech Enforcer,unit,fury,2,0,2,Zaun,,"ASSAULT 2 ( +2 [might] while I'm an attacker. ) When you play me, discard 1.",Origins
+OGN-139,Cithria of Cloudfield,unit,body,2,0,1,"Elite, Demacia",,"When you play another unit, buff me. (If i don't have a buff, I get a +1 [might] buff.)",Origins
+OGN-004,Cleave,spell,fury,1,0,,,,ACTION (Play on your turn or in showdowns.) Give a unit ASSAULT 3 this turn. (+3 [might] while it's an attacker.),Origins
+OGN-044,Clockwork Keeper,unit,calm,2,0,2,Shurima,,"You may pay [calm] as an additional cost to play me. When you play me, if you paid the additional cost, draw 1.",Origins
+SFD-064,Cloth Armor,gear,mind,1,0,,Equipment,,"[Quick-Draw] (This has [Reaction]. When you play it, attach it to a unit you control.)[Equip] :rb_rune_mind: (:rb_rune_mind:: Attach this to a unit you control.)",Spiritforged
+SFD-092,Combat Chef,unit,body,5,0,5,Demacia,,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)",Spiritforged
+OGN-231,Commander Ledros,unit,order,6,0,8,"Spirit, Shadow Isles",,"As you play me, you may kill any number of friendly units as an additional cost. Reduce my cost by [order] for each killed this way. DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.) GANKING (I can move from battlefield to battlefield.)",Origins
+OGN-129,Confront,spell,body,2,0,,,,ACTION (Play on your turn or in showdowns.) Units you play this turn enter ready. Draw 1.,Origins
+OGN-083,Consult the Past,spell,mind,4,0,,,,"HIDDEN (Hide now for [rune] to react with later for [0].) REACTION (Play any time, even before spells and abilities resolve.) Draw 2.",Origins
+OGN-083-P,Consult the Past,spell,mind,4,0,,,,"HIDDEN (Hide now for [rune] to react with later for [0].) REACTION (Play any time, even before spells and abilities resolve.) Draw 2.",Origins
+OGN-108,Convergent Mutation,spell,mind,2,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Choose a friendly unit. This turn, increase its Might to the Might of another friendly unit.",Origins
+SFD-179,Corina Veraza,unit,order,7,0,6,Zaun,,"[Accelerate] (You may pay :rb_energy_1::rb_rune_order: as an additional cost to have me enter ready.)When I move to a battlefield, play three 1 :rb_might: Recruit unit tokens here.",Spiritforged
+SFD-123,Corrupt Enforcer,unit,chaos,3,0,4,Piltover,,"When I move to a battlefield, discard 1.When I win a combat, draw 1.",Spiritforged
+SFD-194,Counter Strike,spell,calm,2,0,,Jax,,"[Reaction] (Play any time, even before spells and abilities resolve.)Choose a unit. The next time that unit would be dealt damage this turn, prevent it. Draw 1.",Spiritforged
+OGN-130,Crackshot Corsair,unit,body,3,0,3,"Pirate, Bilgewater",,"When I attack, deal 1 to an enemy unit here.",Origins
+OGN-208,Cruel Patron,unit,order,4,0,6,Noxus,,"As an additional cost to play me, kill a friendly unit.",Origins
+SFD-134,Cull,gear,chaos,1,0,1,Equipment,,[Equip] :rb_rune_chaos: (:rb_rune_chaos:: Attach this to a unit you control.),Spiritforged
+OGN-209,Cull the Weak,spell,order,2,0,,,,Each player kills one of their units.,Origins
+SFD-182,Danger Zone,spell,fury,1,0,,Rumble,,"[Reaction] (Play any time, even before spells and abilities resolve.)[Repeat] :rb_energy_1::rb_rune_rainbow: (You may pay the additional cost to repeat this spell's effect.)Give your Mechs +1 :rb_might: this turn.",Spiritforged
+OGN-016,Dangerous Duo,unit,fury,3,0,3,"Mech, Bandle City",,"LEGION — When you play me, give a unit +2 [might] this turn. (Get the effect if you've played another card this turn.)",Origins
+OGN-210,Daring Poro,unit,order,2,0,2,Poro,,ASSAULT (+1 might while I'm an attacker.),Origins
+OGN-210-P,Daring Poro,unit,order,2,0,2,Poro,,ASSAULT (+1 might while I'm an attacker.),Origins
+OGN-243,Darius - Executioner,unit,order,6,0,6,"Trifarian, Darius, Noxus",,"LEGION - When you play me, ready me. (Get the effect if you've played another card this turn) Other friendly units have +1 [might] here.",Origins
+OGN-243a,Darius - Executioner,unit,order,6,0,6,"Trifarian, Darius, Noxus",,"LEGION - When you play me, ready me. (Get the effect if you've played another card this turn) Other friendly units have +1 [might] here.",Origins
+SFD-236,Darius - Executioner,unit,order,6,0,6,"Trifarian, Darius",,"[Legion] — When you play me, ready me. (Get the effect if you've played another card this turn)Other friendly units have +1 :rb_might: here.",Spiritforged
+SFD-236-STAR,Darius - Executioner,unit,order,6,0,6,"Trifarian, Darius",,"[Legion] — When you play me, ready me. (Get the effect if you've played another card this turn)Other friendly units have +1 :rb_might: here.",Spiritforged
+OGN-253,Darius - Hand of Noxus,unit,fury,0,0,,Darius,,"[tap] REACTION, LEGION — ADD [1] (Abilities that add resources can't be reacted to. Get the effect if you've played a card this turn.)",Origins
+OGN-302,Darius - Hand of Noxus,unit,fury,0,0,,Darius,,"[tap] REACTION, LEGION — ADD [1] (Abilities that add resources can't be reacted to. Get the effect if you've played a card this turn.)",Origins
+OGN-302-STAR,Darius - Hand of Noxus,unit,fury,0,0,,Darius,,":rb_exhaust:: [Reaction], [Legion] — [Add] :rb_energy_1:. (Abilities that add resources can't be reacted to. Get the effect if you've played a card this turn.)",Origins
+OGN-027,Darius - Trifarian,unit,fury,5,0,5,"Trifarian, Darius, Noxus",,"When you play your second card in a turn, give me +2 [might] this turn and ready me.",Origins
+OGN-027a,Darius - Trifarian,unit,fury,5,0,5,"Trifarian, Darius, Noxus",,"When you play your second card in a turn, give me +2 [might] this turn and ready me.",Origins
+OGN-253-P,"Darius, Hand of Noxus",unit,fury,0,0,,Darius,,"[tap] REACTION, LEGION — ADD [1] (Abilities that add resources can't be reacted to. Get the effect if you've played a card this turn.)",Origins
+SFD-093,Dauntless Vanguard,unit,body,4,0,4,"Elite, Demacia",,You may play me to an occupied enemy battlefield.,Spiritforged
+OGN-160,Dazzling Aurora,gear,body,9,0,,,,"At the end of your turn, reveal cards from the top of your Main Deck until you reveal a unit and banish it. Play it, ignoring its cost, and recycle the rest.",Origins
+OGN-161,Deadbloom Predator,unit,body,8,0,8,Shadow Isles,,DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.)  You may play me to an occupied enemy battlefield.,Origins
+SFD-163,Deathgrip,spell,order,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)Kill a friendly unit to give +:rb_might: equal to its Might to another friendly unit this turn. Draw 1.",Spiritforged
+OGS-024,Decisive Strike,spell,body,5,0,,Garen,,ACTION (Play on your turn or in showdowns.) Give friendly units +2 [might] this turn.,Proving Grounds
+SFD-196,Defiant Dance,spell,calm,1,0,,Irelia,,"[Reaction] (Play any time, even before spells and abilities resolve.)Give a unit +2 :rb_might: this turn and another unit -2 :rb_might: this turn.",Spiritforged
+OGN-045,Defy,spell,calm,1,0,,,,"REACTION (Play anytime, even before spells and abilities resolve.)  Counter a spell that costs no more than [4] and no more than [rune] .",Origins
+SFD-031,Desert's Call,spell,calm,2,0,,,,[Repeat] :rb_energy_2: (You may pay the additional cost to repeat this spell's effect.)Play a 2 :rb_might: Sand Soldier unit token.,Spiritforged
+SFD-005,Detonate,spell,fury,1,0,,,,Kill a gear. Its controller draws 2.,Spiritforged
+SFD-094,Direwing,unit,body,7,0,7,"Dragon, Demacia",,I enter ready if you control another Dragon.,Spiritforged
+SFD-032,Disarming Rake,unit,calm,3,0,2,Demacia,,"When you play me, you may kill a gear.",Spiritforged
+OGN-058,Discipline,spell,calm,2,0,,,,"REACTION (Play anytime, even before spells and abilities resolve.) Give a unit +2 [might] this turn. Draw 1.",Origins
+OGN-058-P,Discipline,spell,calm,2,0,,,,"REACTION (Play anytime, even before spells and abilities resolve.) Give a unit +2 [might] this turn. Draw 1.",Origins
+OGN-005,Disintegrate,spell,fury,4,0,,,,"ACTION  (Play on your turn or showdowns.) Deal 3 to a unit at a battlefield. If this kills it, do this: draw 1.",Origins
+OGN-244,Divine Judgment,spell,order,7,0,,,,"Each player chooses 2 units, 2 gear, 2 runes, and 2 cards in their hands. Recycle the rest.",Origins
+SFD-095,Doran's Blade,gear,body,2,0,2,Equipment,,[Equip] :rb_rune_body: (:rb_rune_body:: Attach this to a unit you control.),Spiritforged
+SFD-124,Doran's Ring,gear,chaos,1,0,1,Equipment,,[Equip] :rb_rune_chaos: (:rb_rune_chaos:: Attach this to a unit you control.),Spiritforged
+SFD-033,Doran's Shield,gear,calm,1,0,1,Equipment,,[Equip] :rb_rune_calm: (:rb_rune_calm:: Attach this to a unit you control.),Spiritforged
+SFD-147,Downwell,spell,chaos,8,0,,,,Return all units and gear to their owners' hands.,Spiritforged
+OGN-109,Dr. Mundo - Expert,unit,mind,8,0,6,"Dr. Mundo, Zaun",,"My Might is increased by the number of cards in your trash. At the start of your Beginning Phase, recycle 3 from your trash.",Origins
+SFD-164,Drag Under,spell,order,5,0,,,,[Action] (Play on your turn or in showdowns.)I cost :rb_energy_2: less to play from anywhere other than your hand.Kill a unit at a battlefield.,Spiritforged
+OGN-258,Dragon's Rage,spell,calm,4,0,,Lee Sin,,Move an enemy unit. Then do this: Choose another enemy unit at its destination. They deal damage equal to their Mights to each other.,Origins
+SFD-148,Draven - Audacious,unit,chaos,6,0,6,"Draven, Noxus",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)The first time I win a combat each turn, you score 1 point.When I die in combat, choose an opponent. They score 1 point.",Spiritforged
+SFD-148A,Draven - Audacious,unit,chaos,6,0,6,"Draven, Noxus",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)The first time I win a combat each turn, you score 1 point.When I die in combat, choose an opponent. They score 1 point.",Spiritforged
+SFD-185,Draven - Glorious Executioner,unit,fury,0,0,,Draven,,"When you win a combat, draw 1. (You win if only your units remain after combat.)",Spiritforged
+SFD-242,Draven - Glorious Executioner,unit,fury,0,0,,Draven,,"When you win a combat, draw 1. (You win if only your units remain after combat.)",Spiritforged
+OGN-028,Draven - Showboat,unit,fury,5,0,3,"Draven, Noxus",,My Might is increased by your points.,Origins
+SFD-020,Draven - Vanquisher,unit,fury,4,0,4,"Draven, Noxus",,"When I win a combat, play a Gold gear token exhausted.When I attack or defend, you may pay :rb_rune_fury:. If you do, give me +2 :rb_might: this turn.",Spiritforged
+SFD-020A,Draven - Vanquisher,unit,fury,4,0,4,"Draven, Noxus",,"When I win a combat, play a Gold gear token exhausted.When I attack or defend, you may pay :rb_rune_fury:. If you do, give me +2 :rb_might: this turn.",Spiritforged
+SFD-072,Dropboarder,unit,mind,4,0,4,Zaun,,"When you play me, if you control two or more gear, ready me.",Spiritforged
+OGN-131,Dune Drake,unit,body,5,0,5,"Dragon, Shurima",,"When I attack, give me +2 [might] this turn if there is a ready enemy unit here.",Origins
+SFD-027,Dunebreaker,unit,fury,7,0,7,The Void,,"If you have two or fewer cards in your hand, I enter ready.When I hold, draw 2.",Spiritforged
+OGN-084,Eager Apprentice,unit,mind,3,0,3,Piltover,,"While I'm at a battlefield, the Energy costs for spells you play is reduced by [1], to a minimum of [1].",Origins
+SFD-006,Eager Drakehound,unit,fury,3,0,3,"Dog, Dragon, Noxus",,I enter ready.,Spiritforged
+OGN-059,Eclipse Herald,unit,calm,7,0,7,"Bird, Mount Targon",,"When you stun an enemy unit, ready me and give me +1 [might] this turn.",Origins
+SFD-139,Edge of Night,gear,chaos,3,0,2,Equipment,,"[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)When you play this from face down, attach it to a unit you control here.[Equip] :rb_rune_chaos: (:rb_rune_chaos:: Attach this to a unit you control.)",Spiritforged
+OGN-110,Ekko - Recurrent,unit,mind,5,0,5,"Ekko, Zaun",,"ACCELERATE (You may pay [1] [mind] as an additional cost to have me enter ready.) DEATHKNELL - Recycle me to ready your runes. (When I die, get the effect.)",Origins
+OGN-167,Ember Monk,unit,chaos,4,0,4,Bandle City,,"When you play a card from HIDDEN, give me +2 [might] this turn.",Origins
+SFD-152,Eminent Benefactor,unit,order,6,0,5,Piltover,,"When I hold, play two Gold gear tokens exhausted.",Spiritforged
+SFD-207,Emperor's Dais,battlefield,colorless,0,0,,,,"When you conquer here, you may pay :rb_energy_1: and return a unit you control here to its owner's hand. If you do, play a 2 :rb_might: Sand Soldier unit token here.",Spiritforged
+SFD-043,Emperor's Divide,spell,calm,2,0,,,,[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)[Action] (Play on your turn or in showdowns.)Move any number of friendly units at a battlefield to their base.,Spiritforged
+OGN-046,En Garde,spell,calm,1,0,,,,"REACTION (Play any time, even before spells or abilities resolve.) Give a friendly unit +1 [might[, then an additional +1 [might] this turn if it is the only unit you control there.",Origins
+OGN-098,Energy Conduit,gear,mind,3,0,,,,[tap]: REACTION - ADD 1. (Abilities that add resources can't be reacted to.),Origins
+SFD-073,Experimental Hexplate,gear,mind,1,0,1,Equipment,,[Equip] :rb_rune_mind: (:rb_rune_mind:: Attach this to a unit you control.),Spiritforged
+SFD-153,Eye of the Herald,gear,order,1,0,,Equipment,,[Equip] :rb_rune_order: (:rb_rune_order:: Attach this to a unit you control.),Spiritforged
+SFD-082,Ezreal - Dashing,unit,mind,4,0,3,"Ezreal, Piltover",,"When I attack or defend, deal damage equal to my Might to an enemy unit here.I don't deal combat damage.:rb_rune_mind:: [Action] — Move me to your base.",Spiritforged
+SFD-082A,Ezreal - Dashing,unit,mind,4,0,3,"Ezreal, Piltover",,"When I attack or defend, deal damage equal to my Might to an enemy unit here.I don't deal combat damage.:rb_rune_mind:: [Action] — Move me to your base.",Spiritforged
+SFD-199,Ezreal - Prodigal Explorer,unit,mind,0,0,,Ezreal,,:rb_exhaust:: [Reaction] — Draw 1. Use only if you've chosen enemy units and/or gear twice this turn with spells or unit abilities.,Spiritforged
+SFD-248,Ezreal - Prodigal Explorer,unit,mind,0,0,,Ezreal,,:rb_exhaust:: [Reaction] — Draw 1. Use only if you've chosen enemy units and/or gear twice this turn with spells or unit abilities.,Spiritforged
+SFD-149,Ezreal - Prodigy,unit,chaos,3,0,3,"Ezreal, Piltover",,"When you play me, discard 1, then draw 2.Optional additional costs you pay cost :rb_energy_1: or :rb_rune_rainbow: less.",Spiritforged
+SFD-149A,Ezreal - Prodigy,unit,chaos,3,0,3,"Ezreal, Piltover",,"When you play me, discard 1, then draw 2.Optional additional costs you pay cost :rb_energy_1: or :rb_rune_rainbow: less.",Spiritforged
+OGN-220,Facebreaker,spell,order,2,0,,,,HIDDEN (Hide now for [rune] to react with later for [0].) ACTION (play on your turn or in showdowns.) Stun a friendly unit and an enemy unit at the same battlefield. (They don't deal combat damage this turn.),Origins
+SFD-135,Factory Recall,spell,chaos,1,0,,,,[Action] (Play on your turn or in showdowns.)Return a gear to its owner's hand.,Spiritforged
+OGN-180,Fading Memories,spell,chaos,4,0,,,,"Give a unit at a battlefield or a gear TEMPORARY. (Kill it at the start of its controller's Beginning Phase, before scoring.)",Origins
+SFD-101,Fae Dragon,unit,body,7,0,7,"Fae, Dragon, Bandle City",,"When you play me, buff up to four friendly units. (Give each a +1 :rb_might: buff if it doesn't have one.)When you spend a buff, play a Gold gear token exhausted.",Spiritforged
+SFD-125,Fae Porter,unit,chaos,4,0,4,"Fae, Ionia",,"When I move to a battlefield, you may pay :rb_rune_chaos: to move a unit you control to the same battlefield.",Spiritforged
+OGN-211,Faithful Manufactor,unit,order,3,0,2,Piltover,,"When you play me, play a 1 [might] Recruit unit token here.",Origins
+OGN-085,Falling Comet,spell,mind,5,0,,,,ACTION (play on your turn or in showdowns.) Deal 6 to a unit at a battlefield.,Origins
+OGN-029,Falling Star,spell,fury,2,0,,,,Do this twice: Deal 3 to a unit. (You can choose different units.),Origins
+SFD-034,Feral Strength,spell,calm,2,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) REPEAT 2 (You may pay the additional cost to repeat this spell's effect.) Give a unit +2 Might this turn.",Spiritforged
+SFD-021,Ferrous Forerunner,unit,fury,6,0,6,"Mech, Yordle, Bandle City",,"[Deathknell] — Play two 3 :rb_might: Mech unit tokens to your base. (When I die, get the effect.)",Spiritforged
+OGN-168,Fight or Flight,spell,chaos,2,0,,,,HIDDEN (Hide now for [rune] to react with later for [0].) ACTION (Play on your turn or in showdowns.) Move a unit from a battlefield to its base.,Origins
+OGS-022,Final Spark,spell,mind,8,0,,Lux,,ACTION (Play on your turn or in showdowns.) Deal 8 to a unit.,Proving Grounds
+OGN-047,Find Your Center,spell,calm,3,0,,,,"ACTION (Play on your turn or in showdowns.) If an opponent's score is  within 3 points of the Victory Score, this costs [2] less. Draw 1 and channel 1 rune exhausted.",Origins
+SFD-205,Fiora - Grand Duelist,unit,body,0,0,,Fiora,,"When one of your units becomes [Mighty], you may exhaust me to channel 1 rune exhausted. (A unit is Mighty while it has 5+ :rb_might:.)",Spiritforged
+SFD-251,Fiora - Grand Duelist,unit,body,0,0,,Fiora,,"When one of your units becomes [Mighty], you may exhaust me to channel 1 rune exhausted. (A unit is Mighty while it has 5+ :rb_might:.)",Spiritforged
+SFD-110,Fiora - Peerless,unit,body,3,0,3,"Fiora, Demacia",,"When I attack or defend one on one, double my Might this combat.",Spiritforged
+SFD-110A,Fiora - Peerless,unit,body,3,0,3,"Fiora, Demacia",,"When I attack or defend one on one, double my Might this combat.",Spiritforged
+OGN-232,Fiora - Victorious,unit,order,4,0,4,"Fiora, Demacia",,"While I'm MIGHTY, I have DEFLECT, GANKING and SHIELD. (I'm Mighty while I have 5+ [might].)",Origins
+SFD-180,Fiora - Worthy,unit,order,3,0,3,"Fiora, Demacia",,"When a unit you control becomes [Mighty], you may pay :rb_rune_order: to ready it. (A unit is Mighty while it has 5+ :rb_might:.)",Spiritforged
+SFD-180A,Fiora - Worthy,unit,order,3,0,3,"Fiora, Demacia",,"When a unit you control becomes [Mighty], you may pay :rb_rune_order: to ready it. (A unit is Mighty while it has 5+ :rb_might:.)",Spiritforged
+OGS-002,Firestorm,spell,fury,6,0,,,,Deal 3 to all enemy units at a battlefield.,Proving Grounds
+OGN-132,First Mate,unit,body,3,0,3,"Pirate, Bilgewater",,"When you play me, ready another unit.",Origins
+SFD-140,Fizz - Trickster,unit,chaos,3,0,3,"Yordle, Fizz, Bilgewater",,"When you play me, you may play a spell from your trash with Energy cost no more than :rb_energy_3:, ignoring its Energy cost. Recycle that spell after you play it. (You must still pay its Power cost.)",Spiritforged
+OGN-006,Flame Chompers,unit,fury,3,0,3,Zaun,,"When you discard me, you may pay [fury] to play me.",Origins
+OGS-011,Flash,spell,chaos,2,0,,,,"REACTION (Play at any time, even before spells and abilities resolve.) Move up to 2 friendly units to base.",Proving Grounds
+OGN-133,Flurry of Blades,spell,body,1,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Deal 1 to all units at battlefields.",Origins
+SFD-065,Forecaster,unit,mind,2,0,2,"Mech, Yordle, Bandle City",,"Your Mechs have [Vision]. (When you play us, look at the top card of your Main Deck. You may recycle it.)",Spiritforged
+SFD-208,Forge of the Fluft,battlefield,colorless,0,0,,,,"While you control this battlefield, friendly legends have &quot;:rb_exhaust:: Attach an Equipment you control to a unit you control.&quot;",Spiritforged
+OGN-212,Forge of the Future,gear,order,2,0,,,,"When you play this, play a 1 [might] Recruit unit token at your base. Kill this: Recycle up to 4 cards from trashes.",Origins
+SFD-190,Forgefire Cape,gear,calm,4,0,3,"Ornn, Equipment",,[Unique]** **(Your deck can have only 1 card with this name.)[Equip] :rb_rune_rainbow: (:rb_rune_rainbow:: Attach this to a unit you control.),Spiritforged
+SFD-209,Forgotten Monument,battlefield,colorless,0,0,,,,Players can't score here until their third turn.,Spiritforged
+OGN-279,Fortified Position,battlefield,colorless,0,0,,,,"When you defend here, choose a unit. It gains SHIELD 2 this combat. (+2 might while It's a defender.)",Origins
+OGN-279/298,Fortified Position (Oversized),battlefield,colorless,0,0,,,,"When you defend here, choose a unit. It gains SHIELD 2 this combat. (+2 might while It's a defender.)",Origins Proving Grounds
+OGN-256,Fox-Fire,spell,calm,3,0,,Ahri,,HIDDEN  (hide now for [rune] to react with later for [0].) ACTION (Play on your turn or in showdowns.)  Kill any number of units at a battlefield with total Might 4 or less.,Origins
+SFD-066,Frigid Touch,spell,mind,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)[Repeat] :rb_energy_2: (You may pay the additional cost to repeat this spell's effect.)Give a unit -2 :rb_might: this turn.",Spiritforged
+SFD-067,Frostcoat Cub,unit,mind,3,0,3,"Dog, Freljord",,"You may pay :rb_rune_mind: as an additional cost to play me.When you play me, if you paid the additional cost, give a unit -2 :rb_might: this turn.",Spiritforged
+OGN-099,Garbage Grabber,gear,mind,2,0,,,,"Recycle 3 from your trash, [1], [tap]: Draw 1.",Origins
+OGS-013,Garen - Commander,unit,order,6,0,5,"Elite, Garen, Demacia",,Other friendly units have +1 might here.,Proving Grounds
+OGS-023,Garen - Might of Demacia - Starter,unit,body,0,0,,Garen,,"When you conquer, if you have 4+ units at that battlefield, draw 2.",Proving Grounds
+OGS-007,Garen - Rugged,unit,body,6,0,5,"Elite, Garen, Demacia",,"ASSAULT 2, SHIELD 2 (+2 [might] while I'm an attacker or defender.)",Proving Grounds
+SFD-068,Gearhead,unit,mind,5,0,3,Zaun,,[Accelerate]_ _(You may pay :rb_energy_1::rb_rune_mind: as an additional cost to have me enter ready.)Each Equipment attached to me gives double its base Might bonus.,Spiritforged
+SFD-007,Gem Jammer,unit,fury,2,0,2,"Mech, Bandle City",,"When you play me, give a unit [Ganking] this turn. (It can move from battlefield to battlefield.)",Spiritforged
+OGN-100,Gemcraft Seer,unit,mind,3,0,3,Mount Targon,,"VISION (When you play me, look at the top card of your Main Deck. You may recycle it.)  Other friendly units have VISION.",Origins
+OGS-008,Gentlemen's Duel,spell,body,6,0,,,,"ACTION (Play on your turn or in showdowns.) Give a friendly unit +3 [might] this turn. Then, choose an enemy unit. They deal damage equal to their Mights to each other.",Proving Grounds
+OGN-008,Get Excited!,spell,fury,2,0,,,,ACTION (Play on your turn or in showdowns.) Discard 1. Deal its Energy cost as damage to a unit at a battlefield. (Ignore its Power cost.),Origins
+SFD-165,Glasc Mixologist,unit,order,5,0,5,Zaun,,"[Deathknell] — You may play a unit with cost no more than :rb_energy_3: and no more than :rb_rune_rainbow: from your trash, ignoring its cost. (When I die, get the effect.)",Spiritforged
+SFD,Gold,gear,colorless,0,0,,,,"Kill this, :rb_exhaust:: [Reaction] — [Add] :rb_rune_rainbow:. (Abilities that add resources can't be reacted to.)",Spiritforged
+OGN-233,Grand Strategem,spell,order,6,0,,,,Give friendly units +5 [might] this turn.,Origins
+OGN-280,Grove of the God-Willow,battlefield,colorless,0,0,,,,"When you hold here, draw 1.",Origins
+SFD-051,Guardian Angel,gear,calm,2,0,1,Equipment,,[Equip] :rb_rune_calm: (:rb_rune_calm:: Attach this to a unit you control.),Spiritforged
+SFD-035,Guardian of the Passage,unit,calm,6,0,6,"Spirit, Shadow Isles",,"When I hold, you may return a unit or gear from your trash to your hand.",Spiritforged
+SFD-154,Guards!,spell,order,3,0,,,,[Hidden]_ (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)_Play a 2 :rb_might: Sand Soldier unit token. You may pay :rb_rune_order: to ready it.,Spiritforged
+OGN-264,Guerilla Warfare,spell,mind,2,0,,Teemo,,Return up to two cards with HIDDEN from your trash to your hand. You can hide ignoring costs this turn.,Origins
+OGN-169,Gust,spell,chaos,1,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Return a unit at a battlefield with 3 [might] or less to its owner's hand.",Origins
+SFD-210,Hall of Legends,battlefield,colorless,0,0,,,,"When you conquer here, you may pay :rb_energy_1: to ready your legend.",Spiritforged
+OGN-281,Hallowed Tomb,battlefield,colorless,0,0,,,,,Origins
+SFD-136,Hard Bargain,spell,chaos,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)[Repeat] :rb_energy_2: (You may pay the additional cost to repeat this spell's effect.)Counter a spell unless its controller pays :rb_energy_2:.",Spiritforged
+OGN-234,Harnessed Dragon,unit,order,8,0,6,"Dragon, Demacia",,"When you play me, kill a unit.",Origins
+SFD-137,Harpoon Squad,unit,chaos,4,0,4,"Pirate, Bilgewater",,"When I move from a battlefield, give me +2 :rb_might: this turn.",Spiritforged
+SFD-052,Heart of Dark Ice,gear,calm,3,0,,,,:rb_exhaust:: Give a unit +3 :rb_might: this turn.,Spiritforged
+ARC-003,Heimerdinger - Inventor,unit,mind,3,0,3,,,"I have all [tap] abilities of all friendly legends, units, and gears.",Arcane Box Set
+OGN-111,Heimerdinger - Inventor,unit,mind,3,0,3,"Yordle, Heimerdinger, Piltover",,"I have all [tap] abilities of all friendly legends, units, and gears.",Origins
+OGN-111-P,Heimerdinger - Inventor Judge,unit,mind,3,0,3,"Yordle, Heimerdinger, Piltover",,"I have all [tap] abilities of all friendly legends, units, and gears.",Origins
+OGN-140,Herald of Scales,unit,body,4,0,3,Mount Targon,,"Your Dragons' Energy costs are reduced by [2], to a minimum of [1].",Origins
+SFD-111,Here to Help,spell,body,2,0,,,,"[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)[Action] (Play on your turn or in showdowns.)You may play a unit from hand to a battlefield you control, reducing its cost by :rb_energy_3:.",Spiritforged
+SFD-102,Hexdrinker,gear,body,2,0,1,Equipment,,[Equip] :rb_rune_body: (:rb_rune_body:: Attach this to a unit you control.),Spiritforged
+SFD-083,Hextech Anomaly,gear,mind,3,0,,,,:rb_exhaust:: [Reaction] — Pay any amount of :rb_rune_rainbow: to [Add] that much Energy. (Abilities that add resources can't be reacted to.),Spiritforged
+OGN-009,Hextech Ray,spell,fury,1,0,,,,ACTION (Play on your turn or in showdowns.) Deal 3 damage to a unit at a battlefield.,Origins
+OGN-213,Hidden Blade,spell,order,2,0,,,,"HIDDEN (Hide now for [rune] to react with later for [0].) ACTION (Play on your turn or showdowns.) Kill a unit at a battlefield, Its controller draws 2.",Origins
+OGS-020,Highlander,spell,calm,4,0,,Master Yi,,"REACTION (Play any time, even before spells and abilities resolve.) Choose a friendly unit. The next time it would die this turn, heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.)",Proving Grounds
+SFD-155,Honest Broker,unit,order,2,0,2,Ionia,,"[Deathknell] — Play a Gold gear token exhausted. (When I die, get the effect.)",Spiritforged
+SFD-202,Hostile Takeover,spell,mind,5,0,,Renata Glasc,,"[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)Take control of an enemy unit at a battlefield. Ready it. (Start a combat if other enemies are there. Otherwise, conquer.)Lose control of that unit and recall it at end of turn. (Send it to base. This isn't a move.)",Spiritforged
+OGN-248,Icathian Rain,spell,fury,7,0,,Kai'Sa,,Do this 6 times: Deal 2 to a unit. (You can choose different units.),Origins
+OGN-037,Immortal Phoenix,unit,fury,3,0,3,Spirit,,"ASSAULT 2 (+2 [might] when I'm an attacker.) When you kill a unit with a spell, you may pay [1] [fury] to play me from your trash.",Origins
+OGN-221,Imperial Decree,spell,order,5,0,,,,"ACTION (Play on your turn or in showdowns.)  When any unit takes damage this turn, kill it.",Origins
+OGS-003,Incinerate,spell,fury,2,0,,,,ACTION (play on your turn or in showdowns.)  Deal 2 to a unit at a battlefield.,Proving Grounds
+OGN-201,Invert Timelines,spell,chaos,3,0,,,,"Each player discards their hand, then draws 4.",Origins
+SFD-195,Irelia - Blade Dancer,unit,calm,0,0,,Irelia,,"When you choose a friendly unit, you may exhaust me and pay :rb_rune_rainbow: to ready it.When you conquer, you may pay :rb_energy_1: to ready me.",Spiritforged
+SFD-246,Irelia - Blade Dancer,unit,calm,0,0,,Irelia,,"When you choose a friendly unit, you may exhaust me and pay :rb_rune_rainbow: to ready it.When you conquer, you may pay :rb_energy_1: to ready me.",Spiritforged
+SFD-057,Irelia - Fervent,unit,calm,5,0,4,"Irelia, Ionia",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)When you choose or ready me, give me +1 :rb_might: this turn.",Spiritforged
+SFD-057A,Irelia - Fervent,unit,calm,5,0,4,"Irelia, Ionia",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)When you choose or ready me, give me +1 :rb_might: this turn.",Spiritforged
+SFD-225,Irelia - Fervent,unit,calm,5,0,4,"Irelia, Ionia",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)When you choose or ready me, give me +1 :rb_might: this turn.",Spiritforged
+SFD-225-STAR,Irelia - Fervent,unit,calm,5,0,4,"Irelia, Ionia",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)When you choose or ready me, give me +1 :rb_might: this turn.",Spiritforged
+SFD-141,Irelia - Graceful,unit,chaos,4,0,4,"Irelia, Ionia",,Your spells that choose me cost :rb_energy_1: or :rb_rune_rainbow: less.,Spiritforged
+SFD-141A,Irelia - Graceful,unit,chaos,4,0,4,"Irelia, Ionia",,Your spells that choose me cost :rb_energy_1: or :rb_rune_rainbow: less.,Spiritforged
+OGN-017,Iron Ballista,gear,fury,3,0,,,,This enters exhausted. [tap]: Deal 2 to a unit at a battlefield.,Origins
+SFD-142,Jae Medarda,unit,chaos,5,0,5,Noxus,,"When you choose me with a spell, draw 1.",Spiritforged
+SFD-053,Janna - Savior,unit,calm,3,0,3,"Janna, Zaun",,"[Reaction] (Play any time, even before spells and abilities resolve, including to a battlefield you control.)When you play me, heal your units here, then move an enemy unit from here to its base.",Spiritforged
+SFD-103,Jaull-Fish,unit,body,7,0,6,Bilgewater,,[Accelerate]_ _(You may pay :rb_energy_1::rb_rune_body: as an additional cost to have me enter ready.)I cost :rb_energy_2: less for each of your [Mighty] units._ (A unit is Mighty while it has 5+ :rb_might:.)_,Spiritforged
+SFD-193,Jax - Grandmaster at Arms,unit,calm,0,0,,Jax,,":rb_energy_1:, :rb_exhaust:: Attach a detached Equipment you control to a unit you control.:rb_exhaust:: Attach an attached Equipment you control to a unit you control.",Spiritforged
+SFD-245,Jax - Grandmaster at Arms,unit,calm,0,0,,Jax,,":rb_energy_1:, :rb_exhaust:: Attach a detached Equipment you control to a unit you control.:rb_exhaust:: Attach an attached Equipment you control to a unit you control.",Spiritforged
+SFD-054,Jax - Unmatched,unit,calm,5,0,5,"Jax, Icathia",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)Each Equipment in your hand has [Quick-Draw]. (It gains [Reaction]. When you play it, attach it to a unit you control.)",Spiritforged
+SFD-054A,Jax - Unmatched,unit,calm,5,0,5,"Jax, Icathia",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)Each Equipment in your hand has [Quick-Draw]. (It gains [Reaction]. When you play it, attach it to a unit you control.)",Spiritforged
+SFD-119,Jax - Unrelenting,unit,body,4,0,3,"Jax, Icathia",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)When you attach an Equipment to me, you may pay :rb_energy_1: to draw 1.",Spiritforged
+SFD-119A,Jax - Unrelenting,unit,body,4,0,3,"Jax, Icathia",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)When you attach an Equipment to me, you may pay :rb_energy_1: to draw 1.",Spiritforged
+SFD-084,Jayce - Man of Progress,unit,mind,4,0,4,"Jayce, Piltover",,"When you play me, you may kill a friendly gear. If you do, you may play a gear with Energy cost no more than :rb_energy_7: from hand this turn, ignoring its Energy cost. (You must still pay its Power cost.)",Spiritforged
+OGN-086,Jeweled Colossus,unit,mind,5,0,5,Mount Targon,,"VISION (When you play me, look at the top card of your Main Deck. You may recycle it.) SHIELD (+1 [might] while I'm a defender.)",Origins
+OGN-030,Jinx - Demolitionist,unit,fury,3,0,4,"Jinx, Zaun",,"ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.) ASSAULT 2 (+2 [might] while I'm an attacker.) When you play me, discard 2.",Origins
+OGN-030a,Jinx - Demolitionist,unit,fury,3,0,4,"Jinx, Zaun",,"ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.)  ASSAULT 2 (+2 [might] while I'm an attacker.)  When you play me, discard 2 cards.",Origins
+OGN-251,Jinx - Loose Cannon,unit,fury,0,0,,Jinx,,"At the start of your Beginning Phase, draw 1 if you have one or fewer cards in your hand.",Origins
+OGN-251-P,Jinx - Loose Cannon,unit,fury,0,0,,Jinx,,"At the start of your Beginning Phase, draw 1 if you have one or fewer cards in your hand.",Origins
+OGN-301,Jinx - Loose Cannon,unit,fury,0,0,,Jinx,,"At the start of your Beginning Phase, draw 1 if you have one or fewer cards in your hand.",Origins
+OGN-301-STAR,Jinx - Loose Cannon,unit,fury,0,0,,Jinx,,"At start of your Beginning Phase, draw 1 if you have one or fewer cards in your hand.",Origins
+ARC-005,Jinx - Rebel,unit,chaos,5,0,5,,,"When you discard one or more cards, ready me and give me +1 [might] this turn.",Arcane Box Set
+OGN-202,Jinx - Rebel,unit,chaos,5,0,5,"Jinx, Zaun",,"When you discard one or more cards, ready me and give me +1 [might] this turn.",Origins
+OGN-202-P,Jinx - Rebel,unit,chaos,5,0,5,"Jinx, Zaun",,"When you discard one or more cards, ready me and give me +1 [might] this turn.",Origins
+OGN-202a,Jinx - Rebel,unit,chaos,5,0,5,"Jinx, Zaun",,"When you discard one or more cards, ready me and give me +1 [might] this turn.",Origins
+OGN-038,Kadregrin the Infernal,unit,fury,9,0,9,"Dragon, Demacia",,"When you play me, draw 1 for each of your MIGHTY units. (A unit is Mighty while it has 5+ [might].)",Origins
+OGN-247,Kai'Sa - Daughter of the Void,unit,fury,0,0,,Kai'Sa,,[tap] REACTION - ADD [rune]. Use only to play spells. (Abilities that add resources can't be reacted to.),Origins
+OGN-299,Kai'Sa - Daughter of the Void,unit,fury,0,0,,Kai'Sa,,[tap] REACTION - ADD [rune]. Use only to play spells. (Abilities that add resources can't be reacted to.),Origins
+OGN-299-STAR,Kai'Sa - Daughter of the Void,unit,fury,0,0,,Kai'Sa,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_rainbow:. Use only to play spells. (Abilities that add resources can't be reacted to.),Origins
+OGN-112,Kai'Sa - Evolutionary,unit,mind,6,0,6,"Kai'Sa, The Void",,"GANKING (I can move from battlefield to battlefield.) When I conquer, you may play a spell from your trash with Energy cost less than your points without paying its Energy cost. Then recycle it, (You must still pay its Power cost.)",Origins
+OGN-112a,Kai'Sa - Evolutionary,unit,mind,6,0,6,"Kai'Sa, The Void",,"GANKING (I can move from battlefield to battlefield.) When I conquer, you may play a spell from your trash with Energy cost less than your points without paying its Energy cost. Then recycle it, (You must still pay its Power cost.)",Origins
+OGN-039,Kai'Sa - Survivor,unit,fury,4,0,4,"Kai'Sa, The Void",,"ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.) When I conquer, draw 1.",Origins
+OGN-039a,Kai'Sa - Survivor,unit,fury,4,0,4,"Kai'Sa, The Void",,"ACCELERATE (You may pay [1] [fury] as an additional cost to have me enter ready.) When I conquer, draw 1.",Origins
+OGN-247-P,"Kai'Sa, Daughter of the Void",unit,fury,0,0,,Kai'Sa,,[tap] REACTION - ADD [rune]. Use only to play spells. (Abilities that add resources can't be reacted to.),Origins
+OGN-235,Karma - Channeler,unit,order,6,0,6,"Vi, Ionia",,"VISION (When you play me, look at the top card of your Main Deck. You may recycle it.) When you recycle one or more cards to your Main Deck, buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff. Runes aren't cards.)",Origins
+SFD-237,Karma - Channeler,unit,order,6,0,6,Karma,,"[Vision] (When you play me, look at the top card of your Main Deck. You may recycle it.)When you recycle one or more cards, buff a friendly unit. (If it doesn't have a buff, it gets a +1 :rb_might: buff. Runes aren't cards.)",Spiritforged
+SFD-237-STAR,Karma - Channeler,unit,order,6,0,6,Karma,,"[Vision] (When you play me, look at the top card of your Main Deck. You may recycle it.)When you recycle one or more cards, buff a friendly unit. (If it doesn't have a buff, it gets a +1 :rb_might: buff. Runes aren't cards.)",Spiritforged
+OGN-236,Karthus - Eternal,unit,order,3,0,3,"Spirit, Karthus, Shadow Isles",,Your DEATHKNELL effects trigger an additional time.,Origins
+SFD-112,Kato the Arm,unit,body,4,0,3,Noxus,,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)When I move to a battlefield, give a friendly unit my keywords and +:rb_might: equal to my Might this turn.",Spiritforged
+OGN-189,Kayn - Unleashed,unit,chaos,6,0,6,"Kayn, Ionia",,"GANKING (I can move from battlefield to battlefield.)  If I have moved twice this turn, I don't take damage.",Origins
+OGN-237,King's Edict,spell,order,6,0,,,,,Origins
+OGN-141,Kinkou Monk,unit,body,4,0,4,Ionia,,"When you play me, buff up to two other friendly units. (Each one that doesn't have a buff gets a +1 [might] buff.)",Origins
+OGN-190,Kog'Maw - Caustic,unit,chaos,3,0,1,"Kog'Maw, The Void",,"DEATHKNELL - Deal 4 to all units at my battlefield. (When I die, get the effect)",Origins
+OGN-150,Kraken Hunter,unit,body,3,0,5,"Pirate, Bilgewater",,"ACCELERATE (You may pay [1] [body] as an additional cost to have me enter ready.) ASSAULT (+1 [might] while I'm an attacker.) As you play me, you may spend any number of buffs as an additional cost. Reduce my cost by [body] for each buff you spend.",Origins
+OGN-260,Last Breath,spell,calm,3,0,,Yasuo,,ACTION (Play on your turn or in showdowns.) Ready a friendly unit. It deals damage equal to its Might to an enemy at a battlefield.,Origins
+SFD-150,Last Rites,gear,chaos,3,0,2,Equipment,,"[Equip] — :rb_rune_chaos:, Recycle 2 cards from your trash (Pay the cost:** **Attach this to a unit you control.)",Spiritforged
+OGN-069,Last Stand,spell,calm,3,0,,,,"ACTION (Play on your turn or in showdowns.) Double a friendly unit's Might this turn. Give it TEMPORARY. (Kill it at the start of its controller's Beginning Phase, before scoring.)",Origins
+SFD-096,Laurent Bladekeeper,unit,body,3,0,3,Demacia,,Ganking (I can move from battlefield to battlefield.),Spiritforged
+SFD-156,Laurent Duelist,unit,order,4,0,3,Demacia,,[Assault 2] (+2 :rb_might: while I'm an attacker.),Spiritforged
+OGN-087,Lecturing Yordle,unit,mind,3,0,2,"Yordle, Bandle City",,"TANK (I must be assigned combat damage first.) When you play me, draw 1.",Origins
+OGN-078,Lee Sin - Ascetic,unit,calm,5,0,5,"Lee Sin, Ionia",,SHIELD (+1 [might] while I'm a defender.) [tap]: Buff me. (I get +1 [might] buff.)  I can have any number of buffs.,Origins
+OGN-078-P,Lee Sin - Ascetic,unit,calm,5,0,5,"Lee Sin, Ionia",,SHIELD (+1 [might] while I'm a defender.) [tap]: Buff me. (I get +1 [might] buff.)  I can have any number of buffs.,Origins
+OGN-078a,Lee Sin - Ascetic,unit,calm,5,0,5,"Lee Sin, Ionia",,SHIELD (+1 [might] while I'm a defender.) [tap]: Buff me. (I get +1 might buff.)  I can have any number of buffs.,Origins
+OGN-257,Lee Sin - Blind Monk,unit,calm,0,0,,Lee Sin,,"[1] [tap]: Buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+OGN-257-P,Lee Sin - Blind Monk,unit,calm,0,0,,Lee Sin,,"[1] [tap]: Buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+OGN-304,Lee Sin - Blind Monk,unit,calm,0,0,,Lee Sin,,"[1] [tap]: Buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+OGN-304-STAR,Lee Sin - Blind Monk,unit,calm,0,0,,Lee Sin,,":rb_energy_1:, :rb_exhaust:: Buff a friendly unit. (If it doesn't have a buff, it gets a +1 :rb_might: buff.)",Origins
+OGN-151,Lee Sin - Centered,unit,body,6,0,6,"Lee Sin, Ionia",,ACCELERATE (You may pay [1] [body] as an additional cost to have me enter ready.) Other buffed friendly units at my battlefield have +2 [might].,Origins
+OGN-151a,Lee Sin - Centered,unit,body,6,0,6,"Lee Sin, Ionia",,ACCELERATE (You may pay [1] [body] as an additional cost to have me enter ready.) Other buffed friendly units at my battlefield have +2 [might].,Origins
+SFD-044,Legion Quartermaster,unit,calm,3,0,4,"Trifarian, Noxus",,"As an additional cost to play me, return a friendly gear to its owner's hand.",Spiritforged
+OGN-010,Legion Rearguard,unit,fury,2,0,2,"Trifarian, Noxus",,"ACCELERATE (As I'm played, your may pay [1] [fury] as an additional cost to have me enter ready)",Origins
+OGN-238,Leona - Determined,unit,order,4,0,4,"Leona, Mount Targon",,"SHIELD (+1 Might while I'm a defender.) When I attack, stun an enemy unit here.  (It doesn't deal combat damage this turn.)",Origins
+OGN-238a,Leona - Determined,unit,order,4,0,4,"Leona, Mount Targon",,"SHIELD (+1 [might] while I'm a defender.) When I attack, stun an enemy unit here. (It doesn't deal combat damage this turn)",Origins
+OGN-261,Leona - Radiant Dawn,unit,calm,0,0,,Leona,,"When you stun one or more enemy units, buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+OGN-261-P,Leona - Radiant Dawn,unit,calm,0,0,,Leona,,"When you stun one or more enemy units, buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+OGN-306,Leona - Radiant Dawn,unit,calm,0,0,,Leona,,"When you stun one or more enemy units, buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+OGN-306-STAR,Leona - Radiant Dawn,unit,calm,0,0,,Leona,,"When you stun one or more enemy units, buff a friendly unit. (If it doesn't have a buff, it gets a +1 :rb_might: buff.)",Origins
+OGN-079,Leona - Zealot,unit,calm,6,0,6,"Leona, Mount Targon",,"If an opponent's score is within 3 points of the Victory Score, I enter ready. Stunned enemy units here have -8 [might], to a minimum of 1 [might].",Origins
+OGN-079a,Leona - Zealot,unit,calm,6,0,6,"Leona, Mount Targon",,"If an opponent's score is within 3 points of the Victory Score, I enter ready. Stunned enemy units here have -8 [might], to a minimum of 1 [might].",Origins
+SFD-036,Lonely Poro,unit,calm,2,0,2,"Poro, Freljord",,"[Deathknell] — If I died alone, draw 1. (When I die, get the effect. I'm alone if there are no other friendly units here.)",Spiritforged
+SFD-022,Long Sword,gear,fury,2,0,2,Equipment,,"[Quick-Draw] (This has [Reaction]. When you play it, attach it to a unit you control.)[Equip] :rb_rune_fury: (:rb_rune_fury:: Attach this to a unit you control.)",Spiritforged
+SFD-126,Loyal Pup,unit,chaos,3,0,3,"Dog, Bandle City",,"When you defend at a battlefield, you may move me there.",Spiritforged
+SFD-028,Lucian - Gunslinger,unit,fury,3,0,2,"Lucian, Demacia, Sentinel",,"[Assault]_ (+1 :rb_might: while I'm an attacker.)_When I attack, deal damage equal to my [Assault] to an enemy unit here.",Spiritforged
+SFD-028A,Lucian - Gunslinger,unit,fury,3,0,2,"Lucian, Demacia, Sentinel",,"[Assault]_ (+1 :rb_might: while I'm an attacker.)_When I attack, deal damage equal to my [Assault] to an enemy unit here.",Spiritforged
+SFD-113,Lucian - Merciless,unit,body,3,0,3,"Lucian, Demacia, Sentinel",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)The first time I conquer each turn, ready me.",Spiritforged
+SFD-113A,Lucian - Merciless,unit,body,3,0,3,"Lucian, Demacia, Sentinel",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)The first time I conquer each turn, ready me.",Spiritforged
+SFD-183,Lucian - Purifier,unit,fury,0,0,,Lucian,,Your Equipment each give [Assault]. (+1 :rb_might: while equipped unit is an attacker.),Spiritforged
+SFD-241,Lucian - Purifier,unit,fury,0,0,,Lucian,,Your Equipment each give [Assault]. (+1 :rb_might: while equipped unit is an attacker.),Spiritforged
+OGS-014,Lux - Crownguard,unit,order,4,0,2,"Lux, Demacia",,[tap]: REACTION — ADD [2] Use only to play spells. (Abilities that add resources can't be reacted to.),Proving Grounds
+OGS-006,Lux - Illuminated,unit,mind,6,0,5,"Lux, Demacia",,"When you play a spell that costs 5 or more, give me +3 [might] this turn.",Proving Grounds
+OGS-021,Lux - Lady of Luminosity - Starter,unit,mind,0,0,,Lux,,"When you play a spell that costs 5 or more, draw a 1.",Proving Grounds
+OGN-239,Machine Evangel,unit,order,5,0,4,Piltover,,"Deathknell Play three 1 [might] Recruit unit tokens into your base. (When I die, get the effect.)",Origins
+OGN-191,Maddened Marauder,unit,chaos,5,0,4,"Pirate, Bilgewater",,"Tank (I must be assigned combat damage first.) When you play me, move a unit from a battlefield to its base.",Origins
+OGN-070,Mageseeker Warden,unit,calm,6,0,5,Demacia,,"While I'm at a battlefield, opponents can only play units to their base. While I'm at a battlefield, spells and abilities can't ready enemy units and gears.",Origins
+OGN-011,Magma Wurm,unit,fury,8,0,8,Freljord,,Other friendly units enter ready.,Origins
+OGN-113,Malzahar - Fanatic,unit,mind,4,0,3,"Malzahar, The Void",,"Kill a friend unit or gear, [tap] : ACTION — ADD [rune] [rune]. (Use on your turn or in showdowns. Abilities that add resources can't be reacted to.)",Origins
+SFD-211,Marai Spire,battlefield,colorless,0,0,,,,"While you control this battlefield, friendly [Repeat] costs cost :rb_energy_1: less.",Spiritforged
+SFD-114,Marching Orders,spell,body,3,0,,,,[Action] (Play on your turn or in showdowns.)[Repeat] :rb_energy_3: (You may pay the additional cost to repeat this spell's effect.)Choose a friendly unit anywhere and an enemy unit at a battlefield. They deal damage equal to their Mights to each other.,Spiritforged
+OGN-060,Mask of Foresight,gear,calm,2,0,,,,"When a friendly unit attacks or defends alone, give it +1 [might] this turn.",Origins
+SFD-127,Master Bingwen,unit,chaos,6,0,6,Ionia,,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)",Spiritforged
+OGS-009,Master Yi - Honed,unit,body,7,0,6,"Master Yi, Ionia",,GANKING (I can move from battlefield to battlefield.) I enter ready.,Proving Grounds
+OGS-004,Master Yi - Meditative,unit,calm,5,0,4,"Master Yi, Ionia",,"While you have 8+ runes, I have +4 [might].",Proving Grounds
+OGN-048,Meditation,spell,calm,2,0,,,,"REACTION (Play anytime, even before spells and abilities resolve.) As an additional cost to play this, you may exhaust a friendly unit. If you do, draw 2. Otherwise, draw 1.",Origins
+OGN-088,Mega-Mech,unit,mind,7,0,8,"Mech, Bandle City",,,Origins
+OGN-192,Mindsplitter,unit,chaos,7,0,7,"Dragon, Mount Targon",,"When you play me, choose an opponent. They reveal their hand. Choose a card from it, and they discard that card.",Origins
+SFD-212,Minefield,battlefield,colorless,0,0,,,,"When you conquer here, put the top 2 cards of your Main Deck into your trash.",Spiritforged
+SFD-014,Minotaur Reckoner,unit,fury,5,0,5,Noxus,,Units can't move to base.,Spiritforged
+OGN-267,Miss Fortune - Bounty Hunter,unit,body,0,0,,Miss Fortune,,[tap]: Give a unit GANKING this tum. (It can move from battlefield to battlefield.),Origins
+OGN-309,Miss Fortune - Bounty Hunter,unit,body,0,0,,Miss Fortune,,[tap]: Give a unit GANKING this tum. (It can move from battlefield to battlefield.),Origins
+OGN-309-STAR,Miss Fortune - Bounty Hunter,unit,body,0,0,,Miss Fortune,,:rb_exhaust:: Give a unit [Ganking] this turn. (It can move from battlefield to battlefield.),Origins
+OGN-193,Miss Fortune - Buccaneer,unit,chaos,4,0,4,"Pirate, Miss Fortune, Bilgewater",,You may play me to an open battlefield. Friendly units may be played to open battlefields.,Origins
+OGN-193a,Miss Fortune - Buccaneer,unit,chaos,4,0,4,"Pirate, Miss Fortune, Bilgewater",,You may play me to an open battlefield. Friendly units may be played to open battlefields.,Origins
+OGN-162,Miss Fortune - Captain,unit,body,5,0,5,"Pirate, Miss Fortune, Bilgewater",,"ACCELERATE (You may pay [1] [body] as an additional cost to have me enter ready.) GANKING (I can move from battlefield to battlefield.) The first time I move each turn, you may ready something else that's exhausted.",Origins
+OGN-162a,Miss Fortune - Captain,unit,body,5,0,5,"Pirate, Miss Fortune, Bilgewater",,"ACCELERATE (You may pay [1] [body] as an additional cost to have me enter ready.) GANKING (I can move from battlefield to battlefield.) The first time I move each turn, you may ready something else that's exhausted.",Origins
+OGN-267-P,"Miss Fortune, Bounty Hunter",unit,body,0,0,,Miss Fortune,,[tap]: Give a unit GANKING this tum. (It can move from battlefield to battlefield.),Origins
+OGN-152,Mistfall,gear,body,3,0,,,,"When you buff a friendly unit, you may pay [body] and exhaust this to ready it.",Origins
+OGN-134,Mobilize,spell,body,2,0,,,,"Channel 1 rune exhausted, if you couldn't, draw 1.",Origins
+OGN-282,Monastery of Hirana,battlefield,colorless,0,0,,,,"When you conquer here, you may spend a buff to draw 1.",Origins
+OGN-170,Morbid Return,spell,chaos,2,0,,,,ACTION (Play on your turn or in showdowns.) Return a unit from your trash to your hand.,Origins
+OGN-142,Mountain Drake,unit,body,9,0,10,Dragon,,,Origins
+OGN-101,Mushroom Pouch,gear,mind,2,0,,,,"At the start of your Beginning Phase, if you control a facedown card at a battlefield, draw 1.",Origins
+OGN-171,Mystic Poro,unit,chaos,2,0,2,Poro,,"VISION (When you play me, look at the top card of your Main Deck. You may recycle it.)",Origins
+OGN-171-P,Mystic Poro,unit,chaos,2,0,2,Poro,,"VISION (When you play me, look at the top card of your Main Deck. You may recycle it.)",Origins
+OGN-080,Mystic Reversal,spell,calm,4,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Gain control of a spell. You may make new choices for it.",Origins
+OGN-283,Navori Fighting Pit,battlefield,colorless,0,0,,,,"When you hold here, buff a unit here. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+SFD-037,Navori Scout,unit,calm,4,0,4,"Yordle, Ionia",,[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.),Spiritforged
+SFD-055,Needlessly Large Yordle,unit,calm,10,0,5,"Yordle, Bandle City",,[Shield 5] (+5 :rb_might: while I'm a defender.)[Tank] (I must be assigned combat damage first.)I cost :rb_energy_2::rb_rune_calm: less for each point you scored from holding this turn.,Spiritforged
+OGN-194,Nocturne - Horrifying,unit,chaos,4,0,4,Nocturne,,"GANKING (I can move from battlefield to battlefield.) As you look at or reveal me from the top of your deck, you may banish me. If you do, you may play me for [rune].",Origins
+SFD-045,Not So Fast,spell,calm,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)Counter an enemy spell or ability that chooses a friendly unit or gear.",Spiritforged
+OGN-222,Noxian Drummer,unit,order,3,0,3,"Trifarian, Noxus",,"When I move to a battlefield, play a 1 [might] Recruit unit token here. (It is also at the battlefield.)",Origins
+OGN-254,Noxian Guillotine,spell,fury,4,0,,Darius,,ACTION (Play on your turn or in showdowns.) Choose a unit. Kill it the next time it takes damage this turn. LEGION - Kill it now instead. (Get the effect if you've played another card this turn),Origins
+OGN-012,Noxus Hopeful,unit,fury,4,0,4,"Trifarian, Noxus",,LEGION — I cost [2]  less. (Get the effect if you've played another card this turn.),Origins
+OGN-018,Noxus Saboteur,unit,fury,3,0,3,"Trifarian, Noxus",,Your opponents' HIDDEN cards can't be revealed here.,Origins
+OGN-284,Obelisk of Power,battlefield,colorless,0,0,,,,"At the start of each player's first Beginning Phase, that player channels 1 rune.",Origins
+SFD-204,On the Hunt,spell,body,1,0,,Sivir,,Ready your units.,Spiritforged
+OGN-090,Orb of Regret,gear,mind,1,0,,,,"[tap]: Give a unit -1 [might] this turn, to a minimum of of 1 [might].",Origins
+SFD-058,Ornn - Blacksmith,unit,calm,5,0,5,"Ornn, Freljord",,"When you play me or when I hold, look at the top 4 cards of your Main Deck. You may reveal a gear from among them and draw it. Then recycle the rest.",Spiritforged
+SFD-058A,Ornn - Blacksmith,unit,calm,5,0,5,"Ornn, Freljord",,"When you play me or when I hold, look at the top 4 cards of your Main Deck. You may reveal a gear from among them and draw it. Then recycle the rest.",Spiritforged
+SFD-189,Ornn - Fire Below the Mountain,unit,calm,0,0,,Ornn,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_rainbow:. Use only to play gear or use gear abilities. (Abilities that add resources can't be reacted to.),Spiritforged
+SFD-244,Ornn - Fire Below the Mountain,unit,calm,0,0,,Ornn,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_rainbow:. Use only to play gear or use gear abilities. (Abilities that add resources can't be reacted to.),Spiritforged
+SFD-085,Ornn - Forge God,unit,mind,6,0,4,"Ornn, Freljord",,"[Deflect 2] (Opponents must pay :rb_rune_rainbow::rb_rune_rainbow: to choose me with a spell or ability.)[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)I have +1 :rb_might: for each friendly gear.",Spiritforged
+SFD-085A,Ornn - Forge God,unit,mind,6,0,4,"Ornn, Freljord",,"[Deflect 2] (Opponents must pay :rb_rune_rainbow::rb_rune_rainbow: to choose me with a spell or ability.)[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)I have +1 :rb_might: for each friendly gear.",Spiritforged
+SFD-213,Ornn's Forge,battlefield,colorless,0,0,,,,"While you control this battlefield, the first friendly non-token gear played each turn costs :rb_energy_1: less.",Spiritforged
+OGN-153,Overt Operation,spell,body,5,0,,,,"ACTION (Play on your turn or in showdowns.) For each friendly unit, you may spend its buff to ready it. Then buff all friendly units. (Each one that doesn't have a buff gets a +1 [might] buff.)",Origins
+SFD-128,Overzealous Fan,unit,chaos,2,0,2,Noxus,,"When I defend, you may kill me to move an attacking unit to its base.",Spiritforged
+OGN-181,Pack of Wonders,gear,chaos,2,0,,,,"[tap]: Return another friendly gear, unit, or facedown card to its owner's hand.",Origins
+OGN-135,Pakaa Cub,unit,body,3,0,3,"Cat, Ixtal",,HIDDEN (Hide now for [rune] to react with later for [0].),Origins
+OGN-135-P,Pakaa Cub,unit,body,3,0,3,"Cat, Ixtal",,HIDDEN (Hide now for [rune] to react with later for [0].),Origins
+OGN-071,Party Favors,spell,calm,3,0,,,,"Each other player chooses Cards or Runes. For each player that chooses Cards, you and that player each draw 1. For each player that chooses Runes, you and that player each channel 1 rune exhausted.",Origins
+OGN-223,Peak Guardian,unit,order,6,0,5,Mount Targon,,"When you play me, buff me. Then, if I am at a battlefield, buff all other friendly units there. (To buff a unit give it a +1 [might] if it doesn't already have one.)",Origins
+SFD-015,Perched Grimwyrm,unit,fury,4,0,5,"Dragon, Shadow Isles",,Play me only to a battlefield you conquered this turn. (You can't play me anywhere else.),Spiritforged
+SFD-104,Petricite Monument,gear,body,2,0,,,,"[Temporary] (Kill this at the start of its controller's Beginning Phase, before scoring.)Friendly units have [Deflect]. (Opponents must pay :rb_rune_rainbow: to choose them with a spell or ability.)",Spiritforged
+OGN-215,Petty Officer,unit,order,5,0,5,"Pirate, Bilgewater",,ASSAULT (+1 [might] while I'm an attacker.),Origins
+SFD-074,Pickpocket,unit,mind,3,0,3,Zaun,,"When you play me, you may kill a gear with Energy cost no more than :rb_energy_1:. If you do, play a Gold gear token exhausted.",Spiritforged
+SFD-023,Piercing Light,spell,fury,2,0,,,,"[Repeat] :rb_energy_2::rb_rune_fury: (You may pay the additional cost to repeat this spell's effect.)Deal 2 to a unit at a battlefield, then deal 2 to up to one other unit.",Spiritforged
+OGN-143,Pirate's Haven,gear,body,3,0,,,,"When you ready a friendly unit, give it +1 [might] this turn.",Origins
+OGN-091,Pit Crew,unit,mind,3,0,3,Bandle City,,,Origins
+OGN-136,Pit Rookie,unit,body,2,0,2,Bilgewater,,"When you play me, buff another friendly unit. (If it doesn't have a buff, it gets +1 [might] buff.)",Origins
+OGN-049,Playful Phantom,unit,calm,5,0,5,"Spirit, Shadow Isles",,,Origins
+SFD-069,Plundering Poro,unit,mind,2,0,2,"Poro, Pirate, Bilgewater",,"When I conquer, play a Gold gear token exhausted.",Spiritforged
+OGN-061,Poro Herder,unit,calm,3,0,3,Freljord,,"When you play me, if you control a Poro, buff me and draw 1. (If I don't have a buff, I get a +1 [might] buff.)",Origins
+SFD-046,Poro Snax,gear,calm,1,0,,,,"When you play this, draw 1.:rb_energy_1::rb_rune_calm:, :rb_exhaust:, Kill this: Draw 1.",Spiritforged
+OGN-102,Portal Rescue,spell,mind,3,0,,,,"ACTION (Play on your turn or in showdowns.) Banish a friendly unit, then its owner plays it to their base, ignoring its cost.",Origins
+OGN-203,Possession,spell,chaos,8,0,,,,ACTION (Play on your turn or in showdowns.) Move an enemy unit at a battlefield. Take control of it and recall it. (Send it to your base. This isn't a move.),Origins
+OGN-013,Pouty Poro,unit,fury,2,0,2,Poro,,DEFLECT (Opponents must pay [rune] to choose me with an ability or spell),Origins
+OGN-013-P,Pouty Poro,unit,fury,2,0,2,Poro,,DEFLECT (Opponents must pay [rune] to choose me with an ability or spell),Origins
+SFD-214,Power Nexus,battlefield,colorless,0,0,,,,"When you hold here, you may pay :rb_rune_rainbow::rb_rune_rainbow::rb_rune_rainbow::rb_rune_rainbow: to score 1 point.",Spiritforged
+SFD-087,Premonition,spell,mind,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)Draw 3.",Spiritforged
+OGN-154,Primal Strength,spell,body,4,0,,,,ACTION (Play on your turn or in showdowns.) Give a unit +7 [might] this turn.,Origins
+SFD-075,Prize of Progress,unit,mind,4,0,3,"Mech, Piltover",,"When you use an activated ability of a gear, give me +1 :rb_might: this turn.",Spiritforged
+SFD-076,Production Surge,spell,mind,4,0,,,,This costs :rb_energy_2: less if you control a Mech.Play a 3 :rb_might: Mech unit token to your base.Draw 1.,Spiritforged
+OGN-114,Progress Day,spell,mind,6,0,,,,Draw 4.,Origins
+OGN-115,Promising Future,spell,mind,5,0,,,,"Each player looks at the top 5 cards of their Main Deck, banishes one of them, then recycles the rest.  Starting with the next player, each player plays those cards, ignoring Energy costs. (They must still pay Power costs.)",Origins
+SFD-097,Punch First,spell,body,1,0,,,,[Action] (Play on your turn or in showdowns.)Give a unit +5 :rb_might: this turn.,Spiritforged
+OGN-155,Qiyana - Victorious,unit,body,4,0,4,"Qiyana, Ixtal",,"DEFLECT (Opponents must pay [rune] to choose me with a spell or ability.) When I conquer, draw 1 or channel 1 rune exhausted.",Origins
+SFD-191,Rabadon's Deathcrown,gear,calm,4,0,3,"Ornn, Equipment",,[Unique]** **(Your deck can have only 1 card with this name.)[Equip] :rb_rune_rainbow: (:rb_rune_rainbow:: Attach this to a unit you control.),Spiritforged
+OGN-031,Raging Firebrand,unit,fury,6,0,4,"Dragon, Mount Targon",,"When you play me, the next spell you play this turn costs [5] less.",Origins
+OGN-019,Raging Soul,unit,fury,4,0,4,"Spirit, Shadow Isles",,"If you've discarded a card this turn, I have ASSAULT and GANKING. (+1 [might] while I'm an attacker. I can move from battlefield to battlefield)",Origins
+SFD-166,Rally the Troops,spell,order,2,0,,,,"[Action] (Play on your turn or in showdowns.)When a friendly unit is played this turn, buff it. (If it doesn't have a buff, it gets a +1 :rb_might: buff.)Draw 1.",Spiritforged
+SFD-215,Ravenbloom Conservatory,battlefield,colorless,0,0,,,,"When you defend here, reveal the top card of your Main Deck. If it's a spell, put it in your hand. Otherwise, recycle it.",Spiritforged
+OGN-103,Ravenbloom Student,unit,mind,2,0,2,Noxus,,"When you play a spell, give me +1 [might] this turn.",Origins
+OGN-103-P,Ravenbloom Student,unit,mind,2,0,2,Noxus,,"When you play a spell, give me +1 [might] this turn.",Origins
+OGN-032,Ravenborn Tome,gear,fury,3,0,,,,[tap]: The next spell you play this turn deals 1 Bonus Damage. (Each instance of damage the spell deals is increased by 1.),Origins
+OGN-285,Reaver's Row,battlefield,colorless,0,0,,,,"When you defend here, you may move a friendly unit here to base.",Origins
+OGN-172,Rebuke,spell,chaos,2,0,,,,ACTION (Play on your turn or in showdowns.) Return a unit at a battlefield to its owner's hand.,Origins
+OGN-286,Reckoner's Arena,battlefield,colorless,0,0,,,,"When you hold here, activate the conquer effects of units here.",Origins
+OGN-271,Recruit (DE),unit,colorless,0,0,1,Recruit,,,Origins
+OGN-272,Recruit (NX),unit,colorless,0,0,1,Recruit,,,Origins
+OGN-273,Recruit (ZN),unit,colorless,0,0,1,Recruit,,,Origins
+OGS-015,Recruit the Vanguard,spell,order,6,0,,,,ACTION (Play on your turn or in showdowns.) Play four 1 might Recruit unit tokens. (They can be played to your base or to battlefields you control.),Proving Grounds
+SFD-016,Recurve Bow,gear,fury,2,0,,Equipment,,[Equip] :rb_rune_fury: (:rb_rune_fury:: Attach this to a unit you control.),Spiritforged
+OGN-062,Reinforce,spell,calm,5,0,,,,Look at the top 5 cards of you Main Deck. You may play a unit from among them. Its Energy cost is reduced by [5]. Then recycle the remaining cards.,Origins
+SFD-029,Rek'Sai - Breacher,unit,fury,3,0,3,"Rek'Sai, The Void",,[Accelerate] (You may pay :rb_energy_1::rb_rune_fury: as an additional cost to have me enter ready.)[Assault]_ (+1 :rb_might: while I'm an attacker.)_Friendly units played from anywhere other than a player's hand have [Accelerate].,Spiritforged
+SFD-029A,Rek'Sai - Breacher,unit,fury,3,0,3,"Rek'Sai, The Void",,[Accelerate] (You may pay :rb_energy_1::rb_rune_fury: as an additional cost to have me enter ready.)[Assault]_ (+1 :rb_might: while I'm an attacker.)_Friendly units played from anywhere other than a player's hand have [Accelerate].,Spiritforged
+SFD-170,Rek'Sai - Swarm Queen,unit,order,5,0,5,"Rek'Sai, The Void",,"When I attack, you may reveal the top 2 cards of your Main Deck. You may play one. Then recycle the rest. If the played card is a unit, you may play it here.",Spiritforged
+SFD-170A,Rek'Sai - Swarm Queen,unit,order,5,0,5,"Rek'Sai, The Void",,"When I attack, you may reveal the top 2 cards of your Main Deck. You may play one. Then recycle the rest. If the played card is a unit, you may play it here.",Spiritforged
+SFD-187,Rek'Sai - Void Burrower,unit,fury,0,0,,Rek'Sai,,"When you conquer, you may exhaust me to reveal the top 2 cards of your Main Deck. You may play one. Then recycle the rest.",Spiritforged
+SFD-243,Rek'Sai - Void Burrower,unit,fury,0,0,,Rek'Sai,,"When you conquer, you may exhaust me to reveal the top 2 cards of your Main Deck. You may play one. Then recycle the rest.",Spiritforged
+SFD-184,Relentless Pursuit,spell,fury,2,0,,Lucian,,"[Action] (Play on your turn or in showdowns.)Move a friendly unit. You may attach an Equipment with the same controller to it. This turn, that unit has &quot;When I conquer, you may move me to my base.&quot;",Spiritforged
+SFD-024,Rell - Magnetic,unit,fury,4,0,4,"Rell, Noxus",,"Tank (I must be assigned combat damage first.)When I attack, you may play an Equipment with Energy cost no more than :rb_energy_2:, ignoring its cost, and attach it to me.",Spiritforged
+SFD-201,Renata Glasc - Chem-Baroness,unit,mind,0,0,,Renata Glasc,,"When you or an ally hold, you may exhaust me to play a Gold gear token exhausted.While your score is within 3 points of the Victory Score, your Gold [ADD] an additional :rb_energy_1:.",Spiritforged
+SFD-249,Renata Glasc - Chem-Baroness,unit,mind,0,0,,Renata Glasc,,"When you or an ally hold, you may exhaust me to play a Gold gear token exhausted.While your score is within 3 points of the Victory Score, your Gold [ADD] an additional :rb_energy_1:.",Spiritforged
+SFD-171,Renata Glasc - Industrialist,unit,order,4,0,4,"Renata Glasc, Zaun",,Your tokens enter ready.,Spiritforged
+SFD-171A,Renata Glasc - Industrialist,unit,order,4,0,4,"Renata Glasc, Zaun",,Your tokens enter ready.,Spiritforged
+SFD-088,Renata Glasc - Mastermind,unit,mind,5,0,4,"Renata Glasc, Zaun",,":rb_energy_1::rb_rune_mind:: Draw 1.:rb_energy_4::rb_rune_mind::rb_rune_mind::rb_rune_mind::rb_rune_mind:, :rb_exhaust:: Score 1 point.Use my abilities only while I'm at a battlefield.",Spiritforged
+SFD-088A,Renata Glasc - Mastermind,unit,mind,5,0,4,"Renata Glasc, Zaun",,":rb_energy_1::rb_rune_mind:: Draw 1.:rb_energy_4::rb_rune_mind::rb_rune_mind::rb_rune_mind::rb_rune_mind:, :rb_exhaust:: Score 1 point.Use my abilities only while I'm at a battlefield.",Spiritforged
+SFD-025,Rengar - Pouncing,unit,fury,3,0,3,"Cat, Rengar, Ixtal",,"[Reaction] (Play any time, even before spells and abilities resolve, including to a battlefield you control.)[Assault 2] (+2 :rb_might: while I'm an attacker.)I can be played to a battlefield you're attacking.",Spiritforged
+OGN-104,Retreat,spell,mind,1,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Return a friendly unit to its owner's hand. Its owner channels 1 rune exhausted.",Origins
+OGN-195,Rhasa the Sunderer,unit,chaos,10,0,6,"Spirit, Shadow Isles",,I cost [1] less for each card in your trash.,Origins
+SFD-038,Ribbon Dancer,unit,calm,3,0,3,Ionia,,"When I move to a battlefield, give another friendly unit +1 :rb_might: this turn.",Spiritforged
+OGN-173,Ride the Wind,spell,chaos,2,0,,,,ACTION (play on your turn or in showdowns.)  Move a friendly unit and ready it.,Origins
+SFD-206,Riposte,spell,body,2,0,,Fiora,,"[Reaction] (Play any time, even before spells and abilities resolve.)Choose a friendly unit and a spell. Counter that spell and give that unit +:rb_might: equal to that spell's Energy cost this turn.",Spiritforged
+OGN-092,Riptide Rex,unit,mind,6,0,6,"Pirate, Bilgewater",,"When you play me, deal 6 to an enemy unit at a battlefield.",Origins
+OGN-092-P,Riptide Rex,unit,mind,6,0,6,"Pirate, Bilgewater",,"When you play me, deal 6 to an enemy unit at a battlefield.",Origins
+SFD-077,Rocket Barrage,spell,mind,4,0,,,,"[Repeat] :rb_energy_4::rb_rune_mind: (You may pay the additional cost to repeat this spell's effect, and may make different choices.)Choose one —Deal 4 to a unit in a base.Kill a gear.",Spiritforged
+SFD-216,Rockfall Path,battlefield,colorless,0,0,,,,Units can't be played here.,Spiritforged
+SFD-039,Royal Entourage,unit,calm,3,0,4,Shurima,,"When you play me, ready or exhaust a legend.",Spiritforged
+SFD-157,Royal Guard,unit,order,4,0,2,Shurima,,"When you play me, play a 2 :rb_might: Sand Soldier unit token here.",Spiritforged
+SFD-105,Ruin Runner,unit,body,6,0,5,Shurima,,I can't be chosen by enemy spells and abilities.,Spiritforged
+SFD-026,Rumble - Hotheaded,unit,fury,4,0,4,"Mech, Yordle, Rumble, Bandle City",,"Your Mechs each have [Assault]._ (+1 :rb_might: while we're attackers.)_When I conquer, you may recycle another friendly unit to play a Mech from your trash. Reduce its Energy cost by the Might of the unit you recycled.",Spiritforged
+SFD-026A,Rumble - Hotheaded,unit,fury,4,0,4,"Mech, Yordle, Rumble, Bandle City",,"Your Mechs each have [Assault]._ (+1 :rb_might: while we're attackers.)_When I conquer, you may recycle another friendly unit to play a Mech from your trash. Reduce its Energy cost by the Might of the unit you recycled.",Spiritforged
+SFD-181,Rumble - Mechanized Menace,unit,fury,0,0,,Rumble,,Your Mechs have [Shield]. (+1 :rb_might: while they're defenders.),Spiritforged
+SFD-240,Rumble - Mechanized Menace,unit,fury,0,0,,Rumble,,Your Mechs have [Shield]. (+1 :rb_might: while they're defenders.),Spiritforged
+SFD-089,Rumble - Scrapper,unit,mind,5,0,4,"Mech, Yordle, Rumble, Bandle City",,"Your Mechs have +1 :rb_might: (including me).When I hold, play a 3 :rb_might: Mech unit token to your base.",Spiritforged
+SFD-089A,Rumble - Scrapper,unit,mind,5,0,4,"Mech, Yordle, Rumble, Bandle City",,"Your Mechs have +1 :rb_might: (including me).When I hold, play a 3 :rb_might: Mech unit token to your base.",Spiritforged
+OGN-050,Rune Prison,spell,calm,2,0,,,,ACTION (Play on your turn or in showdowns.) Stun a unit. (It doesn't deal combat damage this turn.),Origins
+OGN-156,Sabotage,spell,body,1,0,,,,"Choose an opponent. They reveal their hand. Choose a non-unit card from it, and recycle that card.",Origins
+SFD-172,Sacred Shears,gear,order,2,0,1,Equipment,,[Equip] :rb_rune_order: (:rb_rune_order:: Attach this to a unit you control.),Spiritforged
+OGN-174,Sai Scout,unit,chaos,6,0,5,Shurima,,"VISION (When you play me, look at the top card of your Main Deck. You may recycle it.) You may play me to an open battlefield.",Origins
+OGN-224,Salvage,spell,order,2,0,,,,ACTION (play on your turn or in showdowns.)  You may kill up to one gear. Draw 1.,Origins
+SFD-158,Sandshifter,unit,order,5,0,6,Shurima,,"When you play me, kill an enemy unit with 3 :rb_might: or less.",Spiritforged
+OGN-182,Scrapheap,gear,chaos,2,0,,,,"When this is played, discarded, or killed, draw 1.",Origins
+OGN-020,Scrapyard Champion,unit,fury,5,0,5,"Mech, Bandle City",,"LEGION When you play me, discard 2 then draw 2. ( Gain this effect if you've played another card this turn.)",Origins
+SFD-098,Sea Monkey,unit,body,2,0,2,"Pirate, Bilgewater",,"You may pay :rb_energy_1: as an additional cost to play me.When you play me, if you paid the additional cost, buff me. (Give me a +1 :rb_might: buff if I don't already have one.)",Spiritforged
+OGN-204,Seal of Discord,gear,chaos,0,0,,,,[tap] : REACTION — ADD [chaos]. (Abilities that add resources can't be reacted to.),Origins
+SFD-234,Seal of Discord,gear,chaos,0,0,,,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_chaos:. (Abilities that add resources can't be reacted to.),Spiritforged
+OGN-081,Seal of Focus,gear,calm,0,0,,,,[tap]: REACTION — ADD [calm]. (Abilities that add resources can't be reacted to.),Origins
+SFD-226,Seal of Focus,gear,calm,0,0,,,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_calm:. (Abilities that add resources can't be reacted to.),Spiritforged
+OGN-120,Seal of Insight,gear,mind,0,0,,,,[tap]: REACTION - ADD [mind]. Activate this any time. (Abilities that add resources can't be reacted to.),Origins
+SFD-229,Seal of Insight,gear,mind,0,0,,,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_mind:. (Abilities that add resources can't be reacted to.),Spiritforged
+OGN-040,Seal of Rage,gear,fury,0,0,,,,[tap]: REACTION — ADD [fury] . (Abilities that add resources can't be reacted to.),Origins
+SFD-222,Seal of Rage,gear,fury,0,0,,,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_fury:. (Abilities that add resources can't be reacted to.),Spiritforged
+OGN-163,Seal of Strength,gear,body,0,0,,,,[tap]: REACTION — ADD [body]. Activate this any time. (Abilities that add resources can't be reacted to.),Origins
+SFD-231,Seal of Strength,gear,body,0,0,,,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_body:. (Abilities that add resources can't be reacted to.),Spiritforged
+OGN-245,Seal of Unity,gear,order,0,0,,,,[tap] : Add [0] [order] . Activate this any time.,Origins
+SFD-238,Seal of Unity,gear,order,0,0,,,,:rb_exhaust:: [Reaction] — [Add] :rb_rune_order:. (Abilities that add resources can't be reacted to.),Spiritforged
+SFD-217,Seat of Power,battlefield,colorless,0,0,,,,"When you conquer here, draw 1 for each other battlefield you or allies control.",Spiritforged
+SFD-008,Sentinel Adept,unit,fury,3,0,3,"Shadow Isles, Sentinel",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)",Spiritforged
+SFD-009,Serrated Dirk,gear,fury,1,0,,Equipment,,[Equip] :rb_rune_fury: (:rb_rune_fury:: Attach this to a unit you control.),Spiritforged
+OGN-164,Sett - Brawler,unit,body,5,0,4,"Sett, Ionia",,"When I'm played and when I conquer, buff me. (If I don't have a buff, I get a +1 [might] buff.) Spend my buff: Give me +4 [might] this turn.",Origins
+OGN-164a,Sett - Brawler,unit,body,5,0,4,"Sett, Ionia",,"When I'm played and when I conquer, buff me. (If I don't have a buff, I get a +1 [might] buff.) Spend my buff: Give me +4 [might] this turn.",Origins
+SFD-232,Sett - Brawler,unit,body,5,0,4,Sett,,"When I'm played and when I conquer, buff me. (If I don't have a buff, I get a +1 :rb_might: buff.)Spend my buff: Give me +4 :rb_might: this turn.",Spiritforged
+SFD-232-STAR,Sett - Brawler,unit,body,5,0,4,Sett,,"When I'm played and when I conquer, buff me. (If I don't have a buff, I get a +1 :rb_might: buff.)Spend my buff: Give me +4 :rb_might: this turn.",Spiritforged
+OGN-240,Sett - Kingpin,unit,order,4,0,5,"Sett, Ionia",,TANK (I must be assigned combat damage first.) I get +1 [might] for each buffed friendly unit at my battlefield.,Origins
+OGN-240a,Sett - Kingpin,unit,order,4,0,5,"Sett, Ionia",,TANK (I must be assigned combat damage first.) I get +1 [might] for each buffed friendly unit at my battlefield.,Origins
+OGN-269,Sett - The Boss,unit,body,0,0,,Sett,,"If a buffed unit you control would die, you may pay [rune], exhaust me, and spend its buff to heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.) When you conquer, ready me.",Origins
+OGN-269-P,Sett - The Boss,unit,body,0,0,,Sett,,"If a buffed unit you control would die, you may pay [rune], exhaust me, and spend its buff to heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.) When you conquer, ready me.",Origins
+OGN-310,Sett - The Boss,unit,body,0,0,,Sett,,"If a buffed unit you control would die, you may pay [rune], exhaust me, and spend its buff to heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.) When you conquer, ready me.",Origins
+OGN-310-STAR,Sett - The Boss,unit,body,0,0,,Sett,,"When a buffed unit you control would die, you may pay :rb_rune_rainbow: and exhaust me to spend its buff and recall it exhausted instead. (Send it to base. This isn't a move.)When you conquer, ready me.",Origins
+OGN-033,Shakedown,spell,fury,2,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Choose an enemy unit. Deal 6 to it unless its controller has you draw 2.",Origins
+OGN-241,Shen - Kinkou,unit,order,3,0,3,"Shen, Ionia",,"REACTION (Play any time, even before spells and abilities resolve, including to a battlefield you control.) SHIELD 2 (+2 [might] while I'm a defender.) TANK (I must be assigned combat damage first.)",Origins
+OGN-175,Shipyard Skulker,unit,chaos,3,0,3,"Pirate, Bilgewater",,,Origins
+SFD-106,Show of Strength,spell,body,2,0,,,,"[Reaction] (Play any time, even before spells and abilities resolve.)Draw 1 for each of your [Mighty] units. (A unit is Mighty while it has 5+ :rb_might:.)",Spiritforged
+OGN-270,Showstopper,spell,body,1,0,,Sett,,"Buff a friendly unit in your base, then move it to a battlefield. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+SFD-192,Shurelya's Requiem,gear,calm,4,0,2,"Ornn, Equipment",,"[Unique]** **(Your deck can have only 1 card with this name.)[Equip] :rb_rune_rainbow: (:rb_rune_rainbow:: Attach this to a unit you control.)When you play this, ready your units.",Spiritforged
+OGN-287,Sigil of the Storm,battlefield,colorless,0,0,,,,"When you conquer here, you must recycle one of your runes. (This doesn’t choose anything.)",Origins
+SFD-047,Simian Ancestor,unit,calm,5,0,5,Ionia,,"When you buff me, ready me.",Spiritforged
+OGN-105,Singularity,spell,mind,6,0,,,,Deal 6 to each of up to two units.,Origins
+OGN-266,Siphon Power,spell,mind,2,0,,Viktor,,"REACTION (Play any time, even before spells or abilities are resolved.)  Choose a battlefield. Give friendly units there +1 [might] this turn and enemy units there -1 [might], to a minimum of 1 [might]",Origins
+SFD-120,Sivir - Ambitious,unit,body,6,0,7,"Sivir, Shurima",,"[Deflect 2] (Opponents must pay :rb_rune_rainbow::rb_rune_rainbow: to choose me with a spell or Ability.)When I conquer after an attack, if you assigned 5 or more excess damage to enemy units, you may deal that much to an enemy unit.",Spiritforged
+SFD-120A,Sivir - Ambitious,unit,body,6,0,7,"Sivir, Shurima",,"[Deflect 2] (Opponents must pay :rb_rune_rainbow::rb_rune_rainbow: to choose me with a spell or Ability.)When I conquer after an attack, if you assigned 5 or more excess damage to enemy units, you may deal that much to an enemy unit.",Spiritforged
+SFD-203,Sivir - Battle Mistress,unit,body,0,0,,Sivir,,"When you recycle a rune, you may exhaust me to play a Gold gear token exhausted.When one or more enemy units die, ready me.",Spiritforged
+SFD-250,Sivir - Battle Mistress,unit,body,0,0,,Sivir,,"When you recycle a rune, you may exhaust me to play a Gold gear token exhausted.When one or more enemy units die, ready me.",Spiritforged
+SFD-143,Sivir - Mercenary,unit,chaos,4,0,4,"Sivir, Shurima",,"[Accelerate] (You may pay :rb_energy_1::rb_rune_chaos: as an additional cost to have me enter ready.)If you've spent at least :rb_rune_rainbow::rb_rune_rainbow: this turn, I have +2 :rb_might: and [Ganking]. (I can move from battlefield to battlefield.)",Spiritforged
+SFD-143A,Sivir - Mercenary,unit,chaos,4,0,4,"Sivir, Shurima",,"[Accelerate] (You may pay :rb_energy_1::rb_rune_chaos: as an additional cost to have me enter ready.)If you've spent at least :rb_rune_rainbow::rb_rune_rainbow: this turn, I have +2 :rb_might: and [Ganking]. (I can move from battlefield to battlefield.)",Spiritforged
+OGN-014,Sky Splitter,spell,fury,8,0,,,,ACTION (Play on your turn or in showdowns.) This spell's Energy cost is reduced by the highest Might among units you control.  Deal 5 to a unit at a battlefield.,Origins
+SFD-030,Skyfall of Areion,gear,fury,3,0,2,Equipment,,[Equip] :rb_energy_1::rb_rune_fury: (:rb_energy_1::rb_rune_fury:: Attach this to a unit you control.),Spiritforged
+OGN-093,Smoke Screen,spell,mind,2,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) Give a unit -4 [might] this turn, to a minimum of 1 [might].",Origins
+OGN-176,Sneaky Deckhand,unit,chaos,3,0,2,"Pirate, Bilgewater",,You may play me to an open battlefield.,Origins
+OGN-216,Soaring Scout,unit,order,2,0,1,"Bird, Freljord",,"Deathknell Play your top rune exhausted. (When I die, get the effect.)",Origins
+OGN-225,Solari Chief,unit,order,5,0,4,Mount Targon,,"When you play me, choose an enemy unit. If it is stunned, kill it. Otherwise, stun it.",Origins
+OGN-051,Solari Shieldbearer,unit,calm,3,0,2,Mount Targon,,,Origins
+OGN-072,Solari Shrine,gear,calm,3,0,,,,"When you kill a stunned enemy unit, you may exhaust this to draw 1.",Origins
+OGN-073,Sona - Harmonious,unit,calm,4,0,4,"Sona, Demacia",,"At the end of your turn, if I'm at a battlefield, ready up to 4 friendly runes.",Origins
+SFD-173,Soraka - Wanderer,unit,order,4,0,4,"Soraka, Mount Targon",,"I must be assigned combat damage last.If another unit you control here would die, if it has less Might than me, instead heal it, exhaust it, and recall it. (Send it to base. This isn't a move.)",Spiritforged
+SFD-239,Soraka - Wanderer,unit,order,4,0,4,"Soraka, Mount Targon",,"I must be assigned combat damage last.If another unit you control here would die, if it has less Might than me, instead heal it, exhaust it, and recall it. (Send it to base. This isn't a move.)",Spiritforged
+SFD-239-STAR,Soraka - Wanderer,unit,order,4,0,4,"Soraka, Mount Targon",,"I must be assigned combat damage last.If another unit you control here would die, if it has less Might than me, instead heal it, exhaust it, and recall it. (Send it to base. This isn't a move.)",Spiritforged
+OGN-196,Soulgorger,unit,chaos,8,0,5,"Spirit, Shadow Isles",,"When you play me, you may play a unit from your trash, ignoring its Energy cost. (You may still pay its Power cost.)",Origins
+OGN-226,Spectral Matron,unit,order,4,0,4,"Spirit, Shadow Isles",,"When you play me, you may play a unit costing no more than 3 and no more than [rune] from your trash, ignoring its cost.",Origins
+SFD-186,Spinning Axe,gear,fury,2,0,3,"Draven, Equipment",,"[Quick-Draw] (This has [Reaction]. When you play it, attach it to a unit you control.)[Equip] :rb_rune_rainbow: (:rb_rune_rainbow:: Attach this to a unit you control.)[Temporary] (If this is unattached, kill it at the start of its controller's Beginning Phase, before scoring.)",Spiritforged
+SFD-144,Spirit Wheel,gear,chaos,2,0,,,,"When you choose a friendly unit, you may pay :rb_energy_1: and exhaust this to draw 1.",Spiritforged
+OGN-063,Spirit's Refuge,gear,calm,2,0,,,,"When you play this, buff a friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.) Friendly buffed units have DEFLECT if they didn't already. (Opponents must pay [rune] to choose those units with a spell or ability.)",Origins
+OGN-144,Spoils of War,spell,body,4,0,,,,"REACTION (Play any time, even before spells and abilities resolve.) If an enemy unit has died this turn, this costs [2] less. Draw 2.",Origins
+OGN-274,Sprite,unit,colorless,0,0,3,Fae,,"TEMPORARY (Kill me at the start of your Beginning Phase, before scoring.)",Origins
+OGN-094,Sprite Call,spell,mind,3,0,,,,"HIDDEN (Hide now for [rune] to react with later for [0]) ACTION (Play on your turn or in showdowns.) Play a ready 3 [might] Sprite unit token with TEMPORARY (Kill it at the start of its controller's Beginning Phase, before scoring.)",Origins
+OGN-106,Sprite Mother,unit,mind,4,0,3,Fae,,"When you play me, play a ready 3 [might] Sprite unit token with TEMPORARY here. (Kill it at the start of its controller's Beginning Phase, before scoring.)",Origins
+OGN-183,Stacked Deck,spell,chaos,1,0,,,,ACTION (play on your turn or in showdowns.)  Look at the top 3 cards of your Main Deck. Put 1 into your hand and recycle the rest.,Origins
+OGN-183-P,Stacked Deck,spell,chaos,1,0,,,,ACTION (play on your turn or in showdowns.)  Look at the top 3 cards of your Main Deck. Put 1 into your hand and recycle the rest.,Origins
+OGN-052,Stalwart Poro,unit,calm,2,0,2,Poro,,SHIELD (+1 [might] while I'm a defender.),Origins
+OGN-052-P,Stalwart Poro,unit,calm,2,0,2,Poro,,SHIELD (+1 [might] while I'm a defender.),Origins
+OGN-053,Stand United,spell,calm,3,0,,,,"HIDDEN  (Hide now for [rune] to react with later for [0])  ACTION (Play on your turn or in showdowns.) Buff a friendly unit. Buffs give an additional +1 [might] to friendly units this turn. (To buff a unit, give it a +1 [might] buff it it doesn't already have one.)",Origins
+OGN-288,Startipped Peak,battlefield,colorless,0,0,,,,"When you hold here, you may channel 1 rune exhausted.",Origins
+OGN-288/298,Startipped Peak (Oversized),battlefield,colorless,0,0,,,,"When you hold here, you may channel 1 rune exhausted.",Origins Proving Grounds
+OGN-177,Stealthy Pursuer,unit,chaos,4,0,4,Shurima,,"When a friendly unit moves from my location, I may be moved with it.",Origins
+OGN-177-P,Stealthy Pursuer,unit,chaos,4,0,4,Shurima,,"When a friendly unit moves from my location, I may be moved with it.",Origins
+SFD-048,Stellacorn Herder,unit,calm,4,0,3,Mount Targon,,"When I move, draw 1.",Spiritforged
+SFD-056,Sterak's Gage,gear,calm,3,0,3,Equipment,,"[Quick-Draw] (This has [Reaction]. When you play it, attach it to a unit you control.)[Equip] :rb_rune_calm: (:rb_rune_calm:: Attach this to a unit you control.)",Spiritforged
+OGN-250,Stormbringer,spell,fury,6,0,,Volibear,,"Choose a friendly unit in your base. Deal damage equal to its Might to all enemies at a battlefield, then move your unit there.",Origins
+OGN-137,Stormclaw Ursine,unit,body,7,0,6,Freljord,,"Tank ( I must be assigned combat damage first. ) When you play me, channel 1 rune exhausted.",Origins
+OGN-137-P,Stormclaw Ursine,unit,body,7,0,6,Freljord,,"Tank ( I must be assigned combat damage first. ) When you play me, channel 1 rune exhausted.",Origins
+SFD-107,Strike Down,spell,body,3,0,,,,Choose an equipped friendly unit. It deals damage equal to its Might to an enemy unit. Then detach an Equipment from it.,Spiritforged
+OGN-095,Stupefy,spell,mind,1,0,,,,"REACTION (Play anytime, even before spells and abilities resolve.) Give a unit +1 [might] this turn, to a minimum of 1 [might]. Draw 1.",Origins
+SFD-017,Sudden Storm,spell,fury,3,0,,,,"[Hidden]** **(Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)[Action] (Play on your turn or in showdowns.)Deal 2 to a unit at a battlefield. If it's attacking, deal 4 to it instead.",Spiritforged
+OGN-021,Sun Disc,gear,fury,2,0,,,,[tap]: LEGION — The next unit you play this turn enters ready. (Get the effect if you've played another card this turn.),Origins
+SFD-218,Sunken Temple,battlefield,colorless,0,0,,,,"When you conquer here with one or more [Mighty] units, you may pay :rb_energy_1: to draw 1. (A unit is Mighty while it has 5+ :rb_might:.)",Spiritforged
+OGN-054,Sunlit Guardian,unit,calm,3,0,3,Shurima,,SHIELD (+1 [might] while I'm a defender.) TANK (I must be assigned combat damage first.),Origins
+OGN-252,Super Mega Death Rocket!,spell,fury,4,0,,Jinx,,"Deal 5 to a unit.  When you conquer, you may discard 1 to return this from your trash to your hand.",Origins
+SFD-059,Svellsongur,gear,calm,3,0,,Equipment,,"[Equip] :rb_energy_1::rb_rune_calm: (:rb_energy_1::rb_rune_calm:: Attach this to a unit you control.)As this is attached to a unit, copy that unit's text to this Equipment's effect text for as long as this is attached to it.",Spiritforged
+SFD-145,Switcheroo,spell,chaos,2,0,,,,[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)[Action]_ (Play on your turn or in showdowns.)_Swap the Might of two units at the same battlefield this turn.,Spiritforged
+OGN-227,Symbol of the Solari,gear,order,1,0,,,,"If a combat where you are the attacker ends in a tie, recall ALL units instead. (Send them to base. This isn't a move. Ties are calculated after combat damage is dealt.)",Origins
+OGN-289,Targon's Peak,battlefield,colorless,0,0,,,,"When you conquer here, ready up to 2 runes at the end of this turn.",Origins
+OGN-074,Taric - Protector,unit,calm,4,0,4,"Taric, Mount Targon",,SHIELD (+1 might while I'm a defender.) TANK (I must be assigned combat damage first.) Other friendly units here have SHIELD.,Origins
+OGN-075,Tasty Faefolk,unit,calm,7,0,6,"Fae, Bandle City",,"ACCELERATE (You may play [1] [calm] as an additional cost to have me enter ready.) DEATHKNELL — Channel 2 runes exhausted and draw 1. (When I die, get the effect.)",Origins
+OGN-197,Teemo - Scout,unit,chaos,2,0,1,"Yordle, Teemo, Bandle City",,"HIDDEN (Hide now for [rune] to react with later for [0].) When you play me, give me +3 [might] this turn.",Origins
+OGN-197-p,Teemo - Scout,unit,chaos,2,0,1,"Yordle, Teemo, Bandle City",,"HIDDEN (Hide now for [rune] to react with later for [0].) When you play me, give me +3 [might] this turn.",Origins
+OGN-197a,Teemo - Scout,unit,chaos,2,0,1,"Yordle, Teemo, Bandle City",,"HIDDEN (Hide now for [rune] to react with later for [0].) When you play me, give me +3 [might] this turn.",Origins
+OGN-197b,Teemo - Scout,unit,chaos,2,0,1,"Yordle, Teemo, Bandle City",,"HIDDEN (Hide now for [rune] to react with later for [0].) When you play me, give me +3 [might] this turn.",Origins
+OGN-121,Teemo - Strategist,unit,mind,2,0,2,"Yordle, Teemo, Bandle City",,"HIDDEN (Hide now for [rune] to react with later for [0].) When I defend, choose an enemy unit here and reveal the top 5 cards of your Main Deck. Deal 1 to that unit for each card with HIDDEN revealed this way, then recycle the revealed cards.",Origins
+OGN-121a,Teemo - Strategist,unit,mind,2,0,2,"Yordle, Teemo, Bandle City",,"HIDDEN (Hide now for [rune] to react with later for [0].) When I defend, choose an enemy unit here and reveal the top 5 cards of your Main Deck. Deal 1 to that unit for each card with HIDDEN revealed this way, then recycle the revealed cards.",Origins
+SFD-230,Teemo - Strategist,unit,mind,2,0,2,"Yordle, Teemo",,"[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)When I defend or I'm played from [Hidden], reveal the top 5 cards of your Main Deck. Deal 1 to an enemy unit here for each card with [Hidden], then recycle them.",Spiritforged
+SFD-230-STAR,Teemo - Strategist,unit,mind,2,0,2,"Yordle, Teemo",,"[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)When I defend or I'm played from [Hidden], reveal the top 5 cards of your Main Deck. Deal 1 to an enemy unit here for each card with [Hidden], then recycle them.",Spiritforged
+OGN-263,Teemo - Swift Scout,unit,mind,0,0,,Teemo,,"You may pay [1] to hide a card with HIDDEN instead of [rune]. [1], [tap] Put a Teemo unit you own into your hand from your Champion Zone on the board.",Origins
+OGN-263-a,Teemo - Swift Scout,unit,mind,0,0,,Teemo,,"You may pay [1] to hide a card with HIDDEN instead of [rune]. [1], [tap] Put a Teemo unit you own into your hand from your Champion Zone on the board.",Origins
+OGN-263-P,Teemo - Swift Scout,unit,mind,0,0,,Teemo,,"You may pay [1] to hide a card with HIDDEN instead of [rune]. [1], [tap] Put a Teemo unit you own into your hand from your Champion Zone on the board.",Origins
+OGN-307,Teemo - Swift Scout,unit,mind,0,0,,Teemo,,"You may pay [1] to hide a card with HIDDEN instead of [rune]. [1], [tap] Put a Teemo unit you own into your hand from your Champion Zone on the board.",Origins
+OGN-307-STAR,Teemo - Swift Scout,unit,mind,0,0,,Teemo,,"You may pay :rb_energy_1: to hide a card with [Hidden] instead of :rb_rune_rainbow:.:rb_energy_1:, :rb_exhaust:: Put a Teemo unit you own into your hand from your Champion Zone or the board.",Origins
+SFD-078,Temporal Portal,gear,mind,3,0,,,,":rb_rune_rainbow:, :rb_exhaust:: Give the next spell you play this turn [Repeat] equal to its cost. (You may pay the additional cost to repeat the spell's effect.)",Spiritforged
+SFD-129,Temptation,spell,chaos,2,0,,,,[Repeat] :rb_energy_2: (You may pay the additional cost to repeat this spell's effect.)Move an enemy unit to a location where there's a unit with the same controller.,Spiritforged
+OGN-290,The Arena's Greatest,battlefield,colorless,0,0,,,,"At the start of each player's first Beginning Phase, that player gains 1 point.",Origins
+OGN-291,The Candlelit Sanctum,battlefield,colorless,0,0,,,,"When you conquer here, look at the top two cards of your Main Deck. You may recycle one or both of them. Put those you don't back in any order.",Origins
+OGN-292,The Dreaming Tree,battlefield,colorless,0,0,,,,"When a player chooses a friendly unit here with a spell for the first time each turn, they draw 1.",Origins
+OGN-293,The Grand Plaza,battlefield,colorless,0,0,,,,"When you hold here, if you have 7+ units here, you win the game.",Origins
+OGN-198,The Harrowing,spell,chaos,6,0,,,,,Origins
+SFD-219,The Papertree,battlefield,colorless,0,0,,,,"When you hold here, each player channels 1 rune exhausted.",Spiritforged
+OGN-184,The Syren,gear,chaos,2,0,,,,"[1], [tap]: Move a friendly unit at a battlefield to its base.",Origins
+SFD-090,The Zero Drive,gear,mind,3,0,2,Equipment,,"[Equip] :rb_energy_1::rb_rune_mind: (:rb_energy_1::rb_rune_mind:: Attach this to a unit you control.):rb_energy_3::rb_rune_mind:, Banish this: Play all units banished with this, ignoring their costs. (Use only if unattached.)",Spiritforged
+OGN-022,Thermo Beam,spell,fury,5,0,,,,ACTION (Play on your turn or in showdowns) Kill all gear.,Origins
+OGN-116,Thousand-Tailed Watcher,unit,mind,7,0,7,Ionia,,"ACCELERATE (You may pay [1] [mind] as an additional cost to have me enter ready.) When you play me, give enemy units -3 [might] this turn, to a minimum of 1 [might].",Origins
+SFD-040,Thwonk!,spell,calm,2,0,,,,[Action] (Play on your turn or in showdowns.)[Repeat] :rb_energy_2: (You may pay the additional cost to repeat this spell's effect.)Stun an attacking unit. (It doesn't deal combat damage this turn.),Spiritforged
+SFD-060,Tianna Crownguard,unit,calm,7,0,4,"Elite, Demacia",,"[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)While I'm at a battlefield, opponents can't score points.",Spiritforged
+OGS-018,Tibbers,unit,fury,8,0,7,Annie,,"When you play me, deal 3 damage to all units at battlefields.",Proving Grounds
+OGN-199,Tideturner,unit,chaos,2,0,2,Bilgewater,,"HIDDEN (Hide now for [rune] to react with later for [0].) When you play me, you may choose a unit you control at another location. Move me to its location and it to my original location.",Origins
+OGN-122,Time Warp,spell,mind,10,0,,,,Take a turn after this one. Banish this.,Origins
+OGN-185,Traveling Merchant,unit,chaos,2,0,2,Bilgewater,,"When I move, discard 1 then draw 1.",Origins
+SFD-220,Treasure Hoard,battlefield,colorless,0,0,,,,"When you conquer here, you may pay :rb_energy_1: to play a Gold gear token exhausted.",Spiritforged
+SFD-130,Treasure Hunter,unit,chaos,2,0,1,Shurima,,"When I move, play a Gold gear token exhausted.",Spiritforged
+OGN-186,Treasure Trove,gear,chaos,2,0,,,,"When this leaves the board, draw 1 and channel 1 rune exhausted. [Chaos], [Tap]: Kill this.",Origins
+OGN-217,Trifarian Gloryseeker,unit,order,2,0,2,"Trifarian, Noxus",,"LEGION — When you play me, buff me. (If I don't have a buff, I get a +1 [might] buff. Get the effect if you've played another card this turn.)",Origins
+OGN-294,Trifarian War Camp,battlefield,colorless,0,0,,,,Units here have +1 [might] . (Including attackers.),Origins
+OGN-294/298,Trifarian War Camp (Oversized),battlefield,colorless,0,0,,,,Units here have +1 [might] . (Including attackers.),Origins Proving Grounds
+SFD-115,Trinity Force,gear,body,4,0,2,Equipment,,[Equip] :rb_rune_body: (:rb_rune_body:: Attach this to a unit you control.),Spiritforged
+SFD-174,Trove Golem,unit,order,8,0,9,Freljord,,"When you play me, play four Gold gear tokens exhausted.",Spiritforged
+SFD-159,Trusty Ramhound,unit,order,2,0,2,"Dog, Elite, Demacia",,"While you have another unit here, I have +1 :rb_might:.",Spiritforged
+OGN-034,Tryndamere - Barbarian,unit,fury,7,0,8,"Tryndamere, Freljord",,"When I conquer after an attack, if you assigned 5 or more excess damage to opponent's units, you score 1 Point.",Origins
+OGN-034-p,"Tryndamere, Barbarian",unit,fury,7,0,8,"Tryndamere, Freljord",,"When I conquer after an attack, if you assigned 5 or more excess damage to opponent's units, you score 1 Point.",Origins
+OGN-200,Twisted Fate - Gambler,unit,chaos,4,0,4,"Twisted Fate, Bilgewater",,"When I attack, reveal the top rune of your rune deck, then recycle it. Do one of the following based on its domain: [fury] - Deal 2 to an enemy unit here and 1 to all other enemy units here. [mind] - Draw 1. [order] - Stun an enemy unit.",Origins
+OGN-157,Udyr - Wildman,unit,body,6,0,6,"Udyr, Freljord",,Spend my buff: Choose one you've not chosen this turn — • Deal 2 to a unit at a battlefield. • Stun a unit at a battlefield • Ready me. • Give me GANKING this turn.,Origins
+OGN-123,Unchecked Power,spell,mind,7,0,,,,"Exhaust all friendly units, then deal 12 to all units at battlefields.",Origins
+OGN-178,Undercover Agent,unit,chaos,5,0,5,,,"DEATHKNELL — Discard 2, then draw 2. (When I die, get the effect.)",Origins
+SFD-175,Undertitan,unit,order,6,0,5,The Void,,"When you play me, give your other units +2 :rb_might: this turn.As I'm revealed from your deck, [Add] :rb_energy_2:.",Spiritforged
+OGN-023,Unlicensed Armory,gear,fury,2,0,,,,"Discard 1, [tap]: Choose a friendly unit. The next time it would die this turn, you may pay [fury] to heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.)",Origins
+SFD-167,Unsung Hero,unit,order,2,0,2,"Elite, Demacia",,"[Deathknell] — If I was [Mighty], draw 2. (When I die, get the effect. I'm Mighty while I have 5+ :rb_might:.)",Spiritforged
+OGN-145,Unyielding Spirit,spell,body,1,0,,,,"REACTION (Play at any time, even before spells and abilities resolve.) Prevent all spell and ability damage this turn.",Origins
+SFD-168,Vanguard Armory,gear,order,7,0,,,,:rb_exhaust:: Play three 1 :rb_might: Recruit unit tokens. (You may play them to different locations.),Spiritforged
+OGS-016,Vanguard Attendant,unit,order,6,0,5,"Elite, Demacia",,I enter ready.,Proving Grounds
+OGN-218,Vanguard Captain,unit,order,3,0,3,"Elite, Demacia",,"LEGION — When you play me, play two 1 [might] Recruit unit tokens here. (Gain this effect if you've played another card this turn.)",Origins
+OGN-218-P,Vanguard Captain,unit,order,3,0,3,"Elite, Demacia",,"LEGION — When you play me, play two 1 [might] Recruit unit tokens here. (Gain this effect if you've played another card this turn.)",Origins
+OGN-228,Vanguard Helm,gear,order,2,0,,,,"When a buffed friendly unit dies, buff another friendly unit. (If it doesn't have a buff, it gets a +1 [might] buff.)",Origins
+OGN-219,Vanguard Sergeant,unit,order,4,0,4,"Elite, Demacia",,,Origins
+OGN-035,Vayne - Hunter,unit,fury,4,0,2,"Vayne, Demacia",,"ASSAULT 3 (+3 [might] while I'm an attacker.) If an opponent controls a battlefield, I enter ready. When I conquer, you may pay [1] to return me to my owner's hand.",Origins
+SFD-223,Vayne - Hunter,unit,fury,4,0,2,"Vayne, Demacia, Sentinel",,"[Assault 3]_ (+3 :rb_might: while I'm an attacker.)_If an opponent controls a battlefield, I enter ready.When I conquer, you may pay :rb_energy_1: to return me to my owner's hand.",Spiritforged
+SFD-223-STAR,Vayne - Hunter,unit,fury,4,0,2,"Vayne, Demacia, Sentinel",,"[Assault 3]_ (+3 :rb_might: while I'm an attacker.)_If an opponent controls a battlefield, I enter ready.When I conquer, you may pay :rb_energy_1: to return me to my owner's hand.",Spiritforged
+SFD-221,Veiled Temple,battlefield,colorless,0,0,,,,"When you conquer here, you may ready a friendly gear. If it's an Equipment, you may detach it.",Spiritforged
+OGN-229,Vengeance,spell,order,4,0,,,,Kill a unit.,Origins
+OGN-229-P,Vengeance,spell,order,4,0,,,,Kill a unit.,Origins
+SFD-099,Veteran Poro,unit,body,2,0,2,"Poro, Freljord",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)",Spiritforged
+SFD-146,Vex - Cheerless,unit,chaos,5,0,5,"Yordle, Vex, Shadow Isles",,"While I'm in combat, friendly spells cost :rb_energy_1::rb_rune_rainbow: less to a minimum of :rb_energy_1:, and enemy spells cost :rb_energy_1::rb_rune_rainbow: more.",Spiritforged
+ARC-001,Vi - Destructive,unit,fury,2,0,3,,,GANKING (I can move from battlefield to battlefield.) Recycle 1 from your trash: Give me +1 [might] this turn.,Arcane Box Set
+OGN-036,Vi - Destructive,unit,fury,2,0,3,"Vi, Piltover",,GANKING (I can move from battlefield to battlefield.) Recycle 1 from your trash: Give me +1 [might] this turn.,Origins
+OGN-265,Viktor - Herald of the Arcane,unit,mind,0,0,,Viktor,,"[1] , [tap] : Play a 1 [might] Recuit unit token.",Origins
+OGN-265-P,Viktor - Herald of the Arcane,unit,mind,0,0,,Viktor,,"[1] , [tap] : Play a 1 [might] Recuit unit token.",Origins
+OGN-308,Viktor - Herald of the Arcane,unit,mind,0,0,,Viktor,,"[1] , [tap] : Play a 1 [might] Recuit unit token.",Origins
+OGN-308-STAR,Viktor - Herald of the Arcane,unit,mind,0,0,,Viktor,,":rb_energy_1:, :rb_exhaust:: Play a 1 :rb_might: Recruit unit token.",Origins
+OGN-117,Viktor - Innovator,unit,mind,4,0,3,"Viktor, Zaun",,"When you play a card on an opponent's turn, play a 1 [might] Recruit unit token in your base.",Origins
+OGN-117a,Viktor - Innovator,unit,mind,4,0,3,"Viktor, Zaun",,"When you play a card on an opponent's turn, play a 1 [might] Recruit unit token in your base.",Origins
+ARC-006,Viktor - Leader,unit,order,4,0,4,,,"When another non-Recruit unit you control dies, play a 1 [might] Recruit unit token into your base.",Arcane Box Set
+OGN-246,Viktor - Leader,unit,order,4,0,4,"Viktor, Zaun",,"When another non-Recruit unit you control dies, play a 1 [might] Recruit unit token into your base.",Origins
+OGN-246a,Viktor - Leader,unit,order,4,0,4,"Viktor, Zaun",,"When another non-Recruit unit you control dies, play a 1 [might] Recruit unit token into your base.",Origins
+OGN-246-P,"Viktor, Leader",unit,order,4,0,4,"Viktor, Zaun",,"When another non-Recruit unit you control dies, play a 1 [might] Recruit unit token into your base.",Release Event Prize Pack
+OGN-295,Vilemaw's Lair,battlefield,colorless,0,0,,,,Units can't move from here to base.,Origins
+SFD-010,Void Drone,unit,fury,3,0,3,The Void,,I cost :rb_energy_2: less to play from anywhere other than your hand.,Spiritforged
+OGN-296,Void Gate,battlefield,colorless,0,0,,,,Spells and abilities deal 1 Bonus Damage to units here. (Each instance of damage the spell deals to a unit here is increased by 1.),Origins
+OGN-296/298,Void Gate (Oversized),battlefield,colorless,0,0,,,,Spells and abilities deal 1 Bonus Damage to units here. (Each instance of damage the spell deals to a unit here is increased by 1.),Origins Proving Grounds
+SFD-018,Void Hatchling,unit,fury,2,0,2,The Void,,"If you would reveal cards from a deck, look at the top card first. You may recycle it. Then reveal those cards.",Spiritforged
+SFD-188,Void Rush,spell,fury,2,0,,Rek'Sai,,"Reveal the top 2 cards of your Main Deck. You may play one of them, reducing its cost by :rb_energy_2:. Draw any you did not play this way.",Spiritforged
+OGN-024,Void Seeker,spell,fury,3,0,,,,ACTION (Play on your turn or in showdowns.) Deal 4 to a unit at a battlefield. Draw 1.,Origins
+OGN-024-P,Void Seeker,spell,fury,3,0,,,,ACTION (Play on your turn or in showdowns.) Deal 4 to a unit at a battlefield. Draw 1.,Origins
+OGN-041,Volibear - Furious,unit,fury,10,0,9,"Volibear, Freljord",,"DEFLECT 2 ( Opponents must pay [rune][rune] to choose me with a spell or ability.)  When I attack, deal 5 damage split among any number of enemy units here.",Origins
+OGN-041a,Volibear - Furious,unit,fury,10,0,9,"Volibear, Freljord",,"DEFLECT 2 (Opponents must play  [rune] [rune] to choose me with a spell or effect.) When I attack, deal 5 damage split among any number of enemy units here.",Origins
+OGN-158,Volibear - Imposing,unit,body,12,0,10,"Volibear, Freljord",,"SHIELD 3 (+3 [might] while I'm a defender.) TANK (I must be assigned combat damage first.) When an opponent moves to a battlefield other than mine, draw 1. (Bases are not battlefields.)",Origins
+OGN-158a,Volibear - Imposing,unit,body,12,0,10,"Volibear, Freljord",,"SHIELD 3 (+3 [might] while I'm a defender.) TANK (I must be assigned combat damage first.) When an opponent moves to a battlefield other than mine, draw 1. (Bases are not battlefields.)",Origins
+OGN-249,Volibear - Relentless Storm,unit,fury,0,0,,Volibear,,"When you play a MIGHTY unit, you may exhaust me to channel 1 rune exhausted. (A unit is Mighty while it has 5+ [might].)",Origins
+OGN-249-P,Volibear - Relentless Storm,unit,fury,0,0,,Volibear,,"When you play a MIGHTY unit, you may exhaust me to channel 1 rune exhausted. (A unit is Mighty while it has 5+ [might].)",Origins
+OGN-300,Volibear - Relentless Storm,unit,fury,0,0,,Volibear,,"When you play a Mighty unit, you may exhaust me to channel 1 rune exhausted. (A unit is Mighty while it has 5+ [might].)",Origins
+OGN-300-STAR,Volibear - Relentless Storm,unit,fury,0,0,,Volibear,,"When you play a [Mighty] unit, you may exhaust me to channel 1 rune exhausted. (A unit is Mighty while it has 5+ :rb_might:.)",Origins
+SFD-070,Wages of Pain,spell,mind,3,0,,,,[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)[Action]_ (Play on your turn or in showdowns.)_Deal 3 to a unit at a battlefield. Play a Gold gear token exhausted.,Spiritforged
+OGN-146,Wallop,spell,body,2,0,,,,"ACTION (Play on your turn or in showdowns.) As you play this, you may spend a buff as an additional cost. If you do, ignore this spell's cost. Ready a unit.",Origins
+SFD-108,Warmog's Armor,gear,body,1,0,1,Equipment,,[Equip] :rb_rune_body: (:rb_rune_body:: Attach this to a unit you control.),Spiritforged
+ARC-004,Warwick - Hunter,unit,body,6,0,5,,,"I enter ready. When I attack, destroy all damaged enemy units here.",Arcane Box Set
+OGN-159,Warwick - Hunter,unit,body,6,0,5,"Dog, Warwick, Zaun",,"I enter ready. When I attack, destroy all damaged enemy units here.",Origins
+OGN-096,Watchful Sentry,unit,mind,2,0,1,Freljord,,"Deathknell — Draw 1.  When I die, get the effect.)",Origins
+OGN-187,Whirlwind,spell,chaos,3,0,,,,"Starting with the next player, each player may return a unit to its owner's hand.",Origins
+OGN-082,Whiteflame Protector,unit,calm,8,0,8,"Dragon, Mount Targon",,"When you play me, give a unit +8 [might] this turn.",Origins
+OGN-055,Wielder of Water,unit,calm,3,0,2,Ionia,,"While I'm attacking or defending alone, I have +2 [might].",Origins
+OGN-055-P,Wielder of Water,unit,calm,3,0,2,Ionia,,"While I'm attacking or defending alone, I have +2 [might].",Origins
+OGN-147,Wildclaw Shaman,unit,body,4,0,3,Freljord,,"When you play me, you may spend a buff to buff me and ready me. (If I don't have a buff, I get a +1 [might] buff.)",Origins
+OGN-064,Wind Wall,spell,calm,3,0,,,,"REACTION (Play anytime, even before spells and abilities resolve.) Counter a spell.",Origins
+SFD-138,Windsinger,unit,chaos,2,0,1,Ionia,,"Hidden (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)When you play me, you may return another unit at a battlefield with 3 :rb_might: or less to its owner's hand.",Spiritforged
+OGN-297,Windswept Hillock,battlefield,colorless,0,0,,,,Units here have Ganking . (They can move battlefield to battlefield.),Origins
+OGN-065,Wizened Elder,unit,calm,4,0,4,Ionia,,"While I'm buffed, I have an additional +1 [might].",Origins
+SFD-086,World Atlas,gear,mind,3,0,2,Equipment,,[Equip] :rb_rune_mind: (:rb_rune_mind:: Attach this to a unit you control.),Spiritforged
+OGN-118,Wraith of Echoes,unit,mind,6,0,5,"Spirit, Shadow Isles",,"The first time a friendly unit dies each turn, draw 1.",Origins
+OGS-019,Wuju Bladesman - Starter,unit,calm,0,0,,Master Yi,,"While a friendly unit defends alone, it gets +2 [might].",Proving Grounds
+SFD-176,Xin Zhao - Vigilant,unit,order,3,0,4,"Demacia, Xin Zhao",,[Tank] (I must be assigned combat damage first.)I enter ready if you have two or more other units in your base.,Spiritforged
+OGN-076,Yasuo - Remorseful,unit,calm,6,0,6,"Yasuo, Ionia",,"When I attack, deal damage equal to my Might to an enemy here.",Origins
+OGN-076a,Yasuo - Remorseful,unit,calm,6,0,6,"Yasuo, Ionia",,"When I attack, deal damage equal to my Might to an enemy here.",Origins
+OGN-259,Yasuo - Unforgiven,unit,calm,0,0,,Yasuo,,"[2] , [tap] : Move a friendly unit to or from its base.",Origins
+OGN-259-P,Yasuo - Unforgiven,unit,calm,0,0,,Yasuo,,"[2] , [tap] : Move a friendly unit to or from its base.",Origins
+OGN-305,Yasuo - Unforgiven,unit,calm,0,0,,Yasuo,,"[2] , [tap] : Move a friendly unit to or from its base.",Origins
+OGN-305-STAR,Yasuo - Unforgiven,unit,calm,0,0,,Yasuo,,":rb_energy_2:, :rb_exhaust:: Move a friendly unit to or from its base.",Origins
+OGN-205,Yasuo - Windrider,unit,chaos,5,0,4,"Yasuo, Ionia",,"GANKING (I can move from battlefield to battlefield) The third time I move in a turn, you score 1 point.",Origins
+OGN-205a,Yasuo - Windrider,unit,chaos,5,0,4,"Yasuo, Ionia",,"GANKING (I can move from battlefield to battlefield) The third time I move in a turn, you score 1 point.",Origins
+SFD-235,Yasuo - Windrider,unit,chaos,5,0,4,Yasuo,,"[Ganking] (I can move from battlefield to battlefield.)The third time I move in a turn, you score 1 point.",Spiritforged
+SFD-235-STAR,Yasuo - Windrider,unit,chaos,5,0,4,Yasuo,,"[Ganking] (I can move from battlefield to battlefield.)The third time I move in a turn, you score 1 point.",Spiritforged
+SFD-116,Yone - Blademaster,unit,body,5,0,5,"Yone, Ionia, Demon",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)When I conquer an open battlefield, deal damage equal to my Might to an enemy unit in a base.",Spiritforged
+SFD-233,Yone - Blademaster,unit,body,5,0,5,"Yone, Ionia, Demon",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)When I conquer an open battlefield, deal damage equal to my Might to an enemy unit in a base.",Spiritforged
+SFD-233-STAR,Yone - Blademaster,unit,body,5,0,5,"Yone, Ionia, Demon",,"[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)When I conquer an open battlefield, deal damage equal to my Might to an enemy unit in a base.",Spiritforged
+SFD-100,Yordle Explorer,unit,body,4,0,4,"Yordle, Bandle City",,"When you play a card with Power cost :rb_rune_rainbow::rb_rune_rainbow: or more, draw 1.",Spiritforged
+SFD-160,Zaun Punk,unit,order,3,0,3,Zaun,,"You may kill a friendly gear as an additional cost to play me.When you play me, if you paid the additional cost, kill a gear.",Spiritforged
+OGN-298,Zaun Warrens,battlefield,colorless,0,0,,,,"When you conquer here, discard 1 then draw 1.",Origins
+OGN-188,Zaunite Bouncer,unit,chaos,4,0,2,Zaun,,,Origins
+OGN-262,Zenith Blade,spell,calm,3,0,,Leona,,ACTION (Play on your turn or in showdowns.)  Stun an enemy at a battlefield. You may move a friendly unit to that enemy unit's battlefield. (A stunned unit doesn't deal combat damage this turn.),Origins
+OGS-005,Zephyr Sage,unit,calm,6,0,6,"Ionia, Bird",,SHIELD (+1 [might] while I'm a defender.),Proving Grounds
+OGN-077,Zhonya's Hourglass,gear,calm,2,0,,,,"HIDDEN (Hide for now [rune] to react with later for [0].)  If a friendly unit would die, kill this instead. Heal that unit, exhaust it, and recall it. (Send it to base. This isn't a move.)",Origins
