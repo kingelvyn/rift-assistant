@@ -13,11 +13,13 @@ from advisor import (
 )
 from game_state import GameState, Rune, CardType
 from card_db import init_db, CardRecord, get_card, list_cards, upsert_card, count_cards
+from logger_config import setup_logging
 
 app = FastAPI (title="Riftbound Assistant")
 
 @app.on_event("startup")
 def on_startup() -> None:
+    setup_logging()
     init_db()
 
 class AdviceResponse(BaseModel):

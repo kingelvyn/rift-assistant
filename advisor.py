@@ -1,9 +1,18 @@
 # Riftbound advisor
 # advisor.py
 
+import logging
 from typing import Optional, List
 from game_state import GameState, CardInHand, PlayerState, Rune, Phase, CardType, Battlefield, Legend
 from pydantic import BaseModel
+from logger_config import (
+    advisor_logger,
+    log_game_state,
+    log_advisor_decision,
+    log_card_playability,
+    log_legend_interaction,
+    log_battlefield_analysis,
+)
 
 class MulliganCardDecision(BaseModel):
     card_id: str
@@ -403,8 +412,24 @@ def _analyze_legend_synergy(card: CardInHand, player: PlayerState, opponent: Opt
         if _requires_legend_exhaustion(card):
             if _can_exhaust_legend(player):
                 synergy_notes.append(f"Can exhaust {legend.name or 'legend'} for additional effect")
+                log_legend_interaction(
+                    advisor_logger,
+                    card.card_id,
+                    legend.card_id,
+                    "legend_exhaustion_available",
+                    card_name=card.name,
+                    legend_name=legend.name
+                )
             else:
                 synergy_notes.append(f"Requires legend exhaustion but {legend.name or 'legend'} is already exhausted")
+                log_legend_interaction(
+                    advisor_logger,
+                    card.card_id,
+                    legend.card_id,
+                    "legend_exhaustion_unavailable",
+                    card_name=card.name,
+                    legend_name=legend.name
+                )
         
         # Check if card benefits from legend passive abilities
         if legend.passive_abilities:
@@ -469,6 +494,14 @@ def can_play(card: CardInHand, player: PlayerState) -> bool:
     """Check if a card can be played given the player's current resources."""
     # Check total mana
     if player.mana_total is None:
+        log_card_playability(
+            advisor_logger,
+            card.card_id,
+            False,
+            "No mana available",
+            card_name=card.name,
+            energy_cost=card.energy_cost
+        )
         return False
     
     # Check energy cost (rune tap cost)
@@ -476,6 +509,15 @@ def can_play(card: CardInHand, player: PlayerState) -> bool:
         # Need to check if player has the required rune tapped
         # For now, simple check: need at least energy_cost total mana
         if player.mana_total < card.energy_cost:
+            log_card_playability(
+                advisor_logger,
+                card.card_id,
+                False,
+                f"Insufficient mana: need {card.energy_cost}, have {player.mana_total}",
+                card_name=card.name,
+                energy_cost=card.energy_cost,
+                available_mana=player.mana_total
+            )
             return False
     
     # Check power cost (rune recycle cost)
@@ -483,6 +525,15 @@ def can_play(card: CardInHand, player: PlayerState) -> bool:
         # Need to check if player has the required runes available
         # For now, simplified check
         if player.mana_total < card.power_cost:
+            log_card_playability(
+                advisor_logger,
+                card.card_id,
+                False,
+                f"Insufficient mana for power cost: need {card.power_cost}, have {player.mana_total}",
+                card_name=card.name,
+                power_cost=card.power_cost,
+                available_mana=player.mana_total
+            )
             return False
     
     # Check power cost by rune
@@ -490,17 +541,57 @@ def can_play(card: CardInHand, player: PlayerState) -> bool:
         for rune, cost in card.power_cost_by_rune.items():
             available = player.mana_by_rune.get(rune, 0)
             if available < cost:
+                log_card_playability(
+                    advisor_logger,
+                    card.card_id,
+                    False,
+                    f"Insufficient {rune} rune: need {cost}, have {available}",
+                    card_name=card.name,
+                    required_rune=rune,
+                    required_cost=cost,
+                    available_rune=available
+                )
                 return False
     
     # Check if card requires legend exhaustion and if legend is available
     if _requires_legend_exhaustion(card):
         if not _can_exhaust_legend(player):
+            log_card_playability(
+                advisor_logger,
+                card.card_id,
+                False,
+                "Legend exhaustion required but legend is exhausted",
+                card_name=card.name,
+                legend_id=player.legend.card_id if player.legend else None,
+                legend_exhausted=player.legend.exhausted if player.legend else None
+            )
             return False
+        else:
+            log_legend_interaction(
+                advisor_logger,
+                card.card_id,
+                player.legend.card_id if player.legend else None,
+                "legend_exhaustion_required",
+                card_name=card.name,
+                legend_name=player.legend.name if player.legend else None
+            )
     
+    log_card_playability(
+        advisor_logger,
+        card.card_id,
+        True,
+        "Card is playable",
+        card_name=card.name,
+        energy_cost=card.energy_cost,
+        available_mana=player.mana_total
+    )
     return True
 
 
 def get_mulligan_advice(state: GameState) -> MulliganAdvice:
+    """Very simple mulligan heuristic with logging."""
+    advisor_logger.info(f"Processing mulligan advice for turn {state.turn}")
+    log_game_state(advisor_logger, state, "mulligan", turn=state.turn, phase=state.phase.value)
     """
     Very simple mulligan heuristic:
     - Keep cheap units (cost <= 2)
@@ -606,6 +697,18 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
     - Card type synergies (units before gear, removal when needed)
     - Turn and phase context
     """
+    advisor_logger.info(f"Processing playable cards advice for turn {state.turn}, phase {state.phase.value}")
+    log_game_state(
+        advisor_logger,
+        state,
+        "playable_cards",
+        turn=state.turn,
+        phase=state.phase.value,
+        my_mana=state.me.mana_total,
+        hand_size=len(state.me.hand),
+        battlefield_count=len(state.battlefields)
+    )
+    
     if state.phase == Phase.MULLIGAN:
         return PlayableCardsAdvice(
             playable_cards=[],
@@ -726,7 +829,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     reason = f"Strong unit{might_str}{keywords_str}, but no optimal battlefield placement available."
                     recommended = False
                 
-                legend_synergy = _analyze_legend_synergy(card, me)
+                legend_synergy = _analyze_legend_synergy(card, me, opponent)
                 recommendations.append(
                     PlayableCardRecommendation(
                         card_id=card.card_id,
@@ -755,7 +858,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
             removal_spells.sort(key=lambda c: c.energy_cost)
             best_removal = removal_spells[0]
             if best_removal.card_id not in recommended_card_ids:
-                legend_synergy = _analyze_legend_synergy(best_removal, me)
+                legend_synergy = _analyze_legend_synergy(best_removal, me, opponent)
                 recommendations.append(
                     PlayableCardRecommendation(
                         card_id=best_removal.card_id,
@@ -777,7 +880,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
         playable_gear.sort(key=lambda c: c.energy_cost)
         best_gear = playable_gear[0]
         if best_gear.card_id not in recommended_card_ids:
-            legend_synergy = _analyze_legend_synergy(best_gear, me)
+            legend_synergy = _analyze_legend_synergy(best_gear, me, opponent)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=best_gear.card_id,
@@ -803,7 +906,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
         if buff_spells:
             buff_spells.sort(key=lambda c: c.energy_cost)
             best_buff = buff_spells[0]
-            legend_synergy = _analyze_legend_synergy(best_buff, me)
+            legend_synergy = _analyze_legend_synergy(best_buff, me, opponent)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=best_buff.card_id,
@@ -902,9 +1005,32 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
     
     summary = " ".join(summary_parts)
     
-    return PlayableCardsAdvice(
+    advice = PlayableCardsAdvice(
         playable_cards=recommendations,
         recommended_plays=recommended_card_ids,
         summary=summary,
         mana_efficiency_note=mana_efficiency_note,
     )
+    
+    log_advisor_decision(
+        advisor_logger,
+        state,
+        "playable_cards",
+        advice,
+        turn=state.turn,
+        phase=state.phase.value,
+        playable_count=len(playable),
+        recommended_count=len(recommended_card_ids),
+        my_mana=me.mana_total,
+        opponent_mana=opponent.mana_total,
+        my_legend=me.legend.card_id if me.legend else None,
+        opponent_legend=opponent.legend.card_id if opponent.legend else None,
+        battlefield_states={
+            "empty": empty_count,
+            "contested": contested_count,
+            "winning": winning_count,
+            "losing": losing_count
+        }
+    )
+    
+    return advice
