@@ -49,6 +49,7 @@ class CardInHand (BaseModel):
     tags: List[str] = []
     keywords: List[str] = []
     element: Optional[Rune] = None
+    rules_text: Optional[str] = None  # Card rules text for ability analysis
     keep: bool = True
 
 # ----------------
@@ -77,9 +78,24 @@ class Battlefield(BaseModel):
     my_unit: Optional[Unit] = None
     op_unit: Optional[Unit] = None
 
+class Legend(BaseModel):
+    """
+    Legend represents the player's chosen Legend character.
+    Legends have abilities and can be exhausted/ready.
+    """
+    card_id: str
+    name: Optional[str] = None
+    domain: Rune
+    exhausted: bool = False
+    abilities: List[str] = []  # List of ability descriptions
+    passive_abilities: List[str] = []  # Passive abilities that are always active
+    activated_abilities: List[str] = []  # Activated abilities (tap, etc.)
+    triggered_abilities: List[str] = []  # Triggered abilities
+
 class PlayerState(BaseModel):
     name: Optional[str] = None
-    leader_id: Optional[str] = None
+    leader_id: Optional[str] = None  # Deprecated: use legend instead
+    legend: Optional[Legend] = None  # The player's Legend
     mana_total: Optional[int] = None
     mana_by_rune:Dict[Rune, int] = {}
     deck_size: Optional[int] = None

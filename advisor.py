@@ -2,7 +2,7 @@
 # advisor.py
 
 from typing import Optional, List
-from game_state import GameState, CardInHand, PlayerState, Rune, Phase, CardType, Battlefield
+from game_state import GameState, CardInHand, PlayerState, Rune, Phase, CardType, Battlefield, Legend
 from pydantic import BaseModel
 
 class MulliganCardDecision(BaseModel):
@@ -374,6 +374,73 @@ def get_simple_advice(state: GameState) -> str:
     return " ".join(advice_parts)
 
 
+def _requires_legend_exhaustion(card: CardInHand) -> bool:
+    """Check if a card's rules text requires exhausting the legend."""
+    if not card.rules_text:
+        return False
+    rules_lower = card.rules_text.lower()
+    # Check for patterns like "exhaust your legend" or "exhaust legend"
+    return "exhaust your legend" in rules_lower or "exhaust legend" in rules_lower
+
+def _can_exhaust_legend(player: PlayerState) -> bool:
+    """Check if the player's legend can be exhausted (exists and is ready)."""
+    if not player.legend:
+        return False
+    return not player.legend.exhausted
+
+def _analyze_legend_synergy(card: CardInHand, player: PlayerState) -> Optional[str]:
+    """
+    Analyze how a card interacts with the player's legend abilities.
+    Returns a string describing the synergy, or None if no relevant interaction.
+    """
+    if not player.legend:
+        return None
+    
+    legend = player.legend
+    synergy_notes = []
+    
+    # Check if card requires legend exhaustion
+    if _requires_legend_exhaustion(card):
+        if _can_exhaust_legend(player):
+            synergy_notes.append(f"Can exhaust {legend.name or 'legend'} for additional effect")
+        else:
+            synergy_notes.append(f"Requires legend exhaustion but {legend.name or 'legend'} is already exhausted")
+    
+    # Check if card benefits from legend passive abilities
+    if legend.passive_abilities:
+        # Simple keyword matching - could be expanded
+        for ability in legend.passive_abilities:
+            ability_lower = ability.lower()
+            # Check for common synergies
+            if "bonus damage" in ability_lower and card.card_type == CardType.SPELL:
+                synergy_notes.append(f"Benefits from {legend.name or 'legend'}'s bonus damage passive")
+            elif "buff" in ability_lower and card.card_type == CardType.UNIT:
+                synergy_notes.append(f"May benefit from {legend.name or 'legend'}'s buff abilities")
+    
+    # Check if card can ready/exhaust legend
+    if card.rules_text:
+        rules_lower = card.rules_text.lower()
+        if "ready" in rules_lower and "legend" in rules_lower:
+            if legend.exhausted:
+                synergy_notes.append(f"Can ready exhausted {legend.name or 'legend'}")
+        elif "exhaust" in rules_lower and "legend" in rules_lower and "exhaust your legend" not in rules_lower:
+            if not legend.exhausted:
+                synergy_notes.append(f"Can exhaust {legend.name or 'legend'} (may be useful for setup)")
+    
+    # Check if legend has activated abilities that could help
+    if legend.activated_abilities and not legend.exhausted:
+        for ability in legend.activated_abilities:
+            ability_lower = ability.lower()
+            # Check if legend ability could support this card
+            if card.card_type == CardType.UNIT and ("buff" in ability_lower or "might" in ability_lower):
+                synergy_notes.append(f"{legend.name or 'Legend'} can use ability to support this unit")
+            elif card.card_type == CardType.GEAR and "attach" in ability_lower:
+                synergy_notes.append(f"{legend.name or 'Legend'} can help attach equipment")
+    
+    if synergy_notes:
+        return " | ".join(synergy_notes)
+    return None
+
 def can_play(card: CardInHand, player: PlayerState) -> bool:
     """Check if a card can be played given the player's current resources."""
     # Check total mana
@@ -400,6 +467,11 @@ def can_play(card: CardInHand, player: PlayerState) -> bool:
             available = player.mana_by_rune.get(rune, 0)
             if available < cost:
                 return False
+    
+    # Check if card requires legend exhaustion and if legend is available
+    if _requires_legend_exhaustion(card):
+        if not _can_exhaust_legend(player):
+            return False
     
     return True
 
@@ -580,6 +652,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                 
                 if battlefield_placement and battlefield_placement.priority <= 2:  # Only empty or winnable contested battlefields
                     reason = f"Early game board development: {battlefield_placement.reason}"
+                    legend_synergy = _analyze_legend_synergy(card, me)
                     recommendations.append(
                         PlayableCardRecommendation(
                             card_id=card.card_id,
@@ -590,6 +663,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                             recommended=True,
                             reason=reason,
                             battlefield_placement=battlefield_placement,
+                            legend_synergy=legend_synergy,
                         )
                     )
                     recommended_card_ids.append(card.card_id)
@@ -628,6 +702,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     reason = f"Strong unit{might_str}{keywords_str}, but no optimal battlefield placement available."
                     recommended = False
                 
+                legend_synergy = _analyze_legend_synergy(card, me)
                 recommendations.append(
                     PlayableCardRecommendation(
                         card_id=card.card_id,
@@ -638,6 +713,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                         recommended=recommended,
                         reason=reason,
                         battlefield_placement=battlefield_placement,
+                        legend_synergy=legend_synergy,
                     )
                 )
                 if recommended:
@@ -655,6 +731,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
             removal_spells.sort(key=lambda c: c.energy_cost)
             best_removal = removal_spells[0]
             if best_removal.card_id not in recommended_card_ids:
+                legend_synergy = _analyze_legend_synergy(best_removal, me)
                 recommendations.append(
                     PlayableCardRecommendation(
                         card_id=best_removal.card_id,
@@ -664,6 +741,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                         priority=priority_counter,
                         recommended=True,
                         reason=f"Removal spell to answer opponent's {opponent_units} unit(s) on board.",
+                        legend_synergy=legend_synergy,
                     )
                 )
                 recommended_card_ids.append(best_removal.card_id)
@@ -675,6 +753,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
         playable_gear.sort(key=lambda c: c.energy_cost)
         best_gear = playable_gear[0]
         if best_gear.card_id not in recommended_card_ids:
+            legend_synergy = _analyze_legend_synergy(best_gear, me)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=best_gear.card_id,
@@ -684,6 +763,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     priority=priority_counter,
                     recommended=True,
                     reason=f"Gear to equip on existing unit(s) for value and board advantage.",
+                    legend_synergy=legend_synergy,
                 )
             )
             recommended_card_ids.append(best_gear.card_id)
@@ -699,6 +779,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
         if buff_spells:
             buff_spells.sort(key=lambda c: c.energy_cost)
             best_buff = buff_spells[0]
+            legend_synergy = _analyze_legend_synergy(best_buff, me)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=best_buff.card_id,
@@ -708,6 +789,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     priority=priority_counter,
                     recommended=True,
                     reason=f"Buff/protection spell to enhance or protect your units.",
+                    legend_synergy=legend_synergy,
                 )
             )
             recommended_card_ids.append(best_buff.card_id)
@@ -722,6 +804,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
             elif card.card_type == CardType.SPELL and not card.tags:
                 reason = "Utility spell; play when needed for specific situation."
             
+            legend_synergy = _analyze_legend_synergy(card, me)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=card.card_id,
@@ -731,6 +814,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     priority=priority_counter,
                     recommended=False,
                     reason=reason,
+                    legend_synergy=legend_synergy,
                 )
             )
             priority_counter += 1
