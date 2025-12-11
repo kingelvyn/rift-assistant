@@ -6,10 +6,13 @@ from advisor import (
     get_simple_advice,
     get_mulligan_advice,
     get_playable_cards_advice,
+)
+from advisor_models import (
     MulliganAdvice,
     MulliganCardDecision,
     PlayableCardsAdvice,
     PlayableCardRecommendation,
+    ScoringDebugInfo,
 )
 from game_state import GameState, Rune, CardType
 from card_db import init_db, CardRecord, get_card, list_cards, upsert_card, count_cards
@@ -34,6 +37,7 @@ class PlayableCardsAdviceResponse(BaseModel):
     recommended_plays: List[str]
     summary: str
     mana_efficiency_note: Optional[str] = None
+    scoring_debug: Optional[ScoringDebugInfo] = None  # Scoring calculations for debugging
 
 class CardResponse(CardRecord):
     pass
@@ -94,6 +98,7 @@ def playable_cards_advice_endpoint(state: GameState) -> PlayableCardsAdviceRespo
         recommended_plays=advice.recommended_plays,
         summary=advice.summary,
         mana_efficiency_note=advice.mana_efficiency_note,
+        scoring_debug=advice.scoring_debug,
     )
 
 

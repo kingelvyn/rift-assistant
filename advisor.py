@@ -1,243 +1,45 @@
 # Riftbound advisor
 # advisor.py
 
-import logging
-from typing import Optional, List
-from game_state import GameState, CardInHand, PlayerState, Rune, Phase, CardType, Battlefield, Legend
-from pydantic import BaseModel
+from typing import List
+from game_state import GameState, CardType, Phase
 from logger_config import (
     advisor_logger,
     log_game_state,
     log_advisor_decision,
-    log_card_playability,
-    log_legend_interaction,
     log_battlefield_analysis,
 )
 
-class MulliganCardDecision(BaseModel):
-    card_id: str
-    name: Optional[str]
-    keep: bool
-    reason: str
+# Import models
+from advisor_models import (
+    MulliganCardDecision,
+    MulliganAdvice,
+    PlayableCardRecommendation,
+    PlayableCardsAdvice,
+    ScoringDebugInfo,
+)
 
-class MulliganAdvice(BaseModel):
-    decisions: List[MulliganCardDecision]
-    summary: str
+# Import evaluation functions
+from card_evaluation import (
+    get_all_playable_cards,
+    playable_cards_by_mana,
+    describe_card,
+    calculate_card_value,
+    assess_threat_level,
+    should_hold_card,
+    calculate_mana_efficiency_score,
+)
 
-class BattlefieldPlacement(BaseModel):
-    """Recommendation for which battlefield to place a unit."""
-    battlefield_index: int
-    reason: str
-    priority: int  # Lower = higher priority
+# Import battlefield analysis
+from battlefield_analysis import (
+    analyze_battlefield,
+    find_best_battlefield_for_unit,
+)
 
-class PlayableCardRecommendation(BaseModel):
-    card_id: str
-    name: Optional[str]
-    card_type: CardType
-    energy_cost: int
-    priority: int  # 1 = highest priority, higher numbers = lower priority
-    recommended: bool  # Should this card be played this turn?
-    reason: str
-    play_order: Optional[int] = None  # Suggested order if playing multiple cards
-    battlefield_placement: Optional[BattlefieldPlacement] = None  # For units: which battlefield to play into
-
-class PlayableCardsAdvice(BaseModel):
-    playable_cards: List[PlayableCardRecommendation]
-    recommended_plays: List[str]  # card_ids of recommended plays
-    summary: str
-    mana_efficiency_note: Optional[str] = None
-
-def _playable_cards_by_mana(state: GameState) -> List:
-    """
-    Very simple playability check:
-    - A card is considered playable if its energy_cost <= current mana_total.
-    - We ignore colored rune constraints for now and focus on curve/tempo.
-    """
-    me = state.me
-    if me.mana_total is None:
-        return []
-
-    playable = [c for c in me.hand if c.energy_cost <= (me.mana_total or 0)]
-    # Sort by cost, then by type (units first)
-    playable.sort(key=lambda c: (c.energy_cost, 0 if c.card_type == CardType.UNIT else 1))
-    return playable
-
-def _get_all_playable_cards(state: GameState) -> List[CardInHand]:
-    """
-    Get all cards that can actually be played using can_play().
-    More accurate than _playable_cards_by_mana() as it checks rune requirements.
-    """
-    me = state.me
-    return [c for c in me.hand if can_play(c, me)]
-
-
-def _analyze_battlefield(battlefield: Battlefield, battlefield_index: int) -> dict:
-    """
-    Analyze a single battlefield and return its state.
-    
-    Returns:
-    - battlefield_state: "empty", "winning", "losing", "contested", "neutral"
-    - my_might: might of our unit (0 if none)
-    - op_might: might of opponent unit (0 if none)
-    - advantage: positive if we're winning, negative if losing
-    """
-    my_unit = battlefield.my_unit
-    op_unit = battlefield.op_unit
-    
-    my_might = my_unit.current_might if my_unit and my_unit.current_might is not None else (my_unit.might if my_unit else 0)
-    op_might = op_unit.current_might if op_unit and op_unit.current_might is not None else (op_unit.might if op_unit else 0)
-    
-    if my_unit is None and op_unit is None:
-        return {
-            "battlefield_index": battlefield_index,
-            "state": "empty",
-            "my_might": 0,
-            "op_might": 0,
-            "advantage": 0,
-            "description": "Empty battlefield - good for establishing presence"
-        }
-    elif my_unit is not None and op_unit is None:
-        # We control this battlefield
-        return {
-            "battlefield_index": battlefield_index,
-            "state": "winning",
-            "my_might": my_might,
-            "op_might": 0,
-            "advantage": my_might,
-            "description": f"Winning battlefield with {my_might} might unit"
-        }
-    elif my_unit is None and op_unit is not None:
-        # Opponent controls this battlefield
-        return {
-            "battlefield_index": battlefield_index,
-            "state": "contested",
-            "my_might": 0,
-            "op_might": op_might,
-            "advantage": -op_might,
-            "description": f"Contested battlefield - opponent has {op_might} might unit"
-        }
-    else:
-        # Both have units - compare might
-        advantage = my_might - op_might
-        if advantage > 0:
-            state = "winning"
-            desc = f"Winning trade ({my_might} vs {op_might} might)"
-        elif advantage < 0:
-            state = "losing"
-            desc = f"Losing trade ({my_might} vs {op_might} might)"
-        else:
-            state = "neutral"
-            desc = f"Even trade ({my_might} vs {op_might} might)"
-        
-        return {
-            "battlefield_index": battlefield_index,
-            "state": state,
-            "my_might": my_might,
-            "op_might": op_might,
-            "advantage": advantage,
-            "description": desc
-        }
-
-
-def _find_best_battlefield_for_unit(
-    unit: CardInHand,
-    battlefield_analyses: List[dict],
-    turn: int
-) -> Optional[BattlefieldPlacement]:
-    """
-    Determine the best battlefield to place a unit based on:
-    - Empty battlefields (highest priority early game)
-    - Contested battlefields (if unit can win the trade)
-    - Avoiding overfilling winning battlefields
-    """
-    unit_might = unit.might or 0
-    early_game = turn <= 3
-    
-    # Priority 1: Empty battlefields (especially early game)
-    empty_battlefields = [b for b in battlefield_analyses if b["state"] == "empty"]
-    if empty_battlefields:
-        # Prefer empty battlefields, especially early game
-        best_empty = empty_battlefields[0]  # Take first empty battlefield
-        return BattlefieldPlacement(
-            battlefield_index=best_empty["battlefield_index"],
-            reason=f"Empty battlefield - establish board presence{' (high priority early game)' if early_game else ''}",
-            priority=1
-        )
-    
-    # Priority 2: Contested battlefields where we can win or tie
-    contested_battlefields = [b for b in battlefield_analyses if b["state"] == "contested"]
-    if contested_battlefields:
-        # Find battlefields where our unit can win or at least trade
-        winnable_contests = [
-            b for b in contested_battlefields
-            if unit_might >= b["op_might"]
-        ]
-        if winnable_contests:
-            # Prefer battlefields where we can win (not just trade)
-            winning_contests = [b for b in winnable_contests if unit_might > b["op_might"]]
-            target = winning_contests[0] if winning_contests else winnable_contests[0]
-            
-            if unit_might > target["op_might"]:
-                reason = f"Contested battlefield - can win trade ({unit_might} vs {target['op_might']} might)"
-            else:
-                reason = f"Contested battlefield - can trade evenly ({unit_might} vs {target['op_might']} might)"
-            
-            return BattlefieldPlacement(
-                battlefield_index=target["battlefield_index"],
-                reason=reason,
-                priority=2
-            )
-        # If we can't win, but it's a close trade, still consider it
-        close_contests = [
-            b for b in contested_battlefields
-            if unit_might >= b["op_might"] - 1  # Within 1 might
-        ]
-        if close_contests and not early_game:  # Only in mid/late game
-            target = close_contests[0]
-            return BattlefieldPlacement(
-                battlefield_index=target["battlefield_index"],
-                reason=f"Contested battlefield - close trade ({unit_might} vs {target['op_might']} might), may need support",
-                priority=3
-            )
-    
-    # Priority 3: Losing battlefields where we can turn the tide
-    losing_battlefields = [b for b in battlefield_analyses if b["state"] == "losing"]
-    if losing_battlefields:
-        # Find battlefields where our unit can win or at least improve the situation
-        improvable = [
-            b for b in losing_battlefields
-            if unit_might >= b["op_might"]  # Can win or tie
-        ]
-        if improvable:
-            target = improvable[0]
-            return BattlefieldPlacement(
-                battlefield_index=target["battlefield_index"],
-                reason=f"Losing battlefield - can turn the tide ({unit_might} vs {target['op_might']} might)",
-                priority=3
-            )
-    
-    # Priority 4: Winning battlefields (only if no better options and we need to overcommit)
-    # Generally avoid this unless it's a very strong unit
-    winning_battlefields = [b for b in battlefield_analyses if b["state"] == "winning"]
-    if winning_battlefields and unit_might >= 4:  # Only for strong units
-        # Only recommend if we're significantly ahead and unit is strong
-        target = winning_battlefields[0]
-        if target["advantage"] >= 2:  # Already winning by 2+
-            return BattlefieldPlacement(
-                battlefield_index=target["battlefield_index"],
-                reason=f"Winning battlefield - overcommitting with strong unit ({unit_might} might) to secure advantage",
-                priority=4
-            )
-    
-    # No good battlefield found
-    return None
-
-
-def _describe_card(card) -> str:
-    cost = card.energy_cost
-    t = card.card_type.value
-    name = card.name or card.card_id
-    return f"{name} ({t}, cost {cost})"
+# Import legend analysis
+from legend_analysis import (
+    analyze_legend_synergy,
+)
 
 
 def get_simple_advice(state: GameState) -> str:
@@ -274,7 +76,7 @@ def get_simple_advice(state: GameState) -> str:
                 "Consider mulliganing 1–2 non-essential spells/gears to look for early units."
             )
         elif cheap_units:
-            names = ", ".join(_describe_card(c) for c in cheap_units)
+            names = ", ".join(describe_card(c) for c in cheap_units)
             parts.append(
                 f"You have early units: {names}. "
                 "These give you a solid early board; it is usually good to keep them."
@@ -286,7 +88,7 @@ def get_simple_advice(state: GameState) -> str:
             )
 
         if len(high_cost_cards) >= 2:
-            names = ", ".join(_describe_card(c) for c in high_cost_cards)
+            names = ", ".join(describe_card(c) for c in high_cost_cards)
             parts.append(
                 f"You are holding several high-cost cards ({names}). "
                 "On turn 1, these are likely dead cards; consider sending some back."
@@ -298,7 +100,7 @@ def get_simple_advice(state: GameState) -> str:
         return " ".join(parts)
 
     # ----- MAIN / COMBAT PHASE LOGIC -----
-    playable = _playable_cards_by_mana(state)
+    playable = playable_cards_by_mana(state)
 
     if not playable:
         return (
@@ -319,14 +121,14 @@ def get_simple_advice(state: GameState) -> str:
     if early_game and playable_units:
         cheap_playable_units = [c for c in playable_units if c.energy_cost <= 2]
         if cheap_playable_units:
-            names = ", ".join(_describe_card(c) for c in cheap_playable_units)
+            names = ", ".join(describe_card(c) for c in cheap_playable_units)
             advice_parts.append(
                 f"Since it is early (turn {turn}), prioritize developing the board. "
                 f"Consider playing: {names}."
             )
         else:
             # only 3+ cost units playable
-            names = ", ".join(_describe_card(c) for c in playable_units)
+            names = ", ".join(describe_card(c) for c in playable_units)
             advice_parts.append(
                 f"You can play these units this turn: {names}. "
                 "They are a bit expensive for early turns; make sure you are not over-committing "
@@ -336,20 +138,20 @@ def get_simple_advice(state: GameState) -> str:
         # mid/late game units
         best_unit = playable_units[0]
         advice_parts.append(
-            f"You have playable units; a solid option is {_describe_card(best_unit)} to maintain or build board presence."
+            f"You have playable units; a solid option is {describe_card(best_unit)} to maintain or build board presence."
         )
 
     # Mention playable spells (especially cheap ones) as alternatives / support
     if playable_spells:
         cheap_spells = [c for c in playable_spells if c.energy_cost <= 2]
         if cheap_spells:
-            names = ", ".join(_describe_card(c) for c in cheap_spells)
+            names = ", ".join(describe_card(c) for c in cheap_spells)
             advice_parts.append(
                 f"You also have cheap spells: {names}. "
                 "Use them to protect your units, answer threats, or push favorable trades."
             )
         else:
-            names = ", ".join(_describe_card(c) for c in playable_spells)
+            names = ", ".join(describe_card(c) for c in playable_spells)
             advice_parts.append(
                 f"Higher-cost spells available: {names}. "
                 "Consider whether you need immediate impact now or can wait for a better moment."
@@ -357,7 +159,7 @@ def get_simple_advice(state: GameState) -> str:
 
     # Gear: usually best when you already have units worth investing in
     if playable_gear and playable_units:
-        gear_names = ", ".join(_describe_card(c) for c in playable_gear)
+        gear_names = ", ".join(describe_card(c) for c in playable_gear)
         advice_parts.append(
             f"You can also play gear: {gear_names}. "
             "Equipping strong units can snowball the board, but only if you already have "
@@ -368,7 +170,7 @@ def get_simple_advice(state: GameState) -> str:
     if early_game:
         greedy_plays = [c for c in playable if c.energy_cost >= 4]
         if greedy_plays:
-            names = ", ".join(_describe_card(c) for c in greedy_plays)
+            names = ", ".join(describe_card(c) for c in greedy_plays)
             advice_parts.append(
                 f"Be cautious about playing expensive cards this early ({names}); "
                 "they may leave you without flexible responses if the opponent swings the tempo."
@@ -381,211 +183,6 @@ def get_simple_advice(state: GameState) -> str:
         )
 
     return " ".join(advice_parts)
-
-
-def _requires_legend_exhaustion(card: CardInHand) -> bool:
-    """Check if a card's rules text requires exhausting the legend."""
-    if not card.rules_text:
-        return False
-    rules_lower = card.rules_text.lower()
-    # Check for patterns like "exhaust your legend" or "exhaust legend"
-    return "exhaust your legend" in rules_lower or "exhaust legend" in rules_lower
-
-def _can_exhaust_legend(player: PlayerState) -> bool:
-    """Check if the player's legend can be exhausted (exists and is ready)."""
-    if not player.legend:
-        return False
-    return not player.legend.exhausted
-
-def _analyze_legend_synergy(card: CardInHand, player: PlayerState, opponent: Optional[PlayerState] = None) -> Optional[str]:
-    """
-    Analyze how a card interacts with legend abilities (both player's and opponent's).
-    Returns a string describing the synergy, or None if no relevant interaction.
-    """
-    synergy_notes = []
-    
-    # Analyze player's legend
-    if player.legend:
-        legend = player.legend
-        
-        # Check if card requires legend exhaustion
-        if _requires_legend_exhaustion(card):
-            if _can_exhaust_legend(player):
-                synergy_notes.append(f"Can exhaust {legend.name or 'legend'} for additional effect")
-                log_legend_interaction(
-                    advisor_logger,
-                    card.card_id,
-                    legend.card_id,
-                    "legend_exhaustion_available",
-                    card_name=card.name,
-                    legend_name=legend.name
-                )
-            else:
-                synergy_notes.append(f"Requires legend exhaustion but {legend.name or 'legend'} is already exhausted")
-                log_legend_interaction(
-                    advisor_logger,
-                    card.card_id,
-                    legend.card_id,
-                    "legend_exhaustion_unavailable",
-                    card_name=card.name,
-                    legend_name=legend.name
-                )
-        
-        # Check if card benefits from legend passive abilities
-        if legend.passive_abilities:
-            # Simple keyword matching - could be expanded
-            for ability in legend.passive_abilities:
-                ability_lower = ability.lower()
-                # Check for common synergies
-                if "bonus damage" in ability_lower and card.card_type == CardType.SPELL:
-                    synergy_notes.append(f"Benefits from {legend.name or 'legend'}'s bonus damage passive")
-                elif "buff" in ability_lower and card.card_type == CardType.UNIT:
-                    synergy_notes.append(f"May benefit from {legend.name or 'legend'}'s buff abilities")
-        
-        # Check if card can ready/exhaust legend
-        if card.rules_text:
-            rules_lower = card.rules_text.lower()
-            if "ready" in rules_lower and "legend" in rules_lower:
-                if legend.exhausted:
-                    synergy_notes.append(f"Can ready exhausted {legend.name or 'legend'}")
-            elif "exhaust" in rules_lower and "legend" in rules_lower and "exhaust your legend" not in rules_lower:
-                if not legend.exhausted:
-                    synergy_notes.append(f"Can exhaust {legend.name or 'legend'} (may be useful for setup)")
-        
-        # Check if legend has activated abilities that could help
-        if legend.activated_abilities and not legend.exhausted:
-            for ability in legend.activated_abilities:
-                ability_lower = ability.lower()
-                # Check if legend ability could support this card
-                if card.card_type == CardType.UNIT:
-                    if "move" in ability_lower or "battlefield" in ability_lower:
-                        synergy_notes.append(f"{legend.name or 'Legend'} can move units to support this play")
-                    elif "buff" in ability_lower or "might" in ability_lower:
-                        synergy_notes.append(f"{legend.name or 'Legend'} can use ability to support this unit")
-                elif card.card_type == CardType.GEAR and "attach" in ability_lower:
-                    synergy_notes.append(f"{legend.name or 'Legend'} can help attach equipment")
-    
-    # Analyze opponent's legend (for defensive considerations)
-    if opponent and opponent.legend:
-        op_legend = opponent.legend
-        
-        # Check if opponent legend has abilities that might counter this play
-        if op_legend.triggered_abilities:
-            for ability in op_legend.triggered_abilities:
-                ability_lower = ability.lower()
-                # Warn about opponent legend abilities that might affect our play
-                if card.card_type == CardType.UNIT and ("kill" in ability_lower or "destroy" in ability_lower):
-                    synergy_notes.append(f"Opponent {op_legend.name or 'legend'} may counter this unit")
-                elif card.card_type == CardType.SPELL and "counter" in ability_lower:
-                    synergy_notes.append(f"Opponent {op_legend.name or 'legend'} may counter spells")
-        
-        # Check if opponent legend passive might affect us
-        if op_legend.passive_abilities:
-            for ability in op_legend.passive_abilities:
-                ability_lower = ability.lower()
-                if "damage" in ability_lower and card.card_type == CardType.UNIT:
-                    synergy_notes.append(f"Opponent {op_legend.name or 'legend'} passive may affect this unit")
-    
-    if synergy_notes:
-        return " | ".join(synergy_notes)
-    return None
-
-def can_play(card: CardInHand, player: PlayerState) -> bool:
-    """Check if a card can be played given the player's current resources."""
-    # Check total mana
-    if player.mana_total is None:
-        log_card_playability(
-            advisor_logger,
-            card.card_id,
-            False,
-            "No mana available",
-            card_name=card.name,
-            energy_cost=card.energy_cost
-        )
-        return False
-    
-    # Check energy cost (rune tap cost)
-    if card.energy_cost > 0:
-        # Need to check if player has the required rune tapped
-        # For now, simple check: need at least energy_cost total mana
-        if player.mana_total < card.energy_cost:
-            log_card_playability(
-                advisor_logger,
-                card.card_id,
-                False,
-                f"Insufficient mana: need {card.energy_cost}, have {player.mana_total}",
-                card_name=card.name,
-                energy_cost=card.energy_cost,
-                available_mana=player.mana_total
-            )
-            return False
-    
-    # Check power cost (rune recycle cost)
-    if card.power_cost > 0:
-        # Need to check if player has the required runes available
-        # For now, simplified check
-        if player.mana_total < card.power_cost:
-            log_card_playability(
-                advisor_logger,
-                card.card_id,
-                False,
-                f"Insufficient mana for power cost: need {card.power_cost}, have {player.mana_total}",
-                card_name=card.name,
-                power_cost=card.power_cost,
-                available_mana=player.mana_total
-            )
-            return False
-    
-    # Check power cost by rune
-    if card.power_cost_by_rune:
-        for rune, cost in card.power_cost_by_rune.items():
-            available = player.mana_by_rune.get(rune, 0)
-            if available < cost:
-                log_card_playability(
-                    advisor_logger,
-                    card.card_id,
-                    False,
-                    f"Insufficient {rune} rune: need {cost}, have {available}",
-                    card_name=card.name,
-                    required_rune=rune,
-                    required_cost=cost,
-                    available_rune=available
-                )
-                return False
-    
-    # Check if card requires legend exhaustion and if legend is available
-    if _requires_legend_exhaustion(card):
-        if not _can_exhaust_legend(player):
-            log_card_playability(
-                advisor_logger,
-                card.card_id,
-                False,
-                "Legend exhaustion required but legend is exhausted",
-                card_name=card.name,
-                legend_id=player.legend.card_id if player.legend else None,
-                legend_exhausted=player.legend.exhausted if player.legend else None
-            )
-            return False
-        else:
-            log_legend_interaction(
-                advisor_logger,
-                card.card_id,
-                player.legend.card_id if player.legend else None,
-                "legend_exhaustion_required",
-                card_name=card.name,
-                legend_name=player.legend.name if player.legend else None
-            )
-    
-    log_card_playability(
-        advisor_logger,
-        card.card_id,
-        True,
-        "Card is playable",
-        card_name=card.name,
-        energy_cost=card.energy_cost,
-        available_mana=player.mana_total
-    )
-    return True
 
 
 def get_mulligan_advice(state: GameState) -> MulliganAdvice:
@@ -608,8 +205,22 @@ def get_mulligan_advice(state: GameState) -> MulliganAdvice:
     hand = state.me.hand
     decisions: List[MulliganCardDecision] = []
 
-    # basic rules
+    # Improved mulligan heuristics
     kept_any_3_cost_unit = False
+    
+    # Count hand composition for better decisions
+    unit_count = sum(1 for c in hand if c.card_type == CardType.UNIT)
+    cheap_unit_count = sum(1 for c in hand if c.card_type == CardType.UNIT and c.energy_cost <= 2)
+    spell_count = sum(1 for c in hand if c.card_type == CardType.SPELL)
+    high_cost_count = sum(1 for c in hand if c.energy_cost >= 4)
+    
+    # Check for legend-specific cards
+    legend_id = state.me.legend.card_id if state.me.legend else None
+    legend_synergy_cards = []
+    if legend_id:
+        for card in hand:
+            if card.rules_text and legend_id.lower() in card.rules_text.lower():
+                legend_synergy_cards.append(card.card_id)
 
     for card in hand:
         cost = card.energy_cost
@@ -621,18 +232,35 @@ def get_mulligan_advice(state: GameState) -> MulliganAdvice:
         if ctype == CardType.UNIT:
             if cost <= 2:
                 keep = True
-                reason = "Cheap unit (cost ≤ 2): good to have early board presence."
+                # Prioritize units with good keywords
+                if card.keywords:
+                    important_keywords = [k for k in card.keywords if k.lower() in ["assault", "guard"]]
+                    if important_keywords:
+                        reason = f"Cheap unit (cost ≤ 2) with {', '.join(important_keywords)}: excellent early game."
+                    else:
+                        reason = "Cheap unit (cost ≤ 2): good to have early board presence."
+                else:
+                    reason = "Cheap unit (cost ≤ 2): good to have early board presence."
             elif cost == 3:
                 if not kept_any_3_cost_unit:
                     keep = True
                     kept_any_3_cost_unit = True
-                    reason = "Single 3-cost unit: acceptable curve top for opening hand."
+                    # Prefer 3-cost units with good stats/keywords
+                    if card.might and card.might >= 3:
+                        reason = "Strong 3-cost unit: good curve top with solid stats."
+                    else:
+                        reason = "Single 3-cost unit: acceptable curve top for opening hand."
                 else:
                     keep = False
                     reason = "Additional 3-cost unit: likely too heavy for opening hand."
             else:
                 keep = False
-                reason = "High-cost unit in opening hand: better to mulligan for cheaper plays."
+                # Exception: keep if it's a legend synergy card
+                if card.card_id in legend_synergy_cards:
+                    keep = True
+                    reason = "High-cost unit but has legend synergy: worth keeping."
+                else:
+                    reason = "High-cost unit in opening hand: better to mulligan for cheaper plays."
         else:
             # spells/gear
             if cost == 0:
@@ -640,13 +268,39 @@ def get_mulligan_advice(state: GameState) -> MulliganAdvice:
                 reason = "Zero-cost non-unit: flexible and free; safe to keep."
             elif cost == 1:
                 keep = True
-                reason = "Cheap utility (cost 1): often useful early."
-            elif cost <= 2 and "removal" in [t.lower() for t in card.tags]:
-                keep = True
-                reason = "Cheap removal spell: can answer early threats."
+                # Prioritize removal and utility
+                tags_lower = [t.lower() for t in (card.tags or [])]
+                if "removal" in tags_lower:
+                    reason = "Cheap removal (cost 1): excellent early game answer."
+                else:
+                    reason = "Cheap utility (cost 1): often useful early."
+            elif cost <= 2:
+                tags_lower = [t.lower() for t in (card.tags or [])]
+                if "removal" in tags_lower:
+                    keep = True
+                    reason = "Cheap removal spell: can answer early threats."
+                elif card.card_id in legend_synergy_cards:
+                    keep = True
+                    reason = "Cheap spell with legend synergy: worth keeping."
+                else:
+                    # Consider hand balance
+                    if spell_count >= 3 and cheap_unit_count == 0:
+                        keep = False
+                        reason = "Too many spells, need units for board presence."
+                    else:
+                        keep = True
+                        reason = "Cheap utility spell: acceptable in balanced hand."
             else:
-                keep = False
-                reason = "Expensive or situational non-unit: better to mulligan early."
+                # Expensive spells/gear
+                if card.card_id in legend_synergy_cards:
+                    keep = True
+                    reason = "Expensive but has legend synergy: consider keeping."
+                elif high_cost_count >= 2 and cheap_unit_count == 0:
+                    keep = False
+                    reason = "Too many expensive cards, need cheaper plays."
+                else:
+                    keep = False
+                    reason = "Expensive or situational non-unit: better to mulligan early."
 
         decisions.append(
             MulliganCardDecision(
@@ -722,7 +376,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
     phase = state.phase
     
     # Get all actually playable cards
-    playable = _get_all_playable_cards(state)
+    playable = get_all_playable_cards(state)
     
     if not playable:
         return PlayableCardsAdvice(
@@ -738,14 +392,24 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
     
     # Analyze each battlefield for placement decisions
     battlefield_analyses = [
-        _analyze_battlefield(battlefield, idx) for idx, battlefield in enumerate(state.battlefields)
+        analyze_battlefield(battlefield, idx) for idx, battlefield in enumerate(state.battlefields)
     ] if state.battlefields else []
+    
+    log_battlefield_analysis(
+        advisor_logger,
+        battlefield_analyses,
+        turn=state.turn,
+        battlefield_count=len(state.battlefields)
+    )
     
     # Count battlefield states
     empty_count = sum(1 for b in battlefield_analyses if b["state"] == "empty")
     contested_count = sum(1 for b in battlefield_analyses if b["state"] == "contested")
     winning_count = sum(1 for b in battlefield_analyses if b["state"] == "winning")
     losing_count = sum(1 for b in battlefield_analyses if b["state"] == "losing")
+    
+    # Assess threat level from opponent
+    threat_assessment = assess_threat_level(battlefield_analyses, opponent)
     
     # Early game heuristic
     early_game = turn <= 3
@@ -763,23 +427,38 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
     playable_spells = [c for c in playable if c.card_type == CardType.SPELL]
     playable_gear = [c for c in playable if c.card_type == CardType.GEAR]
     
+    # Calculate value scores for all playable cards
+    card_values = {card.card_id: calculate_card_value(card) for card in playable}
+    
     # Priority scoring: lower number = higher priority
     priority_counter = 1
     
     # Early game: prioritize cheap units for board development
+    # Sort by value score to get best units first
     if early_game:
         cheap_units = [c for c in playable_units if c.energy_cost <= 2]
         if cheap_units and battlefield_analyses:
+            # Sort by value score (better units first)
+            cheap_units.sort(key=lambda c: card_values.get(c.card_id, 0), reverse=True)
+            
             # Find best battlefield placements for each cheap unit
             for card in cheap_units:
                 if len([r for r in recommendations if r.card_id == card.card_id]) >= 1:
                     continue  # Already recommended
                 
-                battlefield_placement = _find_best_battlefield_for_unit(card, battlefield_analyses, turn)
+                battlefield_placement = find_best_battlefield_for_unit(card, battlefield_analyses, turn)
                 
                 if battlefield_placement and battlefield_placement.priority <= 2:  # Only empty or winnable contested battlefields
-                    reason = f"Early game board development: {battlefield_placement.reason}"
-                    legend_synergy = _analyze_legend_synergy(card, me, opponent)
+                    # Add keyword context to reason
+                    keyword_note = ""
+                    if card.keywords:
+                        important_keywords = [k for k in card.keywords if k.lower() in ["assault", "guard", "support"]]
+                        if important_keywords:
+                            keyword_note = f" ({', '.join(important_keywords)})"
+                    
+                    reason = f"Early game board development: {battlefield_placement.reason}{keyword_note}"
+                    legend_synergy = analyze_legend_synergy(card, me, opponent)
+                    value_score = card_values.get(card.card_id, 0.0)
                     recommendations.append(
                         PlayableCardRecommendation(
                             card_id=card.card_id,
@@ -791,6 +470,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                             reason=reason,
                             battlefield_placement=battlefield_placement,
                             legend_synergy=legend_synergy,
+                            value_score=value_score,
                         )
                     )
                     recommended_card_ids.append(card.card_id)
@@ -801,18 +481,22 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                         battlefield_analyses[battlefield_placement.battlefield_index]["state"] = "winning"
                         battlefield_analyses[battlefield_placement.battlefield_index]["my_might"] = card.might or 0
     
-    # Mid/late game units: prioritize based on might, keywords, and battlefield placement
+    # Mid/late game units: prioritize based on value score, keywords, and battlefield placement
     if not early_game and playable_units:
-        # Sort by might (if available) or cost efficiency
+        # Sort by value score (considers might per mana, keywords, etc.)
         sorted_units = sorted(
             playable_units,
-            key=lambda c: (c.might or 0, -c.energy_cost),
+            key=lambda c: (
+                card_values.get(c.card_id, 0),
+                c.might or 0,
+                -c.energy_cost
+            ),
             reverse=True
         )
         for card in sorted_units[:3]:  # Top 3 units
             if card.card_id not in recommended_card_ids:
                 # Find best battlefield for this unit
-                battlefield_placement = _find_best_battlefield_for_unit(card, battlefield_analyses, turn)
+                battlefield_placement = find_best_battlefield_for_unit(card, battlefield_analyses, turn)
                 
                 might_str = f" ({card.might} might)" if card.might else ""
                 keywords_str = f" [{', '.join(card.keywords)}]" if card.keywords else ""
@@ -829,7 +513,8 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     reason = f"Strong unit{might_str}{keywords_str}, but no optimal battlefield placement available."
                     recommended = False
                 
-                legend_synergy = _analyze_legend_synergy(card, me, opponent)
+                legend_synergy = analyze_legend_synergy(card, me, opponent)
+                value_score = card_values.get(card.card_id, 0.0)
                 recommendations.append(
                     PlayableCardRecommendation(
                         card_id=card.card_id,
@@ -841,6 +526,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                         reason=reason,
                         battlefield_placement=battlefield_placement,
                         legend_synergy=legend_synergy,
+                        value_score=value_score,
                     )
                 )
                 if recommended:
@@ -848,31 +534,44 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                 priority_counter += 1
     
     # Removal spells: high priority if opponent has threats
+    # Prioritize removal more if threat level is high
     if opponent_units > 0 and playable_spells:
         removal_spells = [
             c for c in playable_spells
-            if "removal" in [t.lower() for t in c.tags] or "damage" in [t.lower() for t in c.tags]
+            if "removal" in [t.lower() for t in (c.tags or [])] or "damage" in [t.lower() for t in (c.tags or [])]
         ]
         if removal_spells:
-            # Prioritize cheap removal
-            removal_spells.sort(key=lambda c: c.energy_cost)
+            # Sort by value score (considering threat level) and cost
+            # High threat = prioritize removal even if more expensive
+            if threat_assessment["threat_level"] == "high":
+                removal_spells.sort(key=lambda c: (-card_values.get(c.card_id, 0), c.energy_cost))
+            else:
+                removal_spells.sort(key=lambda c: (c.energy_cost, -card_values.get(c.card_id, 0)))
+            
             best_removal = removal_spells[0]
             if best_removal.card_id not in recommended_card_ids:
-                legend_synergy = _analyze_legend_synergy(best_removal, me, opponent)
-                recommendations.append(
-                    PlayableCardRecommendation(
-                        card_id=best_removal.card_id,
-                        name=best_removal.name,
-                        card_type=best_removal.card_type,
-                        energy_cost=best_removal.energy_cost,
-                        priority=priority_counter,
-                        recommended=True,
-                        reason=f"Removal spell to answer opponent's {opponent_units} unit(s) on board.",
-                        legend_synergy=legend_synergy,
+                # Check if we should hold this removal
+                should_hold = should_hold_card(best_removal, state, threat_assessment)
+                
+                if not should_hold:
+                    threat_desc = f"High threat level" if threat_assessment["threat_level"] == "high" else f"{opponent_units} unit(s)"
+                    legend_synergy = analyze_legend_synergy(best_removal, me, opponent)
+                    value_score = card_values.get(best_removal.card_id, 0.0)
+                    recommendations.append(
+                        PlayableCardRecommendation(
+                            card_id=best_removal.card_id,
+                            name=best_removal.name,
+                            card_type=best_removal.card_type,
+                            energy_cost=best_removal.energy_cost,
+                            priority=priority_counter,
+                            recommended=True,
+                            reason=f"Removal spell to answer opponent's {threat_desc} on board.",
+                            legend_synergy=legend_synergy,
+                            value_score=value_score,
+                        )
                     )
-                )
-                recommended_card_ids.append(best_removal.card_id)
-                priority_counter += 1
+                    recommended_card_ids.append(best_removal.card_id)
+                    priority_counter += 1
     
     # Gear: only recommend if we have units on board
     if my_units_on_board > 0 and playable_gear:
@@ -880,7 +579,8 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
         playable_gear.sort(key=lambda c: c.energy_cost)
         best_gear = playable_gear[0]
         if best_gear.card_id not in recommended_card_ids:
-            legend_synergy = _analyze_legend_synergy(best_gear, me, opponent)
+            legend_synergy = analyze_legend_synergy(best_gear, me, opponent)
+            value_score = card_values.get(best_gear.card_id, 0.0)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=best_gear.card_id,
@@ -891,6 +591,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     recommended=True,
                     reason=f"Gear to equip on existing unit(s) for value and board advantage.",
                     legend_synergy=legend_synergy,
+                    value_score=value_score,
                 )
             )
             recommended_card_ids.append(best_gear.card_id)
@@ -901,12 +602,13 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
         buff_spells = [
             c for c in playable_spells
             if c.card_id not in recommended_card_ids
-            and ("buff" in [t.lower() for t in c.tags] or "protection" in [t.lower() for t in c.tags])
+            and ("buff" in [t.lower() for t in (c.tags or [])] or "protection" in [t.lower() for t in (c.tags or [])])
         ]
         if buff_spells:
             buff_spells.sort(key=lambda c: c.energy_cost)
             best_buff = buff_spells[0]
-            legend_synergy = _analyze_legend_synergy(best_buff, me, opponent)
+            legend_synergy = analyze_legend_synergy(best_buff, me, opponent)
+            value_score = card_values.get(best_buff.card_id, 0.0)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=best_buff.card_id,
@@ -917,21 +619,35 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     recommended=True,
                     reason=f"Buff/protection spell to enhance or protect your units.",
                     legend_synergy=legend_synergy,
+                    value_score=value_score,
                 )
             )
             recommended_card_ids.append(best_buff.card_id)
             priority_counter += 1
     
     # Add remaining playable cards as lower priority options
+    # Check if they should be held or are just lower value
     for card in playable:
         if card.card_id not in recommended_card_ids:
-            reason = "Playable but lower priority. Consider if it fits your game plan."
-            if card.energy_cost >= 4 and early_game:
-                reason = "Expensive for early game; may be better to save for later."
-            elif card.card_type == CardType.SPELL and not card.tags:
-                reason = "Utility spell; play when needed for specific situation."
+            should_hold = should_hold_card(card, state, threat_assessment)
             
-            legend_synergy = _analyze_legend_synergy(card, me)
+            if should_hold:
+                reason = f"Consider holding this card (cost {card.energy_cost}) for a better opportunity."
+                if card.card_type == CardType.SPELL and card.keywords and "reaction" in [k.lower() for k in card.keywords]:
+                    reason = "Reaction spell - hold for opponent's turn or critical moment."
+            else:
+                reason = "Playable but lower priority. Consider if it fits your game plan."
+                if card.energy_cost >= 4 and early_game:
+                    reason = "Expensive for early game; may be better to save for later."
+                elif card.card_type == CardType.SPELL and not card.tags:
+                    reason = "Utility spell; play when needed for specific situation."
+                elif card.card_type == CardType.UNIT:
+                    value_score = card_values.get(card.card_id, 0)
+                    if value_score < 2.0:
+                        reason = f"Lower value unit (value score: {value_score:.1f}). Consider better options first."
+            
+            legend_synergy = analyze_legend_synergy(card, me, opponent)
+            value_score = card_values.get(card.card_id, 0.0)
             recommendations.append(
                 PlayableCardRecommendation(
                     card_id=card.card_id,
@@ -942,6 +658,7 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
                     recommended=False,
                     reason=reason,
                     legend_synergy=legend_synergy,
+                    value_score=value_score,
                 )
             )
             priority_counter += 1
@@ -949,18 +666,20 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
     # Sort recommendations by priority
     recommendations.sort(key=lambda r: r.priority)
     
-    # Calculate mana efficiency
-    recommended_mana_cost = sum(
-        c.energy_cost for c in playable
-        if c.card_id in recommended_card_ids
-    )
+    # Calculate mana efficiency with improved scoring
+    recommended_cards_list = [c for c in playable if c.card_id in recommended_card_ids]
+    recommended_mana_cost = sum(c.energy_cost for c in recommended_cards_list)
+    mana_efficiency_score = calculate_mana_efficiency_score(recommended_cards_list, available_mana)
+    
     mana_efficiency_note = None
     if available_mana > 0:
-        efficiency = (recommended_mana_cost / available_mana) * 100
-        if efficiency < 50:
-            mana_efficiency_note = f"Recommended plays use {recommended_mana_cost}/{available_mana} mana ({efficiency:.0f}%). Consider additional plays if needed."
-        elif efficiency > 90:
-            mana_efficiency_note = f"Recommended plays use {recommended_mana_cost}/{available_mana} mana ({efficiency:.0f}%) - efficient use of resources."
+        efficiency_pct = (recommended_mana_cost / available_mana) * 100
+        if mana_efficiency_score < 0.5:
+            mana_efficiency_note = f"Recommended plays use {recommended_mana_cost}/{available_mana} mana ({efficiency_pct:.0f}%). Consider additional plays or holding cards for better opportunities."
+        elif mana_efficiency_score >= 0.9:
+            mana_efficiency_note = f"Recommended plays use {recommended_mana_cost}/{available_mana} mana ({efficiency_pct:.0f}%) - efficient use of resources."
+        else:
+            mana_efficiency_note = f"Recommended plays use {recommended_mana_cost}/{available_mana} mana ({efficiency_pct:.0f}%)."
     
     # Build summary with battlefield and legend awareness
     summary_parts = []
@@ -1005,11 +724,24 @@ def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
     
     summary = " ".join(summary_parts)
     
+    # Determine game phase for debug info
+    game_phase = "early" if early_game else ("mid" if mid_game else "late")
+    
+    # Build scoring debug info
+    scoring_debug = ScoringDebugInfo(
+        card_value_scores=card_values,
+        threat_assessment=threat_assessment,
+        mana_efficiency_score=mana_efficiency_score,
+        battlefield_analyses=battlefield_analyses,
+        game_phase=game_phase,
+    )
+    
     advice = PlayableCardsAdvice(
         playable_cards=recommendations,
         recommended_plays=recommended_card_ids,
         summary=summary,
         mana_efficiency_note=mana_efficiency_note,
+        scoring_debug=scoring_debug,
     )
     
     log_advisor_decision(
