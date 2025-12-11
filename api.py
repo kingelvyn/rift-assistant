@@ -2,7 +2,15 @@ from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 
-from advisor import get_simple_advice, get_mulligan_advice, MulliganAdvice, MulliganCardDecision
+from advisor import (
+    get_simple_advice,
+    get_mulligan_advice,
+    get_playable_cards_advice,
+    MulliganAdvice,
+    MulliganCardDecision,
+    PlayableCardsAdvice,
+    PlayableCardRecommendation,
+)
 from game_state import GameState, Rune, CardType
 from card_db import init_db, CardRecord, get_card, list_cards, upsert_card, count_cards
 
@@ -18,6 +26,12 @@ class AdviceResponse(BaseModel):
 class MulliganAdviceResponse(BaseModel):
     decisions: List[MulliganCardDecision]
     summary: str
+
+class PlayableCardsAdviceResponse(BaseModel):
+    playable_cards: List[PlayableCardRecommendation]
+    recommended_plays: List[str]
+    summary: str
+    mana_efficiency_note: Optional[str] = None
 
 class CardResponse(CardRecord):
     pass
@@ -57,6 +71,27 @@ def mulligan_advice_endpoint(state: GameState) -> MulliganAdviceResponse:
     return MulliganAdviceResponse(
         decisions=advice.decisions,
         summary=advice.summary,
+    )
+
+@app.post("/advice/playable", response_model=PlayableCardsAdviceResponse)
+def playable_cards_advice_endpoint(state: GameState) -> PlayableCardsAdviceResponse:
+    """
+    Analyze playable cards and provide structured recommendations.
+    
+    Returns prioritized list of playable cards with:
+    - Priority ranking
+    - Recommended plays
+    - Reasoning for each card
+    - Mana efficiency notes
+    
+    Works best during MAIN or SHOWDOWN phases.
+    """
+    advice = get_playable_cards_advice(state)
+    return PlayableCardsAdviceResponse(
+        playable_cards=advice.playable_cards,
+        recommended_plays=advice.recommended_plays,
+        summary=advice.summary,
+        mana_efficiency_note=advice.mana_efficiency_note,
     )
 
 

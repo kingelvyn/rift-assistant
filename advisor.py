@@ -2,7 +2,7 @@
 # advisor.py
 
 from typing import Optional, List
-from game_state import GameState, CardInHand, PlayerState, Rune, Phase, CardType
+from game_state import GameState, CardInHand, PlayerState, Rune, Phase, CardType, Battlefield
 from pydantic import BaseModel
 
 class MulliganCardDecision(BaseModel):
@@ -14,6 +14,29 @@ class MulliganCardDecision(BaseModel):
 class MulliganAdvice(BaseModel):
     decisions: List[MulliganCardDecision]
     summary: str
+
+class BattlefieldPlacement(BaseModel):
+    """Recommendation for which battlefield to place a unit."""
+    battlefield_index: int
+    reason: str
+    priority: int  # Lower = higher priority
+
+class PlayableCardRecommendation(BaseModel):
+    card_id: str
+    name: Optional[str]
+    card_type: CardType
+    energy_cost: int
+    priority: int  # 1 = highest priority, higher numbers = lower priority
+    recommended: bool  # Should this card be played this turn?
+    reason: str
+    play_order: Optional[int] = None  # Suggested order if playing multiple cards
+    battlefield_placement: Optional[BattlefieldPlacement] = None  # For units: which battlefield to play into
+
+class PlayableCardsAdvice(BaseModel):
+    playable_cards: List[PlayableCardRecommendation]
+    recommended_plays: List[str]  # card_ids of recommended plays
+    summary: str
+    mana_efficiency_note: Optional[str] = None
 
 def _playable_cards_by_mana(state: GameState) -> List:
     """
@@ -29,6 +52,176 @@ def _playable_cards_by_mana(state: GameState) -> List:
     # Sort by cost, then by type (units first)
     playable.sort(key=lambda c: (c.energy_cost, 0 if c.card_type == CardType.UNIT else 1))
     return playable
+
+def _get_all_playable_cards(state: GameState) -> List[CardInHand]:
+    """
+    Get all cards that can actually be played using can_play().
+    More accurate than _playable_cards_by_mana() as it checks rune requirements.
+    """
+    me = state.me
+    return [c for c in me.hand if can_play(c, me)]
+
+
+def _analyze_battlefield(battlefield: Battlefield, battlefield_index: int) -> dict:
+    """
+    Analyze a single battlefield and return its state.
+    
+    Returns:
+    - battlefield_state: "empty", "winning", "losing", "contested", "neutral"
+    - my_might: might of our unit (0 if none)
+    - op_might: might of opponent unit (0 if none)
+    - advantage: positive if we're winning, negative if losing
+    """
+    my_unit = battlefield.my_unit
+    op_unit = battlefield.op_unit
+    
+    my_might = my_unit.current_might if my_unit and my_unit.current_might is not None else (my_unit.might if my_unit else 0)
+    op_might = op_unit.current_might if op_unit and op_unit.current_might is not None else (op_unit.might if op_unit else 0)
+    
+    if my_unit is None and op_unit is None:
+        return {
+            "battlefield_index": battlefield_index,
+            "state": "empty",
+            "my_might": 0,
+            "op_might": 0,
+            "advantage": 0,
+            "description": "Empty battlefield - good for establishing presence"
+        }
+    elif my_unit is not None and op_unit is None:
+        # We control this battlefield
+        return {
+            "battlefield_index": battlefield_index,
+            "state": "winning",
+            "my_might": my_might,
+            "op_might": 0,
+            "advantage": my_might,
+            "description": f"Winning battlefield with {my_might} might unit"
+        }
+    elif my_unit is None and op_unit is not None:
+        # Opponent controls this battlefield
+        return {
+            "battlefield_index": battlefield_index,
+            "state": "contested",
+            "my_might": 0,
+            "op_might": op_might,
+            "advantage": -op_might,
+            "description": f"Contested battlefield - opponent has {op_might} might unit"
+        }
+    else:
+        # Both have units - compare might
+        advantage = my_might - op_might
+        if advantage > 0:
+            state = "winning"
+            desc = f"Winning trade ({my_might} vs {op_might} might)"
+        elif advantage < 0:
+            state = "losing"
+            desc = f"Losing trade ({my_might} vs {op_might} might)"
+        else:
+            state = "neutral"
+            desc = f"Even trade ({my_might} vs {op_might} might)"
+        
+        return {
+            "battlefield_index": battlefield_index,
+            "state": state,
+            "my_might": my_might,
+            "op_might": op_might,
+            "advantage": advantage,
+            "description": desc
+        }
+
+
+def _find_best_battlefield_for_unit(
+    unit: CardInHand,
+    battlefield_analyses: List[dict],
+    turn: int
+) -> Optional[BattlefieldPlacement]:
+    """
+    Determine the best battlefield to place a unit based on:
+    - Empty battlefields (highest priority early game)
+    - Contested battlefields (if unit can win the trade)
+    - Avoiding overfilling winning battlefields
+    """
+    unit_might = unit.might or 0
+    early_game = turn <= 3
+    
+    # Priority 1: Empty battlefields (especially early game)
+    empty_battlefields = [b for b in battlefield_analyses if b["state"] == "empty"]
+    if empty_battlefields:
+        # Prefer empty battlefields, especially early game
+        best_empty = empty_battlefields[0]  # Take first empty battlefield
+        return BattlefieldPlacement(
+            battlefield_index=best_empty["battlefield_index"],
+            reason=f"Empty battlefield - establish board presence{' (high priority early game)' if early_game else ''}",
+            priority=1
+        )
+    
+    # Priority 2: Contested battlefields where we can win or tie
+    contested_battlefields = [b for b in battlefield_analyses if b["state"] == "contested"]
+    if contested_battlefields:
+        # Find battlefields where our unit can win or at least trade
+        winnable_contests = [
+            b for b in contested_battlefields
+            if unit_might >= b["op_might"]
+        ]
+        if winnable_contests:
+            # Prefer battlefields where we can win (not just trade)
+            winning_contests = [b for b in winnable_contests if unit_might > b["op_might"]]
+            target = winning_contests[0] if winning_contests else winnable_contests[0]
+            
+            if unit_might > target["op_might"]:
+                reason = f"Contested battlefield - can win trade ({unit_might} vs {target['op_might']} might)"
+            else:
+                reason = f"Contested battlefield - can trade evenly ({unit_might} vs {target['op_might']} might)"
+            
+            return BattlefieldPlacement(
+                battlefield_index=target["battlefield_index"],
+                reason=reason,
+                priority=2
+            )
+        # If we can't win, but it's a close trade, still consider it
+        close_contests = [
+            b for b in contested_battlefields
+            if unit_might >= b["op_might"] - 1  # Within 1 might
+        ]
+        if close_contests and not early_game:  # Only in mid/late game
+            target = close_contests[0]
+            return BattlefieldPlacement(
+                battlefield_index=target["battlefield_index"],
+                reason=f"Contested battlefield - close trade ({unit_might} vs {target['op_might']} might), may need support",
+                priority=3
+            )
+    
+    # Priority 3: Losing battlefields where we can turn the tide
+    losing_battlefields = [b for b in battlefield_analyses if b["state"] == "losing"]
+    if losing_battlefields:
+        # Find battlefields where our unit can win or at least improve the situation
+        improvable = [
+            b for b in losing_battlefields
+            if unit_might >= b["op_might"]  # Can win or tie
+        ]
+        if improvable:
+            target = improvable[0]
+            return BattlefieldPlacement(
+                battlefield_index=target["battlefield_index"],
+                reason=f"Losing battlefield - can turn the tide ({unit_might} vs {target['op_might']} might)",
+                priority=3
+            )
+    
+    # Priority 4: Winning battlefields (only if no better options and we need to overcommit)
+    # Generally avoid this unless it's a very strong unit
+    winning_battlefields = [b for b in battlefield_analyses if b["state"] == "winning"]
+    if winning_battlefields and unit_might >= 4:  # Only for strong units
+        # Only recommend if we're significantly ahead and unit is strong
+        target = winning_battlefields[0]
+        if target["advantage"] >= 2:  # Already winning by 2+
+            return BattlefieldPlacement(
+                battlefield_index=target["battlefield_index"],
+                reason=f"Winning battlefield - overcommitting with strong unit ({unit_might} might) to secure advantage",
+                priority=4
+            )
+    
+    # No good battlefield found
+    return None
 
 
 def _describe_card(card) -> str:
@@ -304,3 +497,294 @@ def get_mulligan_advice(state: GameState) -> MulliganAdvice:
     summary = " ".join(summary_parts)
 
     return MulliganAdvice(decisions=decisions, summary=summary)
+
+
+def get_playable_cards_advice(state: GameState) -> PlayableCardsAdvice:
+    """
+    Analyze playable cards and provide structured recommendations.
+    
+    Considers:
+    - Mana efficiency (spending all/most mana)
+    - Board state (do we have units to equip gear on?)
+    - Tempo (early game vs late game priorities)
+    - Card type synergies (units before gear, removal when needed)
+    - Turn and phase context
+    """
+    if state.phase == Phase.MULLIGAN:
+        return PlayableCardsAdvice(
+            playable_cards=[],
+            recommended_plays=[],
+            summary="No playable cards advice during mulligan phase. Use /advice/mulligan instead.",
+        )
+    
+    me = state.me
+    opponent = state.opponent
+    turn = state.turn
+    phase = state.phase
+    
+    # Get all actually playable cards
+    playable = _get_all_playable_cards(state)
+    
+    if not playable:
+        return PlayableCardsAdvice(
+            playable_cards=[],
+            recommended_plays=[],
+            summary=f"No playable cards with current mana ({me.mana_total or 0}). Consider passing or planning for future turns.",
+        )
+    
+    # Analyze board state and battlefields
+    my_units_on_board = sum(1 for battlefield in state.battlefields if battlefield.my_unit is not None)
+    opponent_units = sum(1 for battlefield in state.battlefields if battlefield.op_unit is not None)
+    empty_battlefields = sum(1 for battlefield in state.battlefields if battlefield.my_unit is None)
+    
+    # Analyze each battlefield for placement decisions
+    battlefield_analyses = [
+        _analyze_battlefield(battlefield, idx) for idx, battlefield in enumerate(state.battlefields)
+    ] if state.battlefields else []
+    
+    # Count battlefield states
+    empty_count = sum(1 for b in battlefield_analyses if b["state"] == "empty")
+    contested_count = sum(1 for b in battlefield_analyses if b["state"] == "contested")
+    winning_count = sum(1 for b in battlefield_analyses if b["state"] == "winning")
+    losing_count = sum(1 for b in battlefield_analyses if b["state"] == "losing")
+    
+    # Early game heuristic
+    early_game = turn <= 3
+    mid_game = 4 <= turn <= 6
+    late_game = turn > 6
+    
+    # Available mana
+    available_mana = me.mana_total or 0
+    
+    recommendations: List[PlayableCardRecommendation] = []
+    recommended_card_ids: List[str] = []
+    
+    # Categorize playable cards
+    playable_units = [c for c in playable if c.card_type == CardType.UNIT]
+    playable_spells = [c for c in playable if c.card_type == CardType.SPELL]
+    playable_gear = [c for c in playable if c.card_type == CardType.GEAR]
+    
+    # Priority scoring: lower number = higher priority
+    priority_counter = 1
+    
+    # Early game: prioritize cheap units for board development
+    if early_game:
+        cheap_units = [c for c in playable_units if c.energy_cost <= 2]
+        if cheap_units and battlefield_analyses:
+            # Find best battlefield placements for each cheap unit
+            for card in cheap_units:
+                if len([r for r in recommendations if r.card_id == card.card_id]) >= 1:
+                    continue  # Already recommended
+                
+                battlefield_placement = _find_best_battlefield_for_unit(card, battlefield_analyses, turn)
+                
+                if battlefield_placement and battlefield_placement.priority <= 2:  # Only empty or winnable contested battlefields
+                    reason = f"Early game board development: {battlefield_placement.reason}"
+                    recommendations.append(
+                        PlayableCardRecommendation(
+                            card_id=card.card_id,
+                            name=card.name,
+                            card_type=card.card_type,
+                            energy_cost=card.energy_cost,
+                            priority=priority_counter,
+                            recommended=True,
+                            reason=reason,
+                            battlefield_placement=battlefield_placement,
+                        )
+                    )
+                    recommended_card_ids.append(card.card_id)
+                    priority_counter += 1
+                    # Update battlefield analysis to reflect this placement (for next unit)
+                    if battlefield_placement.battlefield_index < len(battlefield_analyses):
+                        # Mark this battlefield as having a unit (simulate)
+                        battlefield_analyses[battlefield_placement.battlefield_index]["state"] = "winning"
+                        battlefield_analyses[battlefield_placement.battlefield_index]["my_might"] = card.might or 0
+    
+    # Mid/late game units: prioritize based on might, keywords, and battlefield placement
+    if not early_game and playable_units:
+        # Sort by might (if available) or cost efficiency
+        sorted_units = sorted(
+            playable_units,
+            key=lambda c: (c.might or 0, -c.energy_cost),
+            reverse=True
+        )
+        for card in sorted_units[:3]:  # Top 3 units
+            if card.card_id not in recommended_card_ids:
+                # Find best battlefield for this unit
+                battlefield_placement = _find_best_battlefield_for_unit(card, battlefield_analyses, turn)
+                
+                might_str = f" ({card.might} might)" if card.might else ""
+                keywords_str = f" [{', '.join(card.keywords)}]" if card.keywords else ""
+                
+                if battlefield_placement:
+                    if battlefield_placement.priority <= 2:  # Good placement (empty or winnable)
+                        reason = f"Strong unit{might_str}{keywords_str}. {battlefield_placement.reason}"
+                        recommended = True
+                    else:  # Suboptimal placement (losing battlefield or overcommitting)
+                        reason = f"Strong unit{might_str}{keywords_str}. {battlefield_placement.reason} (lower priority)"
+                        recommended = False
+                else:
+                    # No good battlefield found - might be overcommitting
+                    reason = f"Strong unit{might_str}{keywords_str}, but no optimal battlefield placement available."
+                    recommended = False
+                
+                recommendations.append(
+                    PlayableCardRecommendation(
+                        card_id=card.card_id,
+                        name=card.name,
+                        card_type=card.card_type,
+                        energy_cost=card.energy_cost,
+                        priority=priority_counter,
+                        recommended=recommended,
+                        reason=reason,
+                        battlefield_placement=battlefield_placement,
+                    )
+                )
+                if recommended:
+                    recommended_card_ids.append(card.card_id)
+                priority_counter += 1
+    
+    # Removal spells: high priority if opponent has threats
+    if opponent_units > 0 and playable_spells:
+        removal_spells = [
+            c for c in playable_spells
+            if "removal" in [t.lower() for t in c.tags] or "damage" in [t.lower() for t in c.tags]
+        ]
+        if removal_spells:
+            # Prioritize cheap removal
+            removal_spells.sort(key=lambda c: c.energy_cost)
+            best_removal = removal_spells[0]
+            if best_removal.card_id not in recommended_card_ids:
+                recommendations.append(
+                    PlayableCardRecommendation(
+                        card_id=best_removal.card_id,
+                        name=best_removal.name,
+                        card_type=best_removal.card_type,
+                        energy_cost=best_removal.energy_cost,
+                        priority=priority_counter,
+                        recommended=True,
+                        reason=f"Removal spell to answer opponent's {opponent_units} unit(s) on board.",
+                    )
+                )
+                recommended_card_ids.append(best_removal.card_id)
+                priority_counter += 1
+    
+    # Gear: only recommend if we have units on board
+    if my_units_on_board > 0 and playable_gear:
+        # Prioritize cheap gear
+        playable_gear.sort(key=lambda c: c.energy_cost)
+        best_gear = playable_gear[0]
+        if best_gear.card_id not in recommended_card_ids:
+            recommendations.append(
+                PlayableCardRecommendation(
+                    card_id=best_gear.card_id,
+                    name=best_gear.name,
+                    card_type=best_gear.card_type,
+                    energy_cost=best_gear.energy_cost,
+                    priority=priority_counter,
+                    recommended=True,
+                    reason=f"Gear to equip on existing unit(s) for value and board advantage.",
+                )
+            )
+            recommended_card_ids.append(best_gear.card_id)
+            priority_counter += 1
+    
+    # Buff/protection spells: useful if we have units
+    if my_units_on_board > 0 and playable_spells:
+        buff_spells = [
+            c for c in playable_spells
+            if c.card_id not in recommended_card_ids
+            and ("buff" in [t.lower() for t in c.tags] or "protection" in [t.lower() for t in c.tags])
+        ]
+        if buff_spells:
+            buff_spells.sort(key=lambda c: c.energy_cost)
+            best_buff = buff_spells[0]
+            recommendations.append(
+                PlayableCardRecommendation(
+                    card_id=best_buff.card_id,
+                    name=best_buff.name,
+                    card_type=best_buff.card_type,
+                    energy_cost=best_buff.energy_cost,
+                    priority=priority_counter,
+                    recommended=True,
+                    reason=f"Buff/protection spell to enhance or protect your units.",
+                )
+            )
+            recommended_card_ids.append(best_buff.card_id)
+            priority_counter += 1
+    
+    # Add remaining playable cards as lower priority options
+    for card in playable:
+        if card.card_id not in recommended_card_ids:
+            reason = "Playable but lower priority. Consider if it fits your game plan."
+            if card.energy_cost >= 4 and early_game:
+                reason = "Expensive for early game; may be better to save for later."
+            elif card.card_type == CardType.SPELL and not card.tags:
+                reason = "Utility spell; play when needed for specific situation."
+            
+            recommendations.append(
+                PlayableCardRecommendation(
+                    card_id=card.card_id,
+                    name=card.name,
+                    card_type=card.card_type,
+                    energy_cost=card.energy_cost,
+                    priority=priority_counter,
+                    recommended=False,
+                    reason=reason,
+                )
+            )
+            priority_counter += 1
+    
+    # Sort recommendations by priority
+    recommendations.sort(key=lambda r: r.priority)
+    
+    # Calculate mana efficiency
+    recommended_mana_cost = sum(
+        c.energy_cost for c in playable
+        if c.card_id in recommended_card_ids
+    )
+    mana_efficiency_note = None
+    if available_mana > 0:
+        efficiency = (recommended_mana_cost / available_mana) * 100
+        if efficiency < 50:
+            mana_efficiency_note = f"Recommended plays use {recommended_mana_cost}/{available_mana} mana ({efficiency:.0f}%). Consider additional plays if needed."
+        elif efficiency > 90:
+            mana_efficiency_note = f"Recommended plays use {recommended_mana_cost}/{available_mana} mana ({efficiency:.0f}%) - efficient use of resources."
+    
+    # Build summary with battlefield awareness
+    summary_parts = []
+    if recommended_card_ids:
+        summary_parts.append(f"Found {len(recommended_card_ids)} recommended play(s) out of {len(playable)} playable cards.")
+    else:
+        summary_parts.append(f"Found {len(playable)} playable cards, but none are strongly recommended this turn.")
+    
+    # Add battlefield state summary
+    if battlefield_analyses:
+        battlefield_summary_parts = []
+        if empty_count > 0:
+            battlefield_summary_parts.append(f"{empty_count} empty battlefield(s)")
+        if contested_count > 0:
+            battlefield_summary_parts.append(f"{contested_count} contested battlefield(s)")
+        if winning_count > 0:
+            battlefield_summary_parts.append(f"{winning_count} winning battlefield(s)")
+        if losing_count > 0:
+            battlefield_summary_parts.append(f"{losing_count} losing battlefield(s)")
+        
+        if battlefield_summary_parts:
+            summary_parts.append(f"Board state: {', '.join(battlefield_summary_parts)}.")
+    
+    if early_game:
+        summary_parts.append("Early game: prioritize board development in empty battlefields.")
+    elif mid_game:
+        summary_parts.append("Mid game: balance tempo and value, contest key battlefields.")
+    else:
+        summary_parts.append("Late game: focus on high-impact plays and securing advantages.")
+    
+    summary = " ".join(summary_parts)
+    
+    return PlayableCardsAdvice(
+        playable_cards=recommendations,
+        recommended_plays=recommended_card_ids,
+        summary=summary,
+        mana_efficiency_note=mana_efficiency_note,
+    )

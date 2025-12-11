@@ -8,7 +8,7 @@ from pprint import pprint
 from game_state import (
     GameState,
     PlayerState,
-    Lane,
+    Battlefield,
     Phase,
     Rune,
 )
@@ -64,7 +64,7 @@ def build_mulligan_state_from_db() -> GameState:
         active_player="me",
         me=me,
         opponent=opponent,
-        lanes=[],                    # no units on board yet
+        battlefields=[],            # no units on board yet
         environment_cards=[],        # add battlefield IDs here later
     )
 

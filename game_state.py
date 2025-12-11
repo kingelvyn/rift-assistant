@@ -52,7 +52,7 @@ class CardInHand (BaseModel):
     keep: bool = True
 
 # ----------------
-# Battlefield / Lane
+# Battlefield
 # ----------------
 class Unit(BaseModel):
     """
@@ -69,7 +69,11 @@ class Unit(BaseModel):
     attached_gear_ids: List[str] = []
     exhausted: bool = False
 
-class Lane(BaseModel):
+class Battlefield(BaseModel):
+    """
+    A battlefield where units can be placed.
+    Riftbound has 2 battlefields in a 1v1 scenario.
+    """
     my_unit: Optional[Unit] = None
     op_unit: Optional[Unit] = None
 
@@ -91,7 +95,7 @@ class GameState(BaseModel):
     me: PlayerState
     opponent: PlayerState
 
-    lanes: List[Lane] = []
+    battlefields: List[Battlefield] = []
     environment_cards: List[str] = []
 
     timestamp: Optional[float] = None
