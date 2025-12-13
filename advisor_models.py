@@ -2,8 +2,28 @@
 # advisor_models.py
 
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from game_state import CardType
+
+
+class MulliganRequest(BaseModel):
+    """Simplified request for mulligan advice."""
+    hand_ids: List[str] = Field(
+        ..., 
+        description="List of card IDs in opening hand", 
+        min_length=4, 
+        max_length=4  # Changed from 7 to 4
+    )
+    legend_id: Optional[str] = Field(None, description="Player's legend card ID")
+    turn: int = Field(1, description="Turn number (should be 1 for mulligan)")
+    going_first: bool = Field(True, description="Whether player is going first/second")
+    
+    @field_validator('hand_ids')
+    @classmethod
+    def validate_hand_size(cls, v):
+        if len(v) != 4:
+            raise ValueError('Opening hand must contain exactly 4 cards')
+        return v
 
 class MulliganCardDecision(BaseModel):
     card_id: str
@@ -14,6 +34,13 @@ class MulliganCardDecision(BaseModel):
 class MulliganAdvice(BaseModel):
     decisions: List[MulliganCardDecision]
     summary: str
+    mulligan_count: int = Field(description="Number of cards to mulligan (max 2)")
+
+class MulliganAdviceResponse(BaseModel):
+    """Response model for mulligan advice endpoint."""
+    decisions: List[MulliganCardDecision]
+    summary: str
+    mulligan_count: int
 
 class BattlefieldPlacement(BaseModel):
     """Recommendation for which battlefield to place a unit."""

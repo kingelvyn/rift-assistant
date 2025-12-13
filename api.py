@@ -1,46 +1,47 @@
+# api.py
+
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
+import logging
 
-from advisor import (
-    get_simple_advice,
-    get_mulligan_advice,
-    get_playable_cards_advice,
-)
+from mulligan_advisor import analyze_mulligan
+from advisor import get_playable_cards_advice
 from advisor_models import (
-    MulliganAdvice,
     MulliganCardDecision,
+    MulliganRequest,
+    MulliganAdviceResponse,
     PlayableCardsAdvice,
     PlayableCardRecommendation,
     ScoringDebugInfo,
 )
+from card_utils import make_hand_from_ids
 from game_state import GameState, Rune, CardType
 from card_db import init_db, CardRecord, get_card, list_cards, upsert_card, count_cards
 from logger_config import setup_logging
 
-app = FastAPI (title="Riftbound Assistant")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="Riftbound Assistant")
 
 @app.on_event("startup")
 def on_startup() -> None:
     setup_logging()
     init_db()
 
-class AdviceResponse(BaseModel):
-    advice: str
-
-class MulliganAdviceResponse(BaseModel):
-    decisions: List[MulliganCardDecision]
-    summary: str
 
 class PlayableCardsAdviceResponse(BaseModel):
     playable_cards: List[PlayableCardRecommendation]
     recommended_plays: List[str]
     summary: str
     mana_efficiency_note: Optional[str] = None
-    scoring_debug: Optional[ScoringDebugInfo] = None  # Scoring calculations for debugging
+    scoring_debug: Optional[ScoringDebugInfo] = None
+
 
 class CardResponse(CardRecord):
     pass
+
 
 class CardUpsertRequest(BaseModel):
     card_id: str
@@ -55,43 +56,61 @@ class CardUpsertRequest(BaseModel):
     rules_text: Optional[str] = None
     set_name: Optional[str] = None
 
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
 
-@app.post("/advice", response_model=AdviceResponse)
-def advice_endpoint(state: GameState) -> AdviceResponse:
-    text = get_simple_advice(state)
-    return AdviceResponse(advice=text)
 
 @app.post("/advice/mulligan", response_model=MulliganAdviceResponse)
-def mulligan_advice_endpoint(state: GameState) -> MulliganAdviceResponse:
-    """
-    Given a GameState in mulligan phase, return which cards to keep vs. mulligan.
+def mulligan_advice_endpoint(request: MulliganRequest) -> MulliganAdviceResponse:
+    """Provide mulligan advice for an opening hand."""
+    try:
+        logger.info(f"Processing mulligan request for {len(request.hand_ids)} cards")
+        
+        hand, missing_ids = make_hand_from_ids(request.hand_ids)
+        
+        if missing_ids:
+            logger.warning(f"Missing card IDs in database: {missing_ids}")
+        
+        if not hand:
+            logger.error("No valid cards found in hand")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"No valid cards found. Missing IDs: {missing_ids}"
+            )
+        
+        legend_card = None
+        if request.legend_id:
+            legend_card = get_card(request.legend_id)
+            if not legend_card:
+                logger.warning(f"Legend ID '{request.legend_id}' not found in database")
+        
+        advice = analyze_mulligan(
+            hand=hand,
+            legend_card=legend_card,
+            turn=request.turn,
+            going_first=request.going_first
+        )
+        
+        logger.info(f"Mulligan advice generated: keeping {sum(1 for d in advice.decisions if d.keep)}/{len(advice.decisions)} cards")
+        
+        return MulliganAdviceResponse(
+            decisions=advice.decisions,
+            summary=advice.summary,
+            mulligan_count=advice.mulligan_count,
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error processing mulligan advice: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-    Expects:
-    - state.phase == "mulligan"
-    - state.me.hand populated with CardInHand objects
-    """
-    advice = get_mulligan_advice(state)
-    return MulliganAdviceResponse(
-        decisions=advice.decisions,
-        summary=advice.summary,
-    )
 
 @app.post("/advice/playable", response_model=PlayableCardsAdviceResponse)
 def playable_cards_advice_endpoint(state: GameState) -> PlayableCardsAdviceResponse:
-    """
-    Analyze playable cards and provide structured recommendations.
-    
-    Returns prioritized list of playable cards with:
-    - Priority ranking
-    - Recommended plays
-    - Reasoning for each card
-    - Mana efficiency notes
-    
-    Works best during MAIN or SHOWDOWN phases.
-    """
+    """Analyze playable cards and provide structured recommendations."""
     advice = get_playable_cards_advice(state)
     return PlayableCardsAdviceResponse(
         playable_cards=advice.playable_cards,
@@ -106,19 +125,9 @@ def playable_cards_advice_endpoint(state: GameState) -> PlayableCardsAdviceRespo
 def list_cards_endpoint(
     card_type: Optional[CardType] = Query(None),
     domain: Optional[Rune] = Query(None),
-    include_battlefields: bool = Query(
-        False,
-        description="If false, battlefield cards are excluded from results unless explicitly requested."
-    ),
+    include_battlefields: bool = Query(False),
 ) -> List[CardResponse]:
-    """
-    List cards in the catalog.
-
-    Optional filters:
-    - card_type: unit / gear / spell / battlefield
-    - domain: fury / body / order / calm / mind / chaos / colorless
-    - include_battlefields: if False, battlefield cards are filtered out
-    """
+    """List cards in the catalog with optional filters."""
     return list_cards(
         card_type=card_type,
         domain=domain,
@@ -133,23 +142,19 @@ def get_card_endpoint(card_id: str) -> CardResponse:
         raise HTTPException(status_code=404, detail="Card not found")
     return card
 
+
 @app.post("/cards", response_model=CardResponse)
 def upsert_card_endpoint(payload: CardUpsertRequest) -> CardResponse:
-    """
-    Create or update a card manually.
-    This is handy until you build a scraper.
-    """
+    """Create or update a card manually."""
     record = CardRecord(**payload.model_dump())
     upsert_card(record)
-    # Return the latest version from DB
     saved = get_card(record.card_id)
     assert saved is not None
     return saved
 
+
 @app.get("/cards/count")
 def card_count_endpoint() -> dict:
-    """
-    Returns the number of cards currently stored in cards.db.
-    """
+    """Returns the number of cards currently stored in cards.db."""
     total = count_cards()
     return {"card_count": total}
