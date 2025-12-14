@@ -499,7 +499,6 @@ def _find_best_battlefield(
     
     # Then consider contested battlefields where we can win
     for idx, battlefield in enumerate(battlefields):
-        # ✅ Use direct attribute access
         if not battlefield.my_unit and battlefield.opponent_unit:
             op_might = battlefield.opponent_unit.get("might", 0)  # This is still a dict
             if card.might and card.might > op_might:
@@ -604,7 +603,7 @@ def analyze_playable_cards(
             summary="No cards in hand to play."
         )
     
-    # ✅ Validate exactly 2 battlefields
+    # Validate exactly 2 battlefields
     if len(battlefields) != 2:
         return PlayableCardsAdvice(
             playable_cards=[],
@@ -623,17 +622,16 @@ def analyze_playable_cards(
             summary=f"No playable cards with {my_energy} energy and {power_summary} power."
         )
     
-    # ✅ Analyze game state IN CORRECT ORDER
+    # Analyze game state IN CORRECT ORDER
     game_phase = _determine_game_phase(turn)
-    battlefield_analysis = _analyze_riftbound_battlefields(battlefields)  # ✅ Define first
-    threat_level = _assess_threat_level(battlefield_analysis, opponent_health, my_health)  # ✅ Then use
+    battlefield_analysis = _analyze_riftbound_battlefields(battlefields)  
+    threat_level = _assess_threat_level(battlefield_analysis, opponent_health, my_health)  
     
     # Categorize playable cards
     playable_units = [c for c in playable if c.card_type == CardType.UNIT]
     playable_spells = [c for c in playable if c.card_type == CardType.SPELL]
     playable_gear = [c for c in playable if c.card_type == CardType.GEAR]
     
-    # ✅ Calculate card values with correct signature (4 params)
     card_values = {
         card.card_id: _calculate_card_value(card, turn, battlefield_analysis, my_legend)
         for card in playable
@@ -644,7 +642,6 @@ def analyze_playable_cards(
     recommended_ids: List[str] = []
     priority = 1
     
-    # ✅ Use the sophisticated helper functions
     # Strategy 1: Fill empty battlefields
     if battlefield_analysis['empty_battlefields'] > 0 and playable_units:
         priority = _recommend_battlefield_development(
@@ -707,7 +704,7 @@ def analyze_playable_cards(
     # Add remaining playable cards as lower priority
     for card in playable:
         if card.card_id not in recommended_ids:
-            reason = _get_low_priority_reason(card, game_phase, battlefield_analysis)  # ✅ Use helper
+            reason = _get_low_priority_reason(card, game_phase, battlefield_analysis) 
             
             recommendations.append(
                 PlayableCardRecommendation(
@@ -738,7 +735,7 @@ def analyze_playable_cards(
     elif efficiency_score < 0.5:
         mana_note += " - consider additional plays or hold for better timing"
     
-    # ✅ Use comprehensive summary builder
+    # Use comprehensive summary builder
     summary = _build_strategy_summary(
         turn,
         game_phase,
