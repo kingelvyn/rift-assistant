@@ -71,6 +71,22 @@ The API will be available at `http://localhost:8000`
 - `POST /cards` - Create or update a card
 - `GET /cards/count` - Get the total number of cards in the database
 
+### Example: Getting mulligan advice
+Using these json templates, POST in mulligan endpoint
+```python
+{
+  "hand_ids": [
+    "OGN-192",
+    "OGN-062",
+    "OGN-199",
+    "OGN-195"
+  ],
+  "legend_id": "OGN-259",
+  "turn": 1,
+  "going_first": true
+}
+```
+
 ### Example: Getting Playable Cards Advice
 POST this json template, replace any data to your liking (hand_ids, legend_id, etc.)
 ```python
