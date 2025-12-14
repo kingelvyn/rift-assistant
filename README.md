@@ -72,48 +72,44 @@ The API will be available at `http://localhost:8000`
 - `GET /cards/count` - Get the total number of cards in the database
 
 ### Example: Getting Playable Cards Advice
-
+# POST this json 
 ```python
-import requests
-
-game_state = {
-    "turn": 5,
-    "phase": "main",
-    "active_player": "me",
-    "me": {
-        "mana_total": 5,
-        "mana_by_rune": {"calm": 3, "mind": 2},
-        "legend": {
-            "card_id": "OGN-259",
-            "name": "Yasuo - Unforgiven",
-            "domain": "calm",
-            "exhausted": False,
-            "activated_abilities": ["[2] , [tap] : Move a friendly unit to or from its base."]
-        },
-        "hand": [
-            {
-                "card_id": "SFD-079",
-                "name": "Bard - Mercurial",
-                "card_type": "unit",
-                "domain": "mind",
-                "energy_cost": 4,
-                "rules_text": "You may exhaust your legend as an additional cost to play me..."
-            }
-        ]
+{
+  "hand_ids": ["OGN-199", "OGN-199", "OGN-055", "OGN-189"],
+  "legend_id": "OGN-076",
+  "opponent_legend_id": "OGN-263",
+  "my_energy": 3,
+  "my_power": {
+    "chaos": 2,
+    "calm": 1
+  },
+  "turn": 2,
+  "phase": "main",
+  "going_first": true,
+  "battlefields": [
+    {
+      "battlefield_id": null,
+      "my_unit": {
+        "card_id": "OGN-034",
+        "name": "Goblin Scout",
+        "might": 2
+      },
+      "opponent_unit": null
     },
-    "opponent": {
-        "mana_total": 4,
-        "legend": {
-            "card_id": "OGS-017",
-            "name": "Annie - Dark Child",
-            "domain": "fury",
-            "exhausted": False
-        }
-    },
-    "battlefields": [
-        {"my_unit": None, "op_unit": None},
-        {"my_unit": None, "op_unit": {"card_id": "Deadbloom", "might": 8}}
-    ]
+    {
+      "battlefield_id": null,
+      "my_unit": null,
+      "opponent_unit": {
+        "card_id": "OGN-197",
+        "name": "Teemo",
+        "might": 1
+      }
+    }
+  ],
+  "my_legend_exhausted": false,
+  "opponent_legend_exhausted": true,
+  "my_health": 20,
+  "opponent_health": 18
 }
 
 response = requests.post("http://localhost:8000/advice/playable", json=game_state)
@@ -197,7 +193,7 @@ The project is designed with modularity in mind:
    - Represents game state with Pydantic models
    - Supports battlefields, legends, units, cards in hand
 
-2. **Advisor Layer** (`advisor.py`)
+2. **Advisor Layer** (`playable_cards_advisor.py, mulligan_advisor`)
    - Rule-based decision making
    - Battlefield analysis and placement recommendations
    - Legend ability integration
