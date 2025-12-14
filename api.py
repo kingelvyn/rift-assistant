@@ -110,76 +110,64 @@ def mulligan_advice_endpoint(request: MulliganRequest) -> MulliganAdviceResponse
 @app.post("/advice/playable", response_model=PlayableCardsAdviceResponse)
 def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCardsAdviceResponse:
     """
-    Analyze playable cards and provide strategic recommendations.
+    Analyze playable cards for Riftbound 1v1 matches.
     
-    Request body:
-        - hand_ids: Cards currently in hand
-        - my_mana: Available mana this turn
-        - turn: Current turn number
-        - phase: Game phase (main/combat/showdown)
-        - legend_id: Optional player legend
-        - battlefields: Optional battlefield state for better recommendations
-    
-    Returns:
-        - playable_cards: All cards with priority and recommendations
-        - recommended_plays: Card IDs of top recommended plays
-        - summary: Strategic overview
-        - mana_efficiency_note: Mana usage analysis
+    Properly handles:
+    - 2 battlefields (standard 1v1 format)
+    - Energy and power resource systems
+    - Battlefield positioning strategy
+    - Threat assessment
     """
     try:
-        logger.info(f"Processing playable cards request: turn {request.turn}, mana {request.my_mana}, phase {request.phase}")
+        logger.info(
+            f"Processing playable cards: turn {request.turn}, "
+            f"energy {request.my_energy}, power {request.my_power}"
+        )
         
         # Validate phase
         valid_phases = ["main", "combat", "showdown"]
         if request.phase.lower() not in valid_phases:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid phase '{request.phase}'. Must be one of: {', '.join(valid_phases)}"
+                detail=f"Invalid phase. Must be one of: {', '.join(valid_phases)}"
             )
         
         # Load hand cards
         hand, missing_ids = make_hand_from_ids(request.hand_ids)
         
         if missing_ids:
-            logger.warning(f"Missing card IDs in database: {missing_ids}")
+            logger.warning(f"Missing card IDs: {missing_ids}")
         
         if not hand:
-            logger.error("No valid cards found in hand")
             raise HTTPException(
                 status_code=400,
                 detail=f"No valid cards found. Missing IDs: {missing_ids}"
             )
         
         # Load legends
-        my_legend = None
-        if request.legend_id:
-            my_legend = get_card(request.legend_id)
-            if not my_legend:
-                logger.warning(f"Legend ID '{request.legend_id}' not found")
+        my_legend = get_card(request.legend_id) if request.legend_id else None
+        opponent_legend = get_card(request.opponent_legend_id) if request.opponent_legend_id else None
         
-        opponent_legend = None
-        if request.opponent_legend_id:
-            opponent_legend = get_card(request.opponent_legend_id)
-            if not opponent_legend:
-                logger.warning(f"Opponent legend ID '{request.opponent_legend_id}' not found")
-        
-        # Analyze playable cards
+        # Analyze
         advice = analyze_playable_cards(
             hand=hand,
-            my_mana=request.my_mana,
+            my_energy=request.my_energy,
+            my_power=request.my_power,
             turn=request.turn,
             phase=request.phase,
+            battlefields=request.battlefields,
             my_legend=my_legend,
             opponent_legend=opponent_legend,
             my_legend_exhausted=request.my_legend_exhausted,
             opponent_legend_exhausted=request.opponent_legend_exhausted,
-            battlefields=request.battlefields,
-            going_first=request.going_first
+            going_first=request.going_first,
+            my_health=request.my_health,
+            opponent_health=request.opponent_health,
         )
         
         logger.info(
-            f"Playable cards advice generated: "
-            f"{len(advice.recommended_plays)}/{len(advice.playable_cards)} recommended"
+            f"Generated advice: {len(advice.recommended_plays)} recommendations, "
+            f"threat level: {advice.scoring_debug.threat_assessment.get('level') if advice.scoring_debug else 'unknown'}"
         )
         
         return PlayableCardsAdviceResponse(
@@ -193,11 +181,8 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Unexpected error processing playable cards advice: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error: {str(e)}"
-        )
+        logger.error(f"Error processing playable cards: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/cards", response_model=List[CardResponse])

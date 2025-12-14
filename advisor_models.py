@@ -48,6 +48,22 @@ class BattlefieldPlacement(BaseModel):
     reason: str
     priority: int  # Lower = higher priority
 
+class BattlefieldState(BaseModel):
+    """State of a single battlefield."""
+    battlefield_id: Optional[str] = Field(None, description="Battlefield card ID if applicable")
+    my_unit: Optional[dict] = Field(None, description="My unit on this battlefield")
+    opponent_unit: Optional[dict] = Field(None, description="Opponent's unit on this battlefield")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "battlefield_id": "OGN-275",
+                "my_unit": {"card_id": "OGN-034", "name": "Veteran Warrior", "might": 2},
+                "opponent_unit": None
+            }
+        }
+
+
 class ScoringDebugInfo(BaseModel):
     """Debug information about scoring calculations."""
     card_value_scores: dict[str, float]  # card_id -> value score
@@ -77,25 +93,45 @@ class PlayableCardsAdvice(BaseModel):
     scoring_debug: Optional[ScoringDebugInfo] = None  # Scoring calculations for debugging
 
 class PlayableCardsRequest(BaseModel):
-
     """Simplified request for playable cards advice."""
     hand_ids: List[str] = Field(..., description="List of card IDs in current hand")
     legend_id: Optional[str] = Field(None, description="Player's legend card ID")
     opponent_legend_id: Optional[str] = Field(None, description="Opponent's legend card ID")
-    my_mana: int = Field(..., ge=0, description="Available mana for this turn")
+    
+    # Resource system
+    my_energy: int = Field(..., ge=0, description="Available energy (generic resource)")
+    my_power: dict[str, int] = Field(
+        default_factory=dict,
+        description="Available power by domain (e.g., {'chaos': 2, 'calm': 1})"
+    )
+    
+    # Game state
     turn: int = Field(..., ge=1, description="Current turn number")
     phase: str = Field(..., description="Current game phase (main/combat/showdown)")
     going_first: bool = Field(True, description="Whether player went first")
     
-    # Battlefield state (optional but helpful)
-    battlefields: Optional[List[dict]] = Field(
-        None,
-        description="Battlefield states with my_unit and op_unit info"
+    # Battlefield state (exactly 2 in 1v1)
+    battlefields: List[BattlefieldState] = Field(
+        default_factory=lambda: [BattlefieldState(), BattlefieldState()],
+        min_length=2,
+        max_length=2,
+        description="State of both battlefields (always 2 in 1v1)"
     )
     
     # Legend states
     my_legend_exhausted: bool = Field(False, description="Is your legend exhausted?")
     opponent_legend_exhausted: bool = Field(False, description="Is opponent's legend exhausted?")
+    
+    # Additional context
+    my_health: Optional[int] = Field(None, ge=0, description="Player's current health")
+    opponent_health: Optional[int] = Field(None, ge=0, description="Opponent's current health")
+
+    @field_validator('battlefields')
+    @classmethod
+    def validate_battlefield_count(cls, v):
+        if len(v) != 2:
+            raise ValueError('Must have exactly 2 battlefields in 1v1')
+        return v
 
     class Config:
         json_schema_extra = {
@@ -103,16 +139,26 @@ class PlayableCardsRequest(BaseModel):
                 "hand_ids": ["OGN-034", "OGN-082", "OGN-142", "OGN-189"],
                 "legend_id": "OGN-076",
                 "opponent_legend_id": "OGN-263",
-                "my_mana": 3,
+                "my_energy": 3,
+                "my_power": {"chaos": 2, "calm": 1},
                 "turn": 2,
                 "phase": "main",
                 "going_first": True,
                 "battlefields": [
-                    {"my_unit": None, "op_unit": None},
-                    {"my_unit": {"card_id": "OGN-034", "might": 2}, "op_unit": None},
-                    {"my_unit": None, "op_unit": {"card_id": "OGN-197", "might": 1}}
+                    {
+                        "battlefield_id": None,
+                        "my_unit": {"card_id": "OGN-034", "name": "Goblin Scout", "might": 2},
+                        "opponent_unit": None
+                    },
+                    {
+                        "battlefield_id": None,
+                        "my_unit": None,
+                        "opponent_unit": {"card_id": "OGN-197", "name": "Teemo", "might": 1}
+                    }
                 ],
                 "my_legend_exhausted": False,
-                "opponent_legend_exhausted": True
+                "opponent_legend_exhausted": True,
+                "my_health": 20,
+                "opponent_health": 18
             }
         }
