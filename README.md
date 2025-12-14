@@ -72,7 +72,7 @@ The API will be available at `http://localhost:8000`
 - `GET /cards/count` - Get the total number of cards in the database
 
 ### Example: Getting Playable Cards Advice
-POST this json 
+POST this json template, replace any data to your liking (hand_ids, legend_id, etc.)
 ```python
 {
   "hand_ids": ["OGN-199", "OGN-199", "OGN-055", "OGN-189"],
