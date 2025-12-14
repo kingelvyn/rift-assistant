@@ -58,9 +58,6 @@ logs/
 !logs/.gitkeep
 !logs/README.md
 
-# Test files
-test_*.py
-test_*.json
-*_test.py
-*_test.json
+# Test files (ignore anything with "test" in the name)
+*test*
 
