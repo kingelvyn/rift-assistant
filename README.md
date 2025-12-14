@@ -120,12 +120,6 @@ response = requests.post("http://localhost:8000/advice/playable", json=game_stat
 print(response.json())
 ```
 
-### Running the Demo
-
-See example game states and advice:
-```bash
-python demo.py
-```
 
 ## Project Structure
 
