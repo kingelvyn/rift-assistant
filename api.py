@@ -1,19 +1,18 @@
 # api.py
 
+import logging
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-import logging
-
 from mulligan_advisor import analyze_mulligan
-from advisor import get_playable_cards_advice
+from playable_cards_advisor import analyze_playable_cards
 from advisor_models import (
     MulliganCardDecision,
     MulliganRequest,
     MulliganAdviceResponse,
-    PlayableCardsAdvice,
     PlayableCardRecommendation,
     ScoringDebugInfo,
+    PlayableCardsRequest,
 )
 from card_utils import make_hand_from_ids
 from game_state import GameState, Rune, CardType
@@ -109,16 +108,96 @@ def mulligan_advice_endpoint(request: MulliganRequest) -> MulliganAdviceResponse
 
 
 @app.post("/advice/playable", response_model=PlayableCardsAdviceResponse)
-def playable_cards_advice_endpoint(state: GameState) -> PlayableCardsAdviceResponse:
-    """Analyze playable cards and provide structured recommendations."""
-    advice = get_playable_cards_advice(state)
-    return PlayableCardsAdviceResponse(
-        playable_cards=advice.playable_cards,
-        recommended_plays=advice.recommended_plays,
-        summary=advice.summary,
-        mana_efficiency_note=advice.mana_efficiency_note,
-        scoring_debug=advice.scoring_debug,
-    )
+def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCardsAdviceResponse:
+    """
+    Analyze playable cards and provide strategic recommendations.
+    
+    Request body:
+        - hand_ids: Cards currently in hand
+        - my_mana: Available mana this turn
+        - turn: Current turn number
+        - phase: Game phase (main/combat/showdown)
+        - legend_id: Optional player legend
+        - battlefields: Optional battlefield state for better recommendations
+    
+    Returns:
+        - playable_cards: All cards with priority and recommendations
+        - recommended_plays: Card IDs of top recommended plays
+        - summary: Strategic overview
+        - mana_efficiency_note: Mana usage analysis
+    """
+    try:
+        logger.info(f"Processing playable cards request: turn {request.turn}, mana {request.my_mana}, phase {request.phase}")
+        
+        # Validate phase
+        valid_phases = ["main", "combat", "showdown"]
+        if request.phase.lower() not in valid_phases:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid phase '{request.phase}'. Must be one of: {', '.join(valid_phases)}"
+            )
+        
+        # Load hand cards
+        hand, missing_ids = make_hand_from_ids(request.hand_ids)
+        
+        if missing_ids:
+            logger.warning(f"Missing card IDs in database: {missing_ids}")
+        
+        if not hand:
+            logger.error("No valid cards found in hand")
+            raise HTTPException(
+                status_code=400,
+                detail=f"No valid cards found. Missing IDs: {missing_ids}"
+            )
+        
+        # Load legends
+        my_legend = None
+        if request.legend_id:
+            my_legend = get_card(request.legend_id)
+            if not my_legend:
+                logger.warning(f"Legend ID '{request.legend_id}' not found")
+        
+        opponent_legend = None
+        if request.opponent_legend_id:
+            opponent_legend = get_card(request.opponent_legend_id)
+            if not opponent_legend:
+                logger.warning(f"Opponent legend ID '{request.opponent_legend_id}' not found")
+        
+        # Analyze playable cards
+        advice = analyze_playable_cards(
+            hand=hand,
+            my_mana=request.my_mana,
+            turn=request.turn,
+            phase=request.phase,
+            my_legend=my_legend,
+            opponent_legend=opponent_legend,
+            my_legend_exhausted=request.my_legend_exhausted,
+            opponent_legend_exhausted=request.opponent_legend_exhausted,
+            battlefields=request.battlefields,
+            going_first=request.going_first
+        )
+        
+        logger.info(
+            f"Playable cards advice generated: "
+            f"{len(advice.recommended_plays)}/{len(advice.playable_cards)} recommended"
+        )
+        
+        return PlayableCardsAdviceResponse(
+            playable_cards=advice.playable_cards,
+            recommended_plays=advice.recommended_plays,
+            summary=advice.summary,
+            mana_efficiency_note=advice.mana_efficiency_note,
+            scoring_debug=advice.scoring_debug,
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error processing playable cards advice: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 
 @app.get("/cards", response_model=List[CardResponse])

@@ -1,6 +1,6 @@
 # Riftbound Assistant
 
-A Python-based assistant for the Riftbound card game by Riot Games. This project provides game state analysis and strategic advice to help players improve their gameplay. This is not meant to provide the most optimal play at all times (yet), but to offer AI suggestive advice.
+A Python-based assistant for the Riftbound card game by Riot Games. This project provides game state analysis and strategic advice to help players improve their gameplay. This is not meant to provide the most optimal play at all times (yet), but to offer AI suggestive advice. More useful for beginners / people learning to play (new players or new decks). Also intended to give advice for 1v1 scenarios, not for 2v2 or free for all.
 
 ## Features
 
