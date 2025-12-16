@@ -10,6 +10,7 @@ from advisor_models import (
     ScoringDebugInfo,
     BattlefieldPlacement,
     BattlefieldState,
+    PlayStrategy,
 )
 
 from battlefield_analysis import (
@@ -408,6 +409,130 @@ def _get_low_priority_reason(
     return "Playable but situational"
  
 
+def _generate_play_strategies(
+    recommendations: List[PlayableCardRecommendation],
+    my_energy: int,
+    game_phase: str,
+    battlefield_analysis: dict
+) -> tuple[List[PlayStrategy], List[str]]:
+    """
+    Generate multiple viable play strategies.
+    
+    Returns:
+        (strategies, primary_strategy_card_ids)
+    """
+    strategies = []
+    
+    # Get recommended cards sorted by priority
+    recommended_cards = [
+        r for r in recommendations 
+        if r.recommended
+    ]
+    recommended_cards.sort(key=lambda r: r.priority)
+    
+    if not recommended_cards:
+        return [], []
+    
+    # Strategy 1: GREEDY/TEMPO - Use as much energy as possible
+    greedy_cards = []
+    greedy_energy = 0
+    for card in recommended_cards:
+        if greedy_energy + card.energy_cost <= my_energy:
+            greedy_cards.append(card.card_id)
+            greedy_energy += card.energy_cost
+    
+    if greedy_cards:
+        efficiency = (greedy_energy / my_energy * 100) if my_energy > 0 else 0
+        strategies.append(PlayStrategy(
+            strategy_name="Tempo Play",
+            card_ids=greedy_cards,
+            total_energy=greedy_energy,
+            reasoning=f"Maximize energy usage ({greedy_energy}/{my_energy} energy, {efficiency:.0f}%). Best for maintaining tempo.",
+            priority=1
+        ))
+    
+    # Strategy 2: VALUE - Play only highest priority cards
+    if len(recommended_cards) >= 2:
+        # Take top priority cards that fit
+        value_cards = []
+        value_energy = 0
+        
+        for card in recommended_cards[:3]:  # Top 3 by priority
+            if value_energy + card.energy_cost <= my_energy:
+                value_cards.append(card.card_id)
+                value_energy += card.energy_cost
+        
+        # Only add if different from greedy
+        if set(value_cards) != set(greedy_cards):
+            strategies.append(PlayStrategy(
+                strategy_name="Value Play",
+                card_ids=value_cards,
+                total_energy=value_energy,
+                reasoning=f"Focus on highest value cards ({value_energy}/{my_energy} energy). Better long-term positioning.",
+                priority=2
+            ))
+    
+    # Strategy 3: SINGLE BIG PLAY - Play one expensive high-impact card
+    expensive_cards = [c for c in recommended_cards if c.energy_cost >= 3]
+    if expensive_cards and len(greedy_cards) > 1:
+        big_card = expensive_cards[0]
+        if big_card.energy_cost <= my_energy:
+            strategies.append(PlayStrategy(
+                strategy_name="Big Play",
+                card_ids=[big_card.card_id],
+                total_energy=big_card.energy_cost,
+                reasoning=f"Single high-impact play. Saves energy for reaction spells or future turns.",
+                priority=3
+            ))
+    
+    # Strategy 4: CONSERVATIVE - Play only cheapest cards, save energy
+    if game_phase in ["early", "mid"]:
+        cheap_cards = [c for c in recommended_cards if c.energy_cost <= 2]
+        if cheap_cards and len(cheap_cards) < len(greedy_cards):
+            conservative_cards = []
+            conservative_energy = 0
+            for card in cheap_cards[:2]:  # Up to 2 cheap cards
+                if conservative_energy + card.energy_cost <= my_energy:
+                    conservative_cards.append(card.card_id)
+                    conservative_energy += card.energy_cost
+            
+            if conservative_cards and set(conservative_cards) != set(greedy_cards):
+                strategies.append(PlayStrategy(
+                    strategy_name="Conservative",
+                    card_ids=conservative_cards,
+                    total_energy=conservative_energy,
+                    reasoning=f"Minimal commitment ({conservative_energy}/{my_energy} energy). Keeps options open for opponent's plays.",
+                    priority=4
+                ))
+    
+    # Strategy 5: BOARD CONTROL - Prioritize units over spells
+    units_only = [c for c in recommended_cards if c.card_type == CardType.UNIT]
+    if len(units_only) >= 2 and battlefield_analysis['empty_battlefields'] > 0:
+        control_cards = []
+        control_energy = 0
+        for card in units_only[:2]:
+            if control_energy + card.energy_cost <= my_energy:
+                control_cards.append(card.card_id)
+                control_energy += card.energy_cost
+        
+        if control_cards and set(control_cards) != set(greedy_cards):
+            strategies.append(PlayStrategy(
+                strategy_name="Board Control",
+                card_ids=control_cards,
+                total_energy=control_energy,
+                reasoning=f"Focus on board presence ({control_energy}/{my_energy} energy). Establish battlefield dominance.",
+                priority=2
+            ))
+    
+    # Sort strategies by priority
+    strategies.sort(key=lambda s: s.priority)
+    
+    # Primary strategy is the first one (highest priority)
+    primary_card_ids = strategies[0].card_ids if strategies else []
+    
+    return strategies, primary_card_ids
+
+
 def analyze_playable_cards(
     hand: List[CardInHand],
     my_energy: int,
@@ -554,36 +679,47 @@ def analyze_playable_cards(
     # Sort by priority
     recommendations.sort(key=lambda r: r.priority)
     
-    # Calculate resource efficiency
-    recommended_ids, recommended_energy = _adjust_recommendations_for_resources(
+    # ✅ Generate multiple play strategies
+    strategies, primary_strategy_ids = _generate_play_strategies(
         recommendations,
-        recommended_ids,
-        my_energy
+        my_energy,
+        game_phase,
+        battlefield_analysis
     )
-    
+
+    # Calculate efficiency based on primary strategy
+    if primary_strategy_ids:
+        primary_strategy = next(s for s in strategies if s.card_ids == primary_strategy_ids)
+        recommended_energy = primary_strategy.total_energy
+    else:
+        recommended_energy = 0
+
     efficiency_score = recommended_energy / my_energy if my_energy > 0 else 0.0
-    
+
     efficiency_pct = (recommended_energy / my_energy * 100) if my_energy > 0 else 0
-    mana_note = f"Recommended plays use {recommended_energy}/{my_energy} energy ({efficiency_pct:.0f}%)"
-    
+    mana_note = f"Primary strategy uses {recommended_energy}/{my_energy} energy ({efficiency_pct:.0f}%)"
+
     if efficiency_score >= 0.9:
         mana_note += " - efficient resource usage"
     elif efficiency_score < 0.5:
-        mana_note += " - consider additional plays or hold for better timing"
-    
+        mana_note += " - conservative play, holding resources"
+
+    if len(strategies) > 1:
+        mana_note += f". {len(strategies)} alternative strategies available."
+
     # Use comprehensive summary builder
     summary = build_strategy_summary(
         turn,
         game_phase,
         phase,
-        len(recommended_ids),
+        len(primary_strategy_ids),
         len(playable),
         battlefield_analysis,
         threat_level,
         my_health,
         opponent_health
     )
-    
+
     # Debug info
     scoring_debug = ScoringDebugInfo(
         card_value_scores=card_values,
@@ -592,10 +728,12 @@ def analyze_playable_cards(
         battlefield_analyses=[bf.model_dump() for bf in battlefields],
         game_phase=game_phase
     )
-    
+
     return PlayableCardsAdvice(
         playable_cards=recommendations,
-        recommended_plays=recommended_ids,
+        recommended_strategies=strategies,  # ✅ Multiple strategies
+        primary_strategy=primary_strategy_ids,  # ✅ Best strategy
+        recommended_plays=primary_strategy_ids,
         summary=summary,
         mana_efficiency_note=mana_note,
         scoring_debug=scoring_debug

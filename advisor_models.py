@@ -63,7 +63,6 @@ class BattlefieldState(BaseModel):
             }
         }
 
-
 class ScoringDebugInfo(BaseModel):
     """Debug information about scoring calculations."""
     card_value_scores: dict[str, float]  # card_id -> value score
@@ -84,13 +83,6 @@ class PlayableCardRecommendation(BaseModel):
     battlefield_placement: Optional[BattlefieldPlacement] = None  # For units: which battlefield to play into
     legend_synergy: Optional[str] = None  # Notes about how this card interacts with legend abilities
     value_score: Optional[float] = None  # Calculated value score for this card (for debugging)
-
-class PlayableCardsAdvice(BaseModel):
-    playable_cards: List[PlayableCardRecommendation]
-    recommended_plays: List[str]  # card_ids of recommended plays
-    summary: str
-    mana_efficiency_note: Optional[str] = None
-    scoring_debug: Optional[ScoringDebugInfo] = None  # Scoring calculations for debugging
 
 class PlayableCardsRequest(BaseModel):
     """Simplified request for playable cards advice."""
@@ -162,3 +154,26 @@ class PlayableCardsRequest(BaseModel):
                 "opponent_health": 18
             }
         }
+
+class PlayStrategy(BaseModel):
+    """A specific play strategy/line."""
+    strategy_name: str = Field(description="Name of this strategy (e.g., 'Greedy Tempo', 'Value Play')")
+    card_ids: List[str] = Field(description="Cards to play in this strategy")
+    total_energy: int = Field(description="Total energy used")
+    reasoning: str = Field(description="Why this strategy is good")
+    priority: int = Field(description="1 = best strategy, higher = alternative")
+
+class PlayableCardsAdvice(BaseModel):
+    playable_cards: List[PlayableCardRecommendation]
+    recommended_strategies: List[PlayStrategy] = Field(
+        description="Multiple viable play strategies to choose from"
+    )
+    primary_strategy: List[str] = Field(
+        description="Card IDs of the primary recommended strategy"
+    )
+    recommended_plays: List[str] = Field(
+        description="Card IDs from primary strategy (deprecated, use primary_strategy)"
+    )
+    summary: str
+    mana_efficiency_note: Optional[str] = None
+    scoring_debug: Optional[ScoringDebugInfo] = None

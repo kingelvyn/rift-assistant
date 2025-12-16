@@ -13,6 +13,7 @@ from advisor_models import (
     PlayableCardRecommendation,
     ScoringDebugInfo,
     PlayableCardsRequest,
+    PlayStrategy
 )
 from card_utils import make_hand_from_ids
 from game_state import GameState, Rune, CardType
@@ -32,7 +33,8 @@ def on_startup() -> None:
 
 class PlayableCardsAdviceResponse(BaseModel):
     playable_cards: List[PlayableCardRecommendation]
-    recommended_plays: List[str]
+    recommended_strategies: List[PlayStrategy]  
+    primary_strategy: List[str]  # ✅ Add this
     summary: str
     mana_efficiency_note: Optional[str] = None
     scoring_debug: Optional[ScoringDebugInfo] = None
@@ -172,7 +174,8 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
         
         return PlayableCardsAdviceResponse(
             playable_cards=advice.playable_cards,
-            recommended_plays=advice.recommended_plays,
+            recommended_strategies=advice.recommended_strategies,
+            primary_strategy=advice.primary_strategy,
             summary=advice.summary,
             mana_efficiency_note=advice.mana_efficiency_note,
             scoring_debug=advice.scoring_debug,
