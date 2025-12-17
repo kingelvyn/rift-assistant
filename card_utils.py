@@ -7,6 +7,7 @@ import logging
 from typing import Iterable, List, Tuple
 from game_state import CardInHand, CardType, Rune
 from card_db import CardRecord, get_card
+from advisor_models import BattlefieldState
 
 logger = logging.getLogger(__name__)
 
@@ -53,3 +54,46 @@ def make_hand_from_ids(card_ids: Iterable[str]) -> Tuple[List[CardInHand], List[
         hand.append(record_to_card_in_hand(rec))
 
     return hand, missing_ids
+
+
+def load_battlefield_state(battlefield_state: BattlefieldState) -> BattlefieldState:
+    """
+    Enrich battlefield state with full card data from database.
+    
+    Takes a BattlefieldState with just IDs and might values,
+    returns a BattlefieldState with full unit dictionaries.
+    """
+    my_unit = None
+    opponent_unit = None
+    
+    # Load my unit if present
+    if battlefield_state.my_unit_id:
+        my_card = get_card(battlefield_state.my_unit_id)
+        if my_card:
+            my_unit = {
+                "card_id": my_card.card_id,
+                "name": my_card.name,
+                "might": battlefield_state.my_unit_might if battlefield_state.my_unit_might is not None else my_card.might
+            }
+    
+    # Load opponent unit if present
+    if battlefield_state.opponent_unit_id:
+        op_card = get_card(battlefield_state.opponent_unit_id)
+        if op_card:
+            opponent_unit = {
+                "card_id": op_card.card_id,
+                "name": op_card.name,
+                "might": battlefield_state.opponent_unit_might if battlefield_state.opponent_unit_might is not None else op_card.might
+            }
+    
+    # Return a new BattlefieldState with enriched data
+    return BattlefieldState(
+        battlefield_id=battlefield_state.battlefield_id,
+        my_unit_id=battlefield_state.my_unit_id,
+        my_unit_might=battlefield_state.my_unit_might,
+        opponent_unit_id=battlefield_state.opponent_unit_id,
+        opponent_unit_might=battlefield_state.opponent_unit_might,
+        # These are used internally by the analyzer
+        my_unit=my_unit,
+        opponent_unit=opponent_unit
+    )

@@ -1,4 +1,4 @@
-# advisor.py (or create playable_cards_advisor.py)
+# playable_cards_advisor.py
 
 from typing import List, Optional, Dict
 from card_evaluation import assess_threat_level
@@ -545,8 +545,8 @@ def analyze_playable_cards(
     my_legend_exhausted: bool = False,
     opponent_legend_exhausted: bool = False,
     going_first: bool = True,
-    my_health: Optional[int] = None,
-    opponent_health: Optional[int] = None,
+    my_score: Optional[int] = None,
+    opponent_score: Optional[int] = None,
 ) -> PlayableCardsAdvice:
     """
     Analyze playable cards for Riftbound 1v1 with proper resource and battlefield rules.
@@ -556,7 +556,11 @@ def analyze_playable_cards(
         return PlayableCardsAdvice(
             playable_cards=[],
             recommended_plays=[],
-            summary="No cards in hand to play."
+            recommended_strategies=[],
+            primary_strategy=[],
+            summary="No cards in hand to play.",
+            mana_efficiency_note=None,
+            scoring_debug=None,
         )
     
     # Validate exactly 2 battlefields
@@ -575,13 +579,17 @@ def analyze_playable_cards(
         return PlayableCardsAdvice(
             playable_cards=[],
             recommended_plays=[],
-            summary=f"No playable cards with {my_energy} energy and {power_summary} power."
+            recommended_strategies=[],
+            primary_strategy=[],
+            summary=f"No playable cards with {my_energy} energy and {power_summary} power.",
+            mana_efficiency_note=None,
+            scoring_debug=None,
         )
     
     # Analyze game state IN CORRECT ORDER
     game_phase = _determine_game_phase(turn)
     battlefield_analysis = analyze_riftbound_battlefields(battlefields)  
-    threat_level = assess_battlefield_threat_level(battlefield_analysis, opponent_health, my_health)  
+    threat_level = assess_battlefield_threat_level(battlefield_analysis, opponent_score, my_score)  
     
     # Categorize playable cards
     playable_units = [c for c in playable if c.card_type == CardType.UNIT]
@@ -679,7 +687,7 @@ def analyze_playable_cards(
     # Sort by priority
     recommendations.sort(key=lambda r: r.priority)
     
-    # ✅ Generate multiple play strategies
+    # Generate multiple play strategies
     strategies, primary_strategy_ids = _generate_play_strategies(
         recommendations,
         my_energy,
@@ -716,8 +724,8 @@ def analyze_playable_cards(
         len(playable),
         battlefield_analysis,
         threat_level,
-        my_health,
-        opponent_health
+        my_score,
+        opponent_score,
     )
 
     # Debug info
@@ -731,8 +739,8 @@ def analyze_playable_cards(
 
     return PlayableCardsAdvice(
         playable_cards=recommendations,
-        recommended_strategies=strategies,  # ✅ Multiple strategies
-        primary_strategy=primary_strategy_ids,  # ✅ Best strategy
+        recommended_strategies=strategies,  # Multiple strategies
+        primary_strategy=primary_strategy_ids,  # Best strategy
         recommended_plays=primary_strategy_ids,
         summary=summary,
         mana_efficiency_note=mana_note,

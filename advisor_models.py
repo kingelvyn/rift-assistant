@@ -1,4 +1,3 @@
-# Advisor response models
 # advisor_models.py
 
 from typing import Optional, List
@@ -51,15 +50,22 @@ class BattlefieldPlacement(BaseModel):
 class BattlefieldState(BaseModel):
     """State of a single battlefield."""
     battlefield_id: Optional[str] = Field(None, description="Battlefield card ID if applicable")
-    my_unit: Optional[dict] = Field(None, description="My unit on this battlefield")
-    opponent_unit: Optional[dict] = Field(None, description="Opponent's unit on this battlefield")
+    my_unit_id: Optional[str] = Field(None, description="My unit's card ID on this battlefield")
+    my_unit_might: Optional[int] = Field(None, description="My unit's current might")
+    opponent_unit_id: Optional[str] = Field(None, description="Opponent's unit card ID")
+    opponent_unit_might: Optional[int] = Field(None, description="Opponent's unit might")
+    my_unit: Optional[dict] = Field(None, description="Full unit data (card_id, name, might)")
+    opponent_unit: Optional[dict] = Field(None, description="Full opponent unit data")
     
+
     class Config:
         json_schema_extra = {
             "example": {
                 "battlefield_id": "OGN-275",
-                "my_unit": {"card_id": "OGN-034", "name": "Veteran Warrior", "might": 2},
-                "opponent_unit": None
+                "my_unit_id": "OGN-034",
+                "my_unit_might": 2,
+                "opponent_unit_id": None,
+                "opponent_unit_might": None
             }
         }
 
@@ -85,7 +91,7 @@ class PlayableCardRecommendation(BaseModel):
     value_score: Optional[float] = None  # Calculated value score for this card (for debugging)
 
 class PlayableCardsRequest(BaseModel):
-    """Simplified request for playable cards advice."""
+    """Simplified request for playable cards advice - only IDs needed."""
     hand_ids: List[str] = Field(..., description="List of card IDs in current hand")
     legend_id: Optional[str] = Field(None, description="Player's legend card ID")
     opponent_legend_id: Optional[str] = Field(None, description="Opponent's legend card ID")
@@ -102,7 +108,7 @@ class PlayableCardsRequest(BaseModel):
     phase: str = Field(..., description="Current game phase (main/combat/showdown)")
     going_first: bool = Field(True, description="Whether player went first")
     
-    # Battlefield state (exactly 2 in 1v1)
+    # Battlefield state (exactly 2 in 1v1) - now only needs IDs and might
     battlefields: List[BattlefieldState] = Field(
         default_factory=lambda: [BattlefieldState(), BattlefieldState()],
         min_length=2,
@@ -115,8 +121,8 @@ class PlayableCardsRequest(BaseModel):
     opponent_legend_exhausted: bool = Field(False, description="Is opponent's legend exhausted?")
     
     # Additional context
-    my_health: Optional[int] = Field(None, ge=0, description="Player's current health")
-    opponent_health: Optional[int] = Field(None, ge=0, description="Opponent's current health")
+    my_score: Optional[int] = Field(None, ge=0, description="Player's current score")
+    opponent_score: Optional[int] = Field(None, ge=0, description="Opponent's current score")
 
     @field_validator('battlefields')
     @classmethod
@@ -129,29 +135,33 @@ class PlayableCardsRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "hand_ids": ["OGN-034", "OGN-082", "OGN-142", "OGN-189"],
-                "legend_id": "OGN-076",
-                "opponent_legend_id": "OGN-263",
-                "my_energy": 3,
-                "my_power": {"chaos": 2, "calm": 1},
-                "turn": 2,
+                "legend_id": "OGN-259",
+                "opponent_legend_id": "OGN-247",
+                "my_energy": 7,
+                "my_power": {"chaos": 4, "calm": 3},
+                "turn": 4,
                 "phase": "main",
                 "going_first": True,
                 "battlefields": [
                     {
                         "battlefield_id": None,
-                        "my_unit": {"card_id": "OGN-034", "name": "Goblin Scout", "might": 2},
-                        "opponent_unit": None
+                        "my_unit_id": "OGN-034",
+                        "my_unit_might": 2,
+                        "opponent_unit_id": None,
+                        "opponent_unit_might": None
                     },
                     {
                         "battlefield_id": None,
-                        "my_unit": None,
-                        "opponent_unit": {"card_id": "OGN-197", "name": "Teemo", "might": 1}
+                        "my_unit_id": None,
+                        "my_unit_might": None,
+                        "opponent_unit_id": "OGN-197",
+                        "opponent_unit_might": 1
                     }
                 ],
                 "my_legend_exhausted": False,
-                "opponent_legend_exhausted": True,
-                "my_health": 20,
-                "opponent_health": 18
+                "opponent_legend_exhausted": False,
+                "my_score": 0,
+                "opponent_score": 0
             }
         }
 

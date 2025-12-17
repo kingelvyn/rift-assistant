@@ -3,7 +3,7 @@
 import logging
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 from mulligan_advisor import analyze_mulligan
 from playable_cards_advisor import analyze_playable_cards
 from advisor_models import (
@@ -34,7 +34,7 @@ def on_startup() -> None:
 class PlayableCardsAdviceResponse(BaseModel):
     playable_cards: List[PlayableCardRecommendation]
     recommended_strategies: List[PlayStrategy]  
-    primary_strategy: List[str]  # ✅ Add this
+    primary_strategy: List[str]  
     summary: str
     mana_efficiency_note: Optional[str] = None
     scoring_debug: Optional[ScoringDebugInfo] = None
@@ -134,7 +134,7 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
                 detail=f"Invalid phase. Must be one of: {', '.join(valid_phases)}"
             )
         
-        # Load hand cards
+        # Load hand cards from database
         hand, missing_ids = make_hand_from_ids(request.hand_ids)
         
         if missing_ids:
@@ -146,29 +146,67 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
                 detail=f"No valid cards found. Missing IDs: {missing_ids}"
             )
         
-        # Load legends
+        # Load legends from database
         my_legend = get_card(request.legend_id) if request.legend_id else None
         opponent_legend = get_card(request.opponent_legend_id) if request.opponent_legend_id else None
         
-        # Analyze
+        # Convert battlefield states - enrich with card data
+        enriched_battlefields = []
+        for bf_state in request.battlefields:
+            # Build my_unit dict if unit exists
+            my_unit = None
+            if bf_state.my_unit_id:
+                my_card = get_card(bf_state.my_unit_id)
+                if my_card:
+                    my_unit = {
+                        "card_id": my_card.card_id,
+                        "name": my_card.name,
+                        "might": bf_state.my_unit_might if bf_state.my_unit_might is not None else my_card.might
+                    }
+                else:
+                    logger.warning(f"My unit card '{bf_state.my_unit_id}' not found in database")
+            
+            # Build opponent_unit dict if unit exists
+            opponent_unit = None
+            if bf_state.opponent_unit_id:
+                op_card = get_card(bf_state.opponent_unit_id)
+                if op_card:
+                    opponent_unit = {
+                        "card_id": op_card.card_id,
+                        "name": op_card.name,
+                        "might": bf_state.opponent_unit_might if bf_state.opponent_unit_might is not None else op_card.might
+                    }
+                else:
+                    logger.warning(f"Opponent unit card '{bf_state.opponent_unit_id}' not found in database")
+            
+            # Create enriched battlefield state with actual unit data
+            from advisor_models import BattlefieldState as EnrichedBattlefieldState
+            enriched_bf = EnrichedBattlefieldState(
+                battlefield_id=bf_state.battlefield_id,
+                my_unit=my_unit,
+                opponent_unit=opponent_unit
+            )
+            enriched_battlefields.append(enriched_bf)
+        
+        # Analyze with enriched data
         advice = analyze_playable_cards(
             hand=hand,
             my_energy=request.my_energy,
             my_power=request.my_power,
             turn=request.turn,
             phase=request.phase,
-            battlefields=request.battlefields,
+            battlefields=enriched_battlefields,  # Pass enriched battlefields
             my_legend=my_legend,
             opponent_legend=opponent_legend,
             my_legend_exhausted=request.my_legend_exhausted,
             opponent_legend_exhausted=request.opponent_legend_exhausted,
             going_first=request.going_first,
-            my_health=request.my_health,
-            opponent_health=request.opponent_health,
+            my_score=request.my_score,
+            opponent_score=request.opponent_score,
         )
         
         logger.info(
-            f"Generated advice: {len(advice.recommended_plays)} recommendations, "
+            f"Generated advice: {len(advice.primary_strategy)} recommendations, "
             f"threat level: {advice.scoring_debug.threat_assessment.get('level') if advice.scoring_debug else 'unknown'}"
         )
         
