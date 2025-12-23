@@ -11,7 +11,7 @@ class MulliganRequest(BaseModel):
         ..., 
         description="List of card IDs in opening hand", 
         min_length=4, 
-        max_length=4  # Changed from 7 to 4
+        max_length=4 
     )
     legend_id: Optional[str] = Field(None, description="Player's legend card ID")
     turn: int = Field(1, description="Turn number (should be 1 for mulligan)")

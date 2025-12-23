@@ -16,7 +16,7 @@ from advisor_models import (
     PlayStrategy
 )
 from card_utils import make_hand_from_ids
-from game_state import GameState, Rune, CardType
+from game_state import GameState, Rune, CardType, PlayerState, Legend
 from card_db import init_db, CardRecord, get_card, list_cards, upsert_card, count_cards
 from logger_config import setup_logging
 
@@ -56,6 +56,80 @@ class CardUpsertRequest(BaseModel):
     keywords: List[str] = []
     rules_text: Optional[str] = None
     set_name: Optional[str] = None
+
+
+def _build_legend_from_card(card: CardRecord, exhausted: bool = False) -> Legend:
+    """
+    Build a Legend object from a CardRecord.
+    Parses rules_text to extract abilities.
+    """
+    if not card:
+        return None
+    
+    # Parse abilities from rules_text
+    passive_abilities = []
+    activated_abilities = []
+    triggered_abilities = []
+    
+    if card.rules_text:
+        # Split by newlines or sentences
+        lines = card.rules_text.split('\n')
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            line_lower = line.lower()
+            
+            # Activated abilities (Tap:, Exhaust:, etc.)
+            if any(keyword in line_lower for keyword in ['tap:', 'exhaust:', 'activate:']):
+                activated_abilities.append(line)
+            
+            # Triggered abilities (When, Whenever, At)
+            elif any(keyword in line_lower for keyword in ['when ', 'whenever ', 'at the ']):
+                triggered_abilities.append(line)
+            
+            # Everything else is passive
+            else:
+                passive_abilities.append(line)
+    
+    return Legend(
+        card_id=card.card_id,
+        name=card.name,
+        domain=card.domain,
+        exhausted=exhausted,
+        abilities=card.rules_text.split('\n') if card.rules_text else [],
+        passive_abilities=passive_abilities,
+        activated_abilities=activated_abilities,
+        triggered_abilities=triggered_abilities
+    )
+
+
+def _build_player_state_from_request(
+    request: PlayableCardsRequest,
+    hand,
+    legend_card: Optional[CardRecord],
+    is_opponent: bool = False
+) -> PlayerState:
+    """Build a complete PlayerState with legend for analysis."""
+    
+    # Build legend if available
+    legend = None
+    if legend_card:
+        exhausted = request.opponent_legend_exhausted if is_opponent else request.my_legend_exhausted
+        legend = _build_legend_from_card(legend_card, exhausted)
+    
+    # For opponent, we don't have full hand data
+    player_hand = [] if is_opponent else hand
+    
+    return PlayerState(
+        name="Opponent" if is_opponent else "Player",
+        legend=legend,
+        mana_by_rune=request.my_power if not is_opponent else {},
+        hand=player_hand,
+        hand_size=len(player_hand) if not is_opponent else None
+    )
 
 
 @app.get("/health")
@@ -114,20 +188,21 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
     """
     Analyze playable cards for Riftbound 1v1 matches.
     
-    Properly handles:
-    - 2 battlefields (standard 1v1 format)
-    - Energy and power resource systems
-    - Battlefield positioning strategy
-    - Threat assessment
+    Now with full legend integration:
+    - Legend synergy detection
+    - Exhaustion tracking
+    - Opponent legend counter-play
+    - Legend-aware sequencing
     """
     try:
         logger.info(
             f"Processing playable cards: turn {request.turn}, "
-            f"energy {request.my_energy}, power {request.my_power}"
+            f"energy {request.my_energy}, power {request.my_power}, "
+            f"legend: {request.legend_id or 'none'}"
         )
         
         # Validate phase
-        valid_phases = ["main", "combat", "showdown"]
+        valid_phases = ["main", "combat", "showdown", "end"]
         if request.phase.lower() not in valid_phases:
             raise HTTPException(
                 status_code=400,
@@ -147,8 +222,38 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
             )
         
         # Load legends from database
-        my_legend = get_card(request.legend_id) if request.legend_id else None
-        opponent_legend = get_card(request.opponent_legend_id) if request.opponent_legend_id else None
+        my_legend_card = get_card(request.legend_id) if request.legend_id else None
+        opponent_legend_card = get_card(request.opponent_legend_id) if request.opponent_legend_id else None
+        
+        if request.legend_id and not my_legend_card:
+            logger.warning(f"My legend '{request.legend_id}' not found in database")
+        
+        if request.opponent_legend_id and not opponent_legend_card:
+            logger.warning(f"Opponent legend '{request.opponent_legend_id}' not found in database")
+        
+        # Build complete player states with legends
+        player_state = _build_player_state_from_request(
+            request, hand, my_legend_card, is_opponent=False
+        )
+        
+        opponent_state = _build_player_state_from_request(
+            request, [], opponent_legend_card, is_opponent=True
+        )
+        
+        # Log legend states
+        if player_state.legend:
+            logger.info(
+                f"Player legend: {player_state.legend.name}, "
+                f"exhausted: {player_state.legend.exhausted}, "
+                f"abilities: {len(player_state.legend.activated_abilities)} activated, "
+                f"{len(player_state.legend.passive_abilities)} passive"
+            )
+        
+        if opponent_state.legend:
+            logger.info(
+                f"Opponent legend: {opponent_state.legend.name}, "
+                f"exhausted: {opponent_state.legend.exhausted}"
+            )
         
         # Convert battlefield states - enrich with card data
         enriched_battlefields = []
@@ -188,27 +293,45 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
             )
             enriched_battlefields.append(enriched_bf)
         
-        # Analyze with enriched data
+        # Analyze with enriched data AND full player states
         advice = analyze_playable_cards(
             hand=hand,
             my_energy=request.my_energy,
             my_power=request.my_power,
             turn=request.turn,
             phase=request.phase,
-            battlefields=enriched_battlefields,  # Pass enriched battlefields
-            my_legend=my_legend,
-            opponent_legend=opponent_legend,
+            battlefields=enriched_battlefields,
+            my_legend=my_legend_card,  # Keep for backward compatibility
+            opponent_legend=opponent_legend_card,  # Keep for backward compatibility
             my_legend_exhausted=request.my_legend_exhausted,
             opponent_legend_exhausted=request.opponent_legend_exhausted,
             going_first=request.going_first,
             my_score=request.my_score,
             opponent_score=request.opponent_score,
+            player_state=player_state,  # NEW: Full player state with legend
+            opponent_state=opponent_state,  # NEW: Full opponent state with legend
         )
+        
+        # Enhanced logging with legend info
+        threat_level = advice.scoring_debug.threat_assessment.get('level') if advice.scoring_debug else 'unknown'
+        legend_info = ""
+        if advice.scoring_debug and 'legend_state' in advice.scoring_debug.threat_assessment:
+            legend_state = advice.scoring_debug.threat_assessment['legend_state']
+            legend_info = f", legend: {legend_state.get('my_legend', 'none')} ({'exhausted' if legend_state.get('exhausted') else 'ready'})"
         
         logger.info(
             f"Generated advice: {len(advice.primary_strategy)} recommendations, "
-            f"threat level: {advice.scoring_debug.threat_assessment.get('level') if advice.scoring_debug else 'unknown'}"
+            f"threat level: {threat_level}{legend_info}"
         )
+        
+        # Log if any cards have legend synergies
+        synergistic_cards = sum(
+            1 for rec in advice.playable_cards 
+            if rec.recommended and 'Legend' in (rec.reason or '')
+        )
+        
+        if synergistic_cards > 0:
+            logger.info(f"{synergistic_cards} cards have legend synergies")
         
         return PlayableCardsAdviceResponse(
             playable_cards=advice.playable_cards,
@@ -260,6 +383,93 @@ def upsert_card_endpoint(payload: CardUpsertRequest) -> CardResponse:
 
 @app.get("/cards/count")
 def card_count_endpoint() -> dict:
+    """Returns the number of cards currently stored in cards.db."""
+    total = count_cards()
+    return {"card_count": total}
+
+
+@app.get("/legends", response_model=List[CardResponse])
+def list_legends_endpoint() -> List[CardResponse]:
+    """List all legend cards in the database."""
+    # Assuming legends have a specific tag or card type
+    # Adjust this based on how you store legends
+    all_cards = list_cards()
+    
+    # Filter for legends (assuming they have "legend" in tags or a specific pattern)
+    legends = [
+        card for card in all_cards
+        if card.tags and any('legend' in tag.lower() for tag in card.tags)
+    ]
+    
+    logger.info(f"Found {len(legends)} legend cards")
+    return legends
+
+
+@app.get("/legends/{legend_id}/synergies", response_model=Dict)
+def get_legend_synergies_endpoint(
+    legend_id: str,
+    hand_ids: List[str] = Query([])
+) -> Dict:
+    """
+    Analyze synergies between a legend and specific cards.
+    Useful for deck building or understanding legend interactions.
+    """
+    from legend_analysis import analyze_legend_synergy, evaluate_legend_state
+    
+    legend_card = get_card(legend_id)
+    if not legend_card:
+        raise HTTPException(status_code=404, detail="Legend not found")
+    
+    # Build legend object
+    legend = _build_legend_from_card(legend_card, exhausted=False)
+    
+    # Build minimal player state
+    player_state = PlayerState(
+        name="Player",
+        legend=legend,
+        hand=[]
+    )
+    
+    # Evaluate legend state
+    legend_eval = evaluate_legend_state(player_state)
+    
+    # If hand_ids provided, analyze synergies
+    synergy_analysis = {}
+    if hand_ids:
+        hand, missing = make_hand_from_ids(hand_ids)
+        
+        for card in hand:
+            synergies, total_modifier = analyze_legend_synergy(
+                card, player_state, None, None
+            )
+            
+            synergy_analysis[card.card_id] = {
+                "card_name": card.name,
+                "total_modifier": total_modifier,
+                "synergies": [
+                    {
+                        "type": s.synergy_type.value,
+                        "description": s.description,
+                        "value": s.value_modifier,
+                        "timing": s.timing
+                    }
+                    for s in synergies
+                ]
+            }
+    
+    return {
+        "legend": {
+            "card_id": legend_card.card_id,
+            "name": legend_card.name,
+            "domain": legend_card.domain,
+            "can_activate": legend_eval.can_activate,
+            "value_score": legend_eval.value_score,
+            "activated_abilities": legend_eval.activated_abilities,
+            "passive_abilities": legend_eval.passive_abilities,
+            "triggered_abilities": legend_eval.triggered_abilities
+        },
+        "card_synergies": synergy_analysis
+    }
     """Returns the number of cards currently stored in cards.db."""
     total = count_cards()
     return {"card_count": total}
