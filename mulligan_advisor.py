@@ -152,7 +152,8 @@ def _evaluate_unit(
     """Evaluate unit cards for mulligan."""
     cost = card.energy_cost
     might = card.might or 0
-    
+
+
     # Cheap units (0-2 cost) - highest priority keeps
     if cost <= 2:
         # Check for premium keywords
