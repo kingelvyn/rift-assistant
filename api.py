@@ -19,6 +19,8 @@ from card_utils import make_hand_from_ids
 from game_state import GameState, Rune, CardType, PlayerState, Legend
 from card_db import init_db, CardRecord, get_card, list_cards, upsert_card, count_cards
 from logger_config import setup_logging
+from legend_analysis import analyze_legend_synergy, evaluate_legend_state
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -308,8 +310,8 @@ def playable_cards_advice_endpoint(request: PlayableCardsRequest) -> PlayableCar
             going_first=request.going_first,
             my_score=request.my_score,
             opponent_score=request.opponent_score,
-            player_state=player_state,  # NEW: Full player state with legend
-            opponent_state=opponent_state,  # NEW: Full opponent state with legend
+            player_state=player_state,  # Full player state with legend
+            opponent_state=opponent_state,  # Full opponent state with legend
         )
         
         # Enhanced logging with legend info
@@ -414,7 +416,6 @@ def get_legend_synergies_endpoint(
     Analyze synergies between a legend and specific cards.
     Useful for deck building or understanding legend interactions.
     """
-    from legend_analysis import analyze_legend_synergy, evaluate_legend_state
     
     legend_card = get_card(legend_id)
     if not legend_card:

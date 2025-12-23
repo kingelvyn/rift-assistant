@@ -35,6 +35,7 @@ class CardType (str, Enum):
     UNIT = "unit"
     GEAR = "gear"
     SPELL = "spell"
+    LEGEND = "legend"
     BATTLEFIELD = "battlefield"
     
 # ----------------
@@ -55,7 +56,7 @@ class CardInHand (BaseModel):
     rules_text: Optional[str] = None  # Card rules text for ability analysis
     keep: bool = True
     
-    # NEW: Parsed abilities
+    # Parsed abilities
     parsed_abilities: List[ParsedAbility] = Field(default_factory=list)
     
     def parse_abilities(self):
@@ -102,7 +103,7 @@ class Unit(BaseModel):
     attached_gear_ids: List[str] = []
     exhausted: bool = False
     
-    # NEW: Parsed abilities
+    # Parsed abilities
     parsed_abilities: List[ParsedAbility] = Field(default_factory=list)
     rules_text: Optional[str] = None
     
@@ -135,7 +136,7 @@ class Battlefield(BaseModel):
     my_unit: Optional[Unit] = None
     op_unit: Optional[Unit] = None
     
-    # NEW: Battlefield abilities (some battlefields have effects)
+    # Battlefield abilities (some battlefields have effects)
     battlefield_id: Optional[str] = None
     battlefield_name: Optional[str] = None
     battlefield_rules: Optional[str] = None
@@ -160,7 +161,7 @@ class Legend(BaseModel):
     activated_abilities: List[str] = []  # Activated abilities (tap, etc.)
     triggered_abilities: List[str] = []  # Triggered abilities
     
-    # NEW: Parsed abilities with full structure
+    # Parsed abilities with full structure
     parsed_abilities: List[ParsedAbility] = Field(default_factory=list)
     rules_text: Optional[str] = None
     tags: List[str] = []  # For tribal synergies

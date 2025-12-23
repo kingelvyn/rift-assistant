@@ -82,8 +82,12 @@ def normalize_card_type(type_str: str) -> CardType:
     """
     s = (type_str or "").strip().lower()
 
-    # Units / legends / champions → UNIT
-    if s in ("unit", "legend", "champion", "champion unit"):
+    # LEGENDS
+    if s in ("legend"):
+        return CardType.LEGEND
+
+    # Units / champions → UNIT
+    if s in ("unit", "champion", "champion unit"):
         return CardType.UNIT
 
     # Gear / equipment / items → GEAR

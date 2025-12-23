@@ -59,6 +59,7 @@ def requires_legend_exhaustion(card: CardInHand) -> bool:
         "exhaust your legend to",
         "you may exhaust your legend",
         "exhaust legend:"
+        "[tap]"
     ]
     
     return any(pattern in rules_lower for pattern in patterns)
