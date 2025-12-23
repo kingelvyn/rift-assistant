@@ -1,8 +1,9 @@
 # playable_cards_advisor.py
 
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple, Set
+from dataclasses import dataclass
 from card_evaluation import assess_threat_level
-from game_state import CardInHand, CardType, Rune
+from game_state import CardInHand, CardType, Rune, Phase
 from card_db import CardRecord
 from advisor_models import (
     PlayableCardsAdvice,
@@ -21,6 +22,29 @@ from battlefield_analysis import (
 )
 
 
+@dataclass
+class PlaySequenceStep:
+    """Represents a single step in a play sequence."""
+    card_id: str
+    card_name: str
+    step_number: int
+    energy_cost: int
+    cumulative_energy: int
+    reason: str
+    dependencies: List[str] = None  # Card IDs that should be played before this
+    battlefield_target: Optional[int] = None
+
+
+@dataclass
+class PlaySequence:
+    """A complete sequence of plays in optimal order."""
+    steps: List[PlaySequenceStep]
+    total_energy: int
+    sequence_reasoning: str
+    efficiency_score: float
+    risk_level: str  # "safe", "moderate", "aggressive"
+
+
 def _filter_playable_cards(
     hand: List[CardInHand],
     my_energy: int,
@@ -34,17 +58,26 @@ def _filter_playable_cards(
         if card.energy_cost > my_energy:
             continue
         
-        # Check power cost
-        # If card has a domain/color, we need power of that color
-        if card.domain and card.domain != Rune.COLORLESS:
-            domain_str = card.domain.value if hasattr(card.domain, 'value') else str(card.domain)
-            available_power = my_power.get(domain_str.lower(), 0)
-            
-            # Assuming card.power_cost is the required power
-            required_power = card.power_cost or 0
-            
-            if required_power > available_power:
-                continue  # Can't afford power cost
+        # Check power cost (for power-based cards)
+        if card.power_cost and card.power_cost > 0:
+            # Check if we have specific rune requirements
+            if card.power_cost_by_rune:
+                can_afford = True
+                for rune, cost in card.power_cost_by_rune.items():
+                    rune_key = rune.value if hasattr(rune, 'value') else str(rune)
+                    available = my_power.get(rune_key.lower(), 0)
+                    if cost > available:
+                        can_afford = False
+                        break
+                if not can_afford:
+                    continue
+            else:
+                # Generic power cost - check if domain power is available
+                if card.domain and card.domain != Rune.COLORLESS:
+                    domain_str = card.domain.value if hasattr(card.domain, 'value') else str(card.domain)
+                    available_power = my_power.get(domain_str.lower(), 0)
+                    if card.power_cost > available_power:
+                        continue
         
         playable.append(card)
     
@@ -61,7 +94,811 @@ def _determine_game_phase(turn: int) -> str:
         return "late"
 
 
-def _recommend_battlefield_development(
+def _identify_card_dependencies(
+    card: CardInHand,
+    hand: List[CardInHand],
+    battlefields: List[BattlefieldState]
+) -> List[str]:
+    """
+    Identify which other cards should be played before this one.
+    Returns list of card IDs that are dependencies.
+    """
+    dependencies = []
+    
+    # GEAR dependencies: need a unit on board first
+    if card.card_type == CardType.GEAR:
+        # Check if we have units on board
+        has_unit_on_board = any(
+            bf.my_unit is not None 
+            for bf in battlefields
+        )
+        
+        if not has_unit_on_board:
+            # Look for units in hand we should play first
+            unit_cards = [
+                c for c in hand 
+                if c.card_type == CardType.UNIT and c.card_id != card.card_id
+            ]
+            if unit_cards:
+                # Prefer cheap units as dependencies
+                cheapest = min(unit_cards, key=lambda c: c.energy_cost)
+                dependencies.append(cheapest.card_id)
+    
+    # BUFF SPELL dependencies: need target on board
+    if card.card_type == CardType.SPELL:
+        tags_lower = [t.lower() for t in (card.tags or [])]
+        
+        if 'buff' in tags_lower or 'enchant' in tags_lower:
+            # Check if we have units on board
+            has_unit_on_board = any(
+                bf.my_unit is not None 
+                for bf in battlefields
+            )
+            
+            if not has_unit_on_board:
+                # Look for units in hand
+                unit_cards = [
+                    c for c in hand 
+                    if c.card_type == CardType.UNIT
+                ]
+                if unit_cards:
+                    # Prefer units with good stats or keywords
+                    best_target = max(
+                        unit_cards, 
+                        key=lambda c: (c.might or 0) + len(c.keywords or [])
+                    )
+                    dependencies.append(best_target.card_id)
+    
+    # COMBO dependencies: check rules text for card name references
+    if card.rules_text:
+        rules_lower = card.rules_text.lower()
+        for other_card in hand:
+            if other_card.card_id == card.card_id:
+                continue
+            
+            # If this card mentions another card by name
+            if other_card.name and other_card.name.lower() in rules_lower:
+                dependencies.append(other_card.card_id)
+    
+    return dependencies
+
+def _calculate_play_priority(
+    card: CardInHand,
+    card_values: Dict[str, float],
+    battlefield_analysis: dict,
+    game_phase: str,
+    threat_level: str,
+    current_phase: str
+) -> float:
+    """
+    Calculate priority score for playing a card.
+    Higher score = higher priority to play.
+    """
+    priority = 0.0
+    
+    # Base value from card evaluation
+    priority += card_values.get(card.card_id, 0.0)
+    
+    # === SITUATIONAL PRIORITY MODIFIERS ===
+    
+    # Empty battlefields need filling urgently
+    if card.card_type == CardType.UNIT:
+        if battlefield_analysis['empty_battlefields'] > 0:
+            priority += 15
+        
+        # Guard units are high priority when opponent threatens
+        if 'guard' in [k.lower() for k in (card.keywords or [])]:
+            if threat_level in ['high', 'critical']:
+                priority += 10
+        
+        # Assault units are high priority in early game
+        if 'assault' in [k.lower() for k in (card.keywords or [])]:
+            if game_phase == 'early':
+                priority += 8
+    
+    # Removal spells are urgent when threatened
+    if card.card_type == CardType.SPELL:
+        tags_lower = [t.lower() for t in (card.tags or [])]
+        
+        if any(t in tags_lower for t in ['removal', 'destroy', 'damage']):
+            if threat_level == 'critical':
+                priority += 20
+            elif threat_level == 'high':
+                priority += 12
+            elif battlefield_analysis['opponent_units'] > 0:
+                priority += 5
+        
+        # Fast spells (combat tricks) should be held
+        if 'fast' in [k.lower() for k in (card.keywords or [])]:
+            if current_phase == Phase.MAIN:
+                priority -= 10  # Hold for showdown phase
+        
+        # Draw spells are lower priority in main phase
+        if 'draw' in tags_lower:
+            if current_phase == Phase.MAIN:
+                priority += 3  # Okay to play but not urgent
+    
+    # Gear needs units
+    if card.card_type == CardType.GEAR:
+        if battlefield_analysis['my_units'] > 0:
+            priority += 8
+            # Better gear on contested battlefields
+            if battlefield_analysis['contested_battlefields'] > 0:
+                priority += 5
+        else:
+            priority -= 10  # Very low priority without units
+    
+    # === EFFICIENCY MODIFIERS ===
+    
+    # Cheap cards are easier to sequence
+    if card.energy_cost <= 2:
+        priority += 3
+    
+    # Expensive cards in early game are risky
+    if game_phase == 'early' and card.energy_cost >= 4:
+        priority -= 5
+    
+    return priority
+
+
+def _build_optimal_sequence(
+    cards: List[CardInHand],
+    card_values: Dict[str, float],
+    battlefield_analysis: dict,
+    game_phase: str,
+    threat_level: str,
+    current_phase: str,
+    my_energy: int,
+    battlefields: List[BattlefieldState]
+) -> PlaySequence:
+    """
+    Build an optimal play sequence considering dependencies and priorities.
+    """
+    # Calculate priorities for all cards
+    card_priorities = {}
+    card_dependencies = {}
+    
+    for card in cards:
+        priority = _calculate_play_priority(
+            card, card_values, battlefield_analysis, 
+            game_phase, threat_level, current_phase
+        )
+        card_priorities[card.card_id] = priority
+        
+        deps = _identify_card_dependencies(card, cards, battlefields)
+        card_dependencies[card.card_id] = deps
+    
+    # Build sequence using topological sort (respecting dependencies)
+    sequence_steps = []
+    played_cards: Set[str] = set()
+    cumulative_energy = 0
+    step_number = 1
+    
+    # Sort cards by priority (highest first)
+    sorted_cards = sorted(
+        cards, 
+        key=lambda c: card_priorities[c.card_id], 
+        reverse=True
+    )
+    
+    # Iteratively add cards that have their dependencies met
+    while sorted_cards and cumulative_energy < my_energy:
+        cards_added_this_iteration = False
+        
+        for card in sorted_cards[:]:  # Iterate over copy
+            # Check if we can afford this card
+            if cumulative_energy + card.energy_cost > my_energy:
+                continue
+            
+            # Check if dependencies are satisfied
+            deps = card_dependencies[card.card_id]
+            if all(dep_id in played_cards for dep_id in deps):
+                # Add this card to sequence
+                cumulative_energy += card.energy_cost
+                
+                # Determine battlefield target
+                battlefield_target = None
+                if card.card_type == CardType.UNIT:
+                    # Find best battlefield for this unit
+                    battlefield_target = _select_battlefield_for_unit(
+                        card, battlefields, battlefield_analysis
+                    )
+                
+                # Generate reason
+                reason = _generate_step_reason(
+                    card, deps, step_number, 
+                    battlefield_analysis, threat_level
+                )
+                
+                step = PlaySequenceStep(
+                    card_id=card.card_id,
+                    card_name=card.name or card.card_id,
+                    step_number=step_number,
+                    energy_cost=card.energy_cost,
+                    cumulative_energy=cumulative_energy,
+                    reason=reason,
+                    dependencies=deps,
+                    battlefield_target=battlefield_target
+                )
+                
+                sequence_steps.append(step)
+                played_cards.add(card.card_id)
+                sorted_cards.remove(card)
+                step_number += 1
+                cards_added_this_iteration = True
+                break
+        
+        # If we couldn't add any cards this iteration, break
+        if not cards_added_this_iteration:
+            break
+    
+    # Calculate efficiency and risk
+    efficiency_score = cumulative_energy / my_energy if my_energy > 0 else 0.0
+    risk_level = _assess_sequence_risk(sequence_steps, efficiency_score, game_phase)
+    
+    # Generate sequence reasoning
+    sequence_reasoning = _generate_sequence_reasoning(
+        sequence_steps, efficiency_score, risk_level, 
+        battlefield_analysis, threat_level
+    )
+    
+    return PlaySequence(
+        steps=sequence_steps,
+        total_energy=cumulative_energy,
+        sequence_reasoning=sequence_reasoning,
+        efficiency_score=efficiency_score,
+        risk_level=risk_level
+    )
+
+
+def _select_battlefield_for_unit(
+    unit: CardInHand,
+    battlefields: List[BattlefieldState],
+    battlefield_analysis: dict
+) -> Optional[int]:
+    """Select the best battlefield index to play a unit."""
+    
+    unit_might = unit.might or 0
+    best_battlefield = None
+    best_score = -999
+    
+    for idx, bf in enumerate(battlefields):
+        # Can't play if we already have a unit there
+        if bf.my_unit is not None:
+            continue
+        
+        score = 0
+        
+        # Empty battlefield is always an option
+        if bf.opponent_unit is None:
+            score = 10
+        else:
+            # Contested battlefield
+            op_might = bf.opponent_unit.get('might', 0)
+            
+            if unit_might > op_might:
+                score = 20  # We win this battlefield
+            elif unit_might == op_might:
+                score = 15  # We contest it
+            else:
+                score = 5   # We're behind, but at least contesting
+        
+        # Prefer guard units on threatened lanes
+        if 'guard' in [k.lower() for k in (unit.keywords or [])]:
+            if bf.opponent_unit is not None:
+                score += 5
+        
+        # Prefer assault units on empty lanes
+        if 'assault' in [k.lower() for k in (unit.keywords or [])]:
+            if bf.opponent_unit is None:
+                score += 3
+        
+        if score > best_score:
+            best_score = score
+            best_battlefield = idx
+    
+    return best_battlefield
+
+
+def _generate_step_reason(
+    card: CardInHand,
+    dependencies: List[str],
+    step_number: int,
+    battlefield_analysis: dict,
+    threat_level: str
+) -> str:
+    """Generate human-readable reason for this play step."""
+    
+    if dependencies:
+        return f"Step {step_number}: Play after dependencies met"
+    
+    if card.card_type == CardType.UNIT:
+        if battlefield_analysis['empty_battlefields'] > 0:
+            return f"Step {step_number}: Develop board presence"
+        elif battlefield_analysis['opponent_only_battlefields'] > 0:
+            return f"Step {step_number}: Contest opponent's battlefield"
+        else:
+            return f"Step {step_number}: Strengthen battlefield position"
+    
+    if card.card_type == CardType.SPELL:
+        tags_lower = [t.lower() for t in (card.tags or [])]
+        if any(t in tags_lower for t in ['removal', 'destroy']):
+            return f"Step {step_number}: Remove opponent threat ({threat_level} priority)"
+        elif 'buff' in tags_lower:
+            return f"Step {step_number}: Enhance existing unit"
+        elif 'draw' in tags_lower:
+            return f"Step {step_number}: Refill resources"
+        else:
+            return f"Step {step_number}: Cast utility spell"
+    
+    if card.card_type == CardType.GEAR:
+        return f"Step {step_number}: Equip gear to strengthen unit"
+    
+    return f"Step {step_number}: Play card"
+
+
+def _assess_sequence_risk(
+    steps: List[PlaySequenceStep],
+    efficiency: float,
+    game_phase: str
+) -> str:
+    """Assess the risk level of this play sequence."""
+    
+    if efficiency >= 0.9:
+        # Using almost all resources
+        if game_phase == 'early':
+            return "moderate"  # It's okay to go all-in early
+        else:
+            return "aggressive"  # Risky to have no resources left
+    
+    if efficiency >= 0.7:
+        return "moderate"
+    
+    if efficiency < 0.5:
+        return "safe"  # Very conservative
+    
+    return "safe"
+
+
+def _generate_sequence_reasoning(
+    steps: List[PlaySequenceStep],
+    efficiency: float,
+    risk_level: str,
+    battlefield_analysis: dict,
+    threat_level: str
+) -> str:
+    """Generate reasoning explanation for the sequence."""
+    
+    parts = []
+    
+    # Efficiency description
+    if efficiency >= 0.9:
+        parts.append(f"Uses {efficiency*100:.0f}% of available energy")
+    elif efficiency >= 0.7:
+        parts.append(f"Efficient {efficiency*100:.0f}% energy usage")
+    else:
+        parts.append(f"Conservative {efficiency*100:.0f}% energy usage")
+    
+    # Sequence structure
+    if len(steps) == 1:
+        parts.append("single high-impact play")
+    elif len(steps) == 2:
+        parts.append("two-step sequence")
+    else:
+        parts.append(f"{len(steps)}-card sequence")
+    
+    # Dependency-aware
+    has_deps = any(step.dependencies for step in steps)
+    if has_deps:
+        parts.append("respects card dependencies")
+    
+    # Threat response
+    if threat_level in ['high', 'critical']:
+        parts.append(f"addresses {threat_level} threat level")
+    
+    # Board development
+    unit_steps = sum(1 for s in steps if s.battlefield_target is not None)
+    if unit_steps > 0:
+        parts.append(f"develops {unit_steps} battlefield(s)")
+    
+    # Risk assessment
+    if risk_level == "aggressive":
+        parts.append("⚠️ commits all resources")
+    elif risk_level == "safe":
+        parts.append("✓ keeps options open")
+    
+    return " - ".join(parts) + "."
+
+
+def _generate_alternative_sequences(
+    cards: List[CardInHand],
+    card_values: Dict[str, float],
+    battlefield_analysis: dict,
+    game_phase: str,
+    threat_level: str,
+    current_phase: str,
+    my_energy: int,
+    battlefields: List[BattlefieldState],
+    primary_sequence: PlaySequence
+) -> List[PlaySequence]:
+    """Generate alternative play sequences with different strategies."""
+    
+    alternatives = []
+    
+    # Alternative 1: Most conservative (minimum commitment)
+    cheap_cards = [c for c in cards if c.energy_cost <= 2]
+    if cheap_cards:
+        conservative_seq = _build_optimal_sequence(
+            cheap_cards[:1],  # Just one cheap card
+            card_values,
+            battlefield_analysis,
+            game_phase,
+            threat_level,
+            current_phase,
+            my_energy,
+            battlefields
+        )
+        if conservative_seq.steps and conservative_seq.total_energy != primary_sequence.total_energy:
+            alternatives.append(conservative_seq)
+    
+    # Alternative 2: Board control focus (units only)
+    unit_cards = [c for c in cards if c.card_type == CardType.UNIT]
+    if len(unit_cards) >= 2:
+        units_seq = _build_optimal_sequence(
+            unit_cards,
+            card_values,
+            battlefield_analysis,
+            game_phase,
+            threat_level,
+            current_phase,
+            my_energy,
+            battlefields
+        )
+        if units_seq.steps and units_seq.total_energy != primary_sequence.total_energy:
+            alternatives.append(units_seq)
+    
+    # Alternative 3: Single big play (most expensive card)
+    expensive_cards = sorted(cards, key=lambda c: c.energy_cost, reverse=True)
+    if expensive_cards and expensive_cards[0].energy_cost >= 3:
+        big_play_seq = _build_optimal_sequence(
+            [expensive_cards[0]],
+            card_values,
+            battlefield_analysis,
+            game_phase,
+            threat_level,
+            current_phase,
+            my_energy,
+            battlefields
+        )
+        if big_play_seq.steps and big_play_seq.total_energy != primary_sequence.total_energy:
+            alternatives.append(big_play_seq)
+    
+    return alternatives
+
+
+def _convert_sequence_to_strategy(
+    sequence: PlaySequence,
+    strategy_name: str,
+    priority: int
+) -> PlayStrategy:
+    """Convert a PlaySequence to a PlayStrategy."""
+    
+    card_ids = [step.card_id for step in sequence.steps]
+    
+    return PlayStrategy(
+        strategy_name=strategy_name,
+        card_ids=card_ids,
+        total_energy=sequence.total_energy,
+        reasoning=sequence.sequence_reasoning,
+        priority=priority
+    )
+
+
+def _calculate_card_value(
+    card: CardInHand,
+    turn: int,
+    battlefield_analysis: dict,
+    my_legend: Optional[CardRecord]
+) -> float:
+    """Calculate value score for a card in context."""
+    value = 0.0
+    
+    # Base value from stats
+    if card.card_type == CardType.UNIT and card.might:
+        # Might per energy is key metric (but with diminishing returns)
+        efficiency = card.might / max(card.energy_cost, 1)
+        value += efficiency * 10
+        
+        # Bonus for absolute might
+        value += card.might * 0.5
+    
+    # Keyword bonuses
+    if card.keywords:
+        keyword_values = {
+            "assault": 4,      # Extra damage pressure
+            "guard": 3,        # Protects other units
+            "flying": 3,       # Hard to block
+            "ambush": 2,       # Surprise factor
+            "overwhelm": 4,    # Damage through
+            "lifesteal": 2,    # Sustain
+            "quick": 3,        # Can attack immediately
+            "double strike": 5, # Very powerful
+        }
+        for keyword in card.keywords:
+            value += keyword_values.get(keyword.lower(), 1)
+    
+    # Context bonuses
+    game_phase = _determine_game_phase(turn)
+    
+    if game_phase == "early":
+        if card.energy_cost <= 2:
+            value += 5  # Early game highly values cheap cards
+        elif card.energy_cost >= 4:
+            value -= 3  # Expensive cards are harder to use
+    
+    if game_phase == "late":
+        if card.card_type == CardType.UNIT and (card.might or 0) >= 5:
+            value += 4  # Late game values bombs
+    
+    # Removal is valuable when opponent has units
+    if card.card_type == CardType.SPELL:
+        tags_lower = [t.lower() for t in (card.tags or [])]
+        
+        if any(t in tags_lower for t in ['removal', 'destroy', 'damage']):
+            value += battlefield_analysis['opponent_units'] * 3
+            
+            # Critical against high might units
+            if battlefield_analysis.get('highest_opponent_might', 0) >= 4:
+                value += 3
+        
+        # Draw spells
+        if 'draw' in tags_lower:
+            value += 2
+            # More valuable in late game
+            if game_phase == "late":
+                value += 2
+    
+    # Gear is valuable when we have units
+    if card.card_type == CardType.GEAR:
+        value += battlefield_analysis['my_units'] * 2
+        
+        # More valuable in contested battlefields
+        if battlefield_analysis['contested_battlefields'] > 0:
+            value += 3
+    
+    return max(value, 0.0)
+
+
+def analyze_playable_cards(
+    hand: List[CardInHand],
+    my_energy: int,
+    my_power: Dict[str, int],
+    turn: int,
+    phase: str,
+    battlefields: List[BattlefieldState],
+    my_legend: Optional[CardRecord] = None,
+    opponent_legend: Optional[CardRecord] = None,
+    my_legend_exhausted: bool = False,
+    opponent_legend_exhausted: bool = False,
+    going_first: bool = True,
+    my_score: Optional[int] = None,
+    opponent_score: Optional[int] = None,
+) -> PlayableCardsAdvice:
+    """
+    Analyze playable cards for Riftbound 1v1 with optimal sequencing.
+    """
+    
+    if not hand:
+        return PlayableCardsAdvice(
+            playable_cards=[],
+            recommended_plays=[],
+            recommended_strategies=[],
+            primary_strategy=[],
+            summary="No cards in hand to play.",
+            mana_efficiency_note=None,
+            scoring_debug=None,
+        )
+    
+    # Validate exactly 2 battlefields
+    if len(battlefields) != 2:
+        return PlayableCardsAdvice(
+            playable_cards=[],
+            recommended_plays=[],
+            summary=f"Error: Expected 2 battlefields for 1v1, got {len(battlefields)}"
+        )
+    
+    # Filter playable cards based on resources
+    playable = _filter_playable_cards(hand, my_energy, my_power)
+    
+    if not playable:
+        power_summary = ", ".join([f"{v} {k}" for k, v in my_power.items()]) if my_power else "0"
+        return PlayableCardsAdvice(
+            playable_cards=[],
+            recommended_plays=[],
+            recommended_strategies=[],
+            primary_strategy=[],
+            summary=f"No playable cards with {my_energy} energy and {power_summary} power.",
+            mana_efficiency_note=None,
+            scoring_debug=None,
+        )
+    
+    # Analyze game state
+    game_phase = _determine_game_phase(turn)
+    battlefield_analysis = analyze_riftbound_battlefields(battlefields)
+    
+    # Add highest might tracking
+    battlefield_analysis['highest_opponent_might'] = max(
+        (bf.opponent_unit.get('might', 0) 
+         for bf in battlefields 
+         if bf.opponent_unit), 
+        default=0
+    )
+    
+    threat_level = assess_battlefield_threat_level(
+        battlefield_analysis, opponent_score, my_score
+    )
+    
+    # Calculate card values
+    card_values = {
+        card.card_id: _calculate_card_value(card, turn, battlefield_analysis, my_legend)
+        for card in playable
+    }
+    
+    # Build optimal play sequence
+    primary_sequence = _build_optimal_sequence(
+        playable,
+        card_values,
+        battlefield_analysis,
+        game_phase,
+        threat_level,
+        phase,
+        my_energy,
+        battlefields
+    )
+    
+    # Generate alternative sequences
+    alternative_sequences = _generate_alternative_sequences(
+        playable,
+        card_values,
+        battlefield_analysis,
+        game_phase,
+        threat_level,
+        phase,
+        my_energy,
+        battlefields,
+        primary_sequence
+    )
+    
+    # Convert sequences to strategies
+    strategies = []
+    
+    # Primary strategy (optimal sequence)
+    strategies.append(_convert_sequence_to_strategy(
+        primary_sequence,
+        "Optimal Sequence",
+        priority=1
+    ))
+    
+    # Alternative strategies
+    for idx, alt_seq in enumerate(alternative_sequences):
+        strategy_names = [
+            "Conservative Play",
+            "Board Control Focus",
+            "Single Big Play"
+        ]
+        strategy_name = strategy_names[idx] if idx < len(strategy_names) else f"Alternative {idx+1}"
+        
+        strategies.append(_convert_sequence_to_strategy(
+            alt_seq,
+            strategy_name,
+            priority=idx + 2
+        ))
+    
+    # Build recommendations list with sequence information
+    recommendations = []
+    
+    for step in primary_sequence.steps:
+        card = next(c for c in playable if c.card_id == step.card_id)
+        
+        battlefield_placement = None
+        if step.battlefield_target is not None:
+            battlefield_placement = BattlefieldPlacement(
+                battlefield_index=step.battlefield_target,
+                reason=f"Best battlefield for this unit",
+                priority=1
+            )
+        
+        recommendations.append(
+            PlayableCardRecommendation(
+                card_id=card.card_id,
+                name=card.name,
+                card_type=card.card_type,
+                energy_cost=card.energy_cost,
+                priority=step.step_number,
+                recommended=True,
+                reason=step.reason,
+                battlefield_placement=battlefield_placement,
+                value_score=card_values.get(card.card_id, 0.0)
+            )
+        )
+    
+    # Add non-sequenced cards as lower priority
+    sequenced_ids = {step.card_id for step in primary_sequence.steps}
+    for card in playable:
+        if card.card_id not in sequenced_ids:
+            recommendations.append(
+                PlayableCardRecommendation(
+                    card_id=card.card_id,
+                    name=card.name,
+                    card_type=card.card_type,
+                    energy_cost=card.energy_cost,
+                    priority=len(primary_sequence.steps) + 10,
+                    recommended=False,
+                    reason="Not included in optimal sequence - lower value or doesn't fit energy curve",
+                    value_score=card_values.get(card.card_id, 0.0)
+                )
+            )
+    
+    # Primary strategy card IDs
+    primary_strategy_ids = [step.card_id for step in primary_sequence.steps]
+    
+    # Efficiency note
+    efficiency_pct = primary_sequence.efficiency_score * 100
+    mana_note = f"Optimal sequence uses {primary_sequence.total_energy}/{my_energy} energy ({efficiency_pct:.0f}%)"
+    
+    if primary_sequence.efficiency_score >= 0.9:
+        mana_note += " - maximum efficiency"
+    elif primary_sequence.efficiency_score >= 0.7:
+        mana_note += " - balanced efficiency"
+    else:
+        mana_note += " - conservative, holds resources"
+    
+    if len(strategies) > 1:
+        mana_note += f". {len(strategies)} strategies available."
+    
+    # Summary
+    summary = build_strategy_summary(
+        turn,
+        game_phase,
+        phase,
+        len(primary_strategy_ids),
+        len(playable),
+        battlefield_analysis,
+        threat_level,
+        my_score,
+        opponent_score,
+    )
+    
+    # Add sequence info to summary
+    if len(primary_sequence.steps) > 1:
+        summary += f" Sequence: {len(primary_sequence.steps)} steps."
+    
+    # Debug info
+    scoring_debug = ScoringDebugInfo(
+        card_value_scores=card_values,
+        threat_assessment={
+            "level": threat_level, 
+            "details": battlefield_analysis
+        },
+        mana_efficiency_score=primary_sequence.efficiency_score,
+        battlefield_analyses=[bf.model_dump() for bf in battlefields],
+        game_phase=game_phase
+    )
+    
+    return PlayableCardsAdvice(
+        playable_cards=recommendations,
+        recommended_strategies=strategies,
+        primary_strategy=primary_strategy_ids,
+        recommended_plays=primary_strategy_ids,
+        summary=summary,
+        mana_efficiency_note=mana_note,
+        scoring_debug=scoring_debug,
+    )
+
+
+# older logic functs
+
+def _recommend_battlefield_development_legacy(
     playable_units: List[CardInHand],
     battlefields: List[BattlefieldState],
     battlefield_analysis: dict,
@@ -125,7 +962,7 @@ def _recommend_battlefield_development(
     return priority
 
 
-def _recommend_contested_plays(
+def _recommend_contested_plays_legacy(
     playable_units: List[CardInHand],
     battlefields: List[BattlefieldState],
     battlefield_analysis: dict,
@@ -183,7 +1020,7 @@ def _recommend_contested_plays(
     return priority
 
 
-def _recommend_removal_spells(
+def _recommend_removal_spells_legacy(
     playable_spells: List[CardInHand],
     threat_level: str,
     card_values: dict,
@@ -234,7 +1071,7 @@ def _recommend_removal_spells(
     return priority
 
 
-def _recommend_gear(
+def _recommend_gear_legacy(
     playable_gear: List[CardInHand],
     battlefield_analysis: dict,
     card_values: dict,
@@ -275,7 +1112,7 @@ def _recommend_gear(
     return priority
 
 
-def _recommend_utility_spells(
+def _recommend_utility_spells_legacy(
     playable_spells: List[CardInHand],
     phase: str,
     battlefield_analysis: dict,
@@ -333,55 +1170,7 @@ def _recommend_utility_spells(
     return priority
 
 
-def _calculate_card_value(
-    card: CardInHand,
-    turn: int,
-    battlefield_analysis: dict,
-    my_legend: Optional[CardRecord]
-) -> float:
-    """Calculate value score for a card in context."""
-    value = 0.0
-    
-    # Base value from stats
-    if card.card_type == CardType.UNIT and card.might:
-        # Might per energy is key metric
-        value += (card.might / max(card.energy_cost, 1)) * 10
-    
-    # Keyword bonuses
-    if card.keywords:
-        keyword_values = {
-            "assault": 3,      # Extra damage
-            "guard": 2,        # Protects other units
-            "flying": 2,       # Hard to block
-            "ambush": 2,       # Surprise factor
-            "overwhelm": 3,    # Damage through
-            "lifesteal": 2,    # Sustain
-        }
-        for keyword in card.keywords:
-            value += keyword_values.get(keyword.lower(), 1)
-    
-    # Context bonuses
-    game_phase = _determine_game_phase(turn)
-    
-    if game_phase == "early" and card.energy_cost <= 2:
-        value += 5  # Early game values cheap cards
-    
-    if game_phase == "late" and card.card_type == CardType.UNIT and (card.might or 0) >= 4:
-        value += 3  # Late game values big units
-    
-    # Removal is valuable when opponent has units
-    if card.card_type == CardType.SPELL and battlefield_analysis['opponent_units'] > 0:
-        if any(tag.lower() in ["removal", "destroy"] for tag in (card.tags or [])):
-            value += battlefield_analysis['opponent_units'] * 2
-    
-    # Gear is valuable when we have units
-    if card.card_type == CardType.GEAR and battlefield_analysis['my_units'] > 0:
-        value += battlefield_analysis['my_units'] * 1.5
-    
-    return max(value, 0.0)
-
-
-def _get_low_priority_reason(
+def _get_low_priority_reason_legacy(
     card: CardInHand,
     game_phase: str,
     battlefield_analysis: dict
@@ -409,7 +1198,7 @@ def _get_low_priority_reason(
     return "Playable but situational"
  
 
-def _generate_play_strategies(
+def _generate_play_strategies_legacy(
     recommendations: List[PlayableCardRecommendation],
     my_energy: int,
     game_phase: str,
@@ -533,222 +1322,7 @@ def _generate_play_strategies(
     return strategies, primary_card_ids
 
 
-def analyze_playable_cards(
-    hand: List[CardInHand],
-    my_energy: int,
-    my_power: Dict[str, int],
-    turn: int,
-    phase: str,
-    battlefields: List[BattlefieldState],
-    my_legend: Optional[CardRecord] = None,
-    opponent_legend: Optional[CardRecord] = None,
-    my_legend_exhausted: bool = False,
-    opponent_legend_exhausted: bool = False,
-    going_first: bool = True,
-    my_score: Optional[int] = None,
-    opponent_score: Optional[int] = None,
-) -> PlayableCardsAdvice:
-    """
-    Analyze playable cards for Riftbound 1v1 with proper resource and battlefield rules.
-    """
-    
-    if not hand:
-        return PlayableCardsAdvice(
-            playable_cards=[],
-            recommended_plays=[],
-            recommended_strategies=[],
-            primary_strategy=[],
-            summary="No cards in hand to play.",
-            mana_efficiency_note=None,
-            scoring_debug=None,
-        )
-    
-    # Validate exactly 2 battlefields
-    if len(battlefields) != 2:
-        return PlayableCardsAdvice(
-            playable_cards=[],
-            recommended_plays=[],
-            summary=f"Error: Expected 2 battlefields for 1v1, got {len(battlefields)}"
-        )
-    
-    # Filter playable cards based on resources
-    playable = _filter_playable_cards(hand, my_energy, my_power)
-    
-    if not playable:
-        power_summary = ", ".join([f"{v} {k}" for k, v in my_power.items()]) if my_power else "0"
-        return PlayableCardsAdvice(
-            playable_cards=[],
-            recommended_plays=[],
-            recommended_strategies=[],
-            primary_strategy=[],
-            summary=f"No playable cards with {my_energy} energy and {power_summary} power.",
-            mana_efficiency_note=None,
-            scoring_debug=None,
-        )
-    
-    # Analyze game state IN CORRECT ORDER
-    game_phase = _determine_game_phase(turn)
-    battlefield_analysis = analyze_riftbound_battlefields(battlefields)  
-    threat_level = assess_battlefield_threat_level(battlefield_analysis, opponent_score, my_score)  
-    
-    # Categorize playable cards
-    playable_units = [c for c in playable if c.card_type == CardType.UNIT]
-    playable_spells = [c for c in playable if c.card_type == CardType.SPELL]
-    playable_gear = [c for c in playable if c.card_type == CardType.GEAR]
-    
-    card_values = {
-        card.card_id: _calculate_card_value(card, turn, battlefield_analysis, my_legend)
-        for card in playable
-    }
-    
-    # Generate recommendations
-    recommendations: List[PlayableCardRecommendation] = []
-    recommended_ids: List[str] = []
-    priority = 1
-    
-    # Strategy 1: Fill empty battlefields
-    if battlefield_analysis['empty_battlefields'] > 0 and playable_units:
-        priority = _recommend_battlefield_development(
-            playable_units,
-            battlefields,
-            battlefield_analysis,
-            card_values,
-            recommendations,
-            recommended_ids,
-            priority,
-            game_phase
-        )
-    
-    # Strategy 2: Contest opponent-controlled battlefields
-    if battlefield_analysis['opponent_only_battlefields'] > 0 and playable_units:
-        priority = _recommend_contested_plays(
-            playable_units,
-            battlefields,
-            battlefield_analysis,
-            card_values,
-            recommendations,
-            recommended_ids,
-            priority
-        )
-    
-    # Strategy 3: Removal spells
-    if battlefield_analysis['opponent_units'] > 0 and playable_spells:
-        priority = _recommend_removal_spells(
-            playable_spells,
-            threat_level,
-            card_values,
-            recommendations,
-            recommended_ids,
-            priority
-        )
-    
-    # Strategy 4: Gear
-    if battlefield_analysis['my_units'] > 0 and playable_gear:
-        priority = _recommend_gear(
-            playable_gear,
-            battlefield_analysis,
-            card_values,
-            recommendations,
-            recommended_ids,
-            priority
-        )
-    
-    # Strategy 5: Utility spells
-    if playable_spells:
-        priority = _recommend_utility_spells(
-            playable_spells,
-            phase,
-            battlefield_analysis,
-            card_values,
-            recommendations,
-            recommended_ids,
-            priority
-        )
-    
-    # Add remaining playable cards as lower priority
-    for card in playable:
-        if card.card_id not in recommended_ids:
-            reason = _get_low_priority_reason(card, game_phase, battlefield_analysis) 
-            
-            recommendations.append(
-                PlayableCardRecommendation(
-                    card_id=card.card_id,
-                    name=card.name,
-                    card_type=card.card_type,
-                    energy_cost=card.energy_cost,
-                    priority=priority,
-                    recommended=False,
-                    reason=reason,
-                    value_score=card_values.get(card.card_id, 0.0)
-                )
-            )
-            priority += 1
-    
-    # Sort by priority
-    recommendations.sort(key=lambda r: r.priority)
-    
-    # Generate multiple play strategies
-    strategies, primary_strategy_ids = _generate_play_strategies(
-        recommendations,
-        my_energy,
-        game_phase,
-        battlefield_analysis
-    )
-
-    # Calculate efficiency based on primary strategy
-    if primary_strategy_ids:
-        primary_strategy = next(s for s in strategies if s.card_ids == primary_strategy_ids)
-        recommended_energy = primary_strategy.total_energy
-    else:
-        recommended_energy = 0
-
-    efficiency_score = recommended_energy / my_energy if my_energy > 0 else 0.0
-
-    efficiency_pct = (recommended_energy / my_energy * 100) if my_energy > 0 else 0
-    mana_note = f"Primary strategy uses {recommended_energy}/{my_energy} energy ({efficiency_pct:.0f}%)"
-
-    if efficiency_score >= 0.9:
-        mana_note += " - efficient resource usage"
-    elif efficiency_score < 0.5:
-        mana_note += " - conservative play, holding resources"
-
-    if len(strategies) > 1:
-        mana_note += f". {len(strategies)} alternative strategies available."
-
-    # Use comprehensive summary builder
-    summary = build_strategy_summary(
-        turn,
-        game_phase,
-        phase,
-        len(primary_strategy_ids),
-        len(playable),
-        battlefield_analysis,
-        threat_level,
-        my_score,
-        opponent_score,
-    )
-
-    # Debug info
-    scoring_debug = ScoringDebugInfo(
-        card_value_scores=card_values,
-        threat_assessment={"level": threat_level, "details": battlefield_analysis},
-        mana_efficiency_score=efficiency_score,
-        battlefield_analyses=[bf.model_dump() for bf in battlefields],
-        game_phase=game_phase
-    )
-
-    return PlayableCardsAdvice(
-        playable_cards=recommendations,
-        recommended_strategies=strategies,  # Multiple strategies
-        primary_strategy=primary_strategy_ids,  # Best strategy
-        recommended_plays=primary_strategy_ids,
-        summary=summary,
-        mana_efficiency_note=mana_note,
-        scoring_debug=scoring_debug
-    )
-
-
-def _adjust_recommendations_for_resources(
+def _adjust_recommendations_for_resources_legacy(
     recommendations: List[PlayableCardRecommendation],
     recommended_ids: List[str],
     my_energy: int

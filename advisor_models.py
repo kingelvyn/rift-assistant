@@ -134,18 +134,18 @@ class PlayableCardsRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "hand_ids": ["OGN-034", "OGN-082", "OGN-142", "OGN-189"],
-                "legend_id": "OGN-259",
-                "opponent_legend_id": "OGN-247",
-                "my_energy": 7,
-                "my_power": {"chaos": 4, "calm": 3},
-                "turn": 4,
+                "hand_ids": ["OGN-185", "OGN-058", "OGN-168", "OGN-183"],
+                "legend_id": "OGN-305",
+                "opponent_legend_id": "OGN-299",
+                "my_energy": 6,
+                "my_power": {"chaos": 3, "calm": 3},
+                "turn": 3,
                 "phase": "main",
                 "going_first": True,
                 "battlefields": [
                     {
                         "battlefield_id": None,
-                        "my_unit_id": "OGN-034",
+                        "my_unit_id": "OGN-052",
                         "my_unit_might": 2,
                         "opponent_unit_id": None,
                         "opponent_unit_might": None
@@ -154,14 +154,14 @@ class PlayableCardsRequest(BaseModel):
                         "battlefield_id": None,
                         "my_unit_id": None,
                         "my_unit_might": None,
-                        "opponent_unit_id": "OGN-197",
-                        "opponent_unit_might": 1
+                        "opponent_unit_id": "OGN-012",
+                        "opponent_unit_might": 4
                     }
                 ],
                 "my_legend_exhausted": False,
                 "opponent_legend_exhausted": False,
-                "my_score": 0,
-                "opponent_score": 0
+                "my_score": 2,
+                "opponent_score": 2
             }
         }
 
