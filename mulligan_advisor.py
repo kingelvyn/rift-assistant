@@ -24,7 +24,6 @@ def analyze_mulligan(
     - Keep exactly one 3-cost unit as curve topper
     - Mulligan most 4+ cost cards unless they have synergy
     - Value cheap interaction (removal, combat tricks)
-    - Never mulligan all 4 cards
     - Consider rune curve (can you cast your cards on curve?)
     """
     if not hand:
@@ -192,7 +191,7 @@ def _evaluate_unit(
             )
             
             if has_lord_effect:
-                return True, "3-cost lord effect: builds around other units - keep for synergy."
+                return True, "3-cost static effect: builds around other units - keep for synergy."
             
             # Evaluate quality of the 3-drop
             if might >= 3:
@@ -239,45 +238,155 @@ def _evaluate_non_unit(
     has_legend_synergy: bool,
     is_rune_dead: bool
 ) -> Tuple[bool, str]:
-    """Evaluate spell/gear cards for mulligan."""
+    """Evaluate spell/gear cards for mulligan. NOW WITH ABILITY PARSING."""
+    from ability_parser import AbilityType, EffectTarget, EffectTiming
+    
+    # Ensure abilities are parsed
+    if not card.parsed_abilities and card.rules_text:
+        card.parse_abilities()
+    
     cost = card.energy_cost
     tags_lower = [t.lower() for t in (card.tags or [])]
     keywords_lower = [k.lower() for k in (card.keywords or [])]
     
-    # Identify card function
-    is_removal = any(tag in tags_lower for tag in ['removal', 'destroy', 'damage'])
-    is_draw = 'draw' in tags_lower or 'cycle' in tags_lower
-    is_combat_trick = any(kw in keywords_lower for kw in ['ambush', 'fast'])
+    # === NEW: Parse ability types ===
+    ability_types = {a.ability_type for a in card.parsed_abilities}
     
-    # Free spells - always keep
+    # Identify card function via PARSED ABILITIES (more accurate than tags!)
+    is_removal = any(
+        t in ability_types 
+        for t in [AbilityType.DESTROY, AbilityType.DAMAGE, AbilityType.EXILE, AbilityType.BOUNCE]
+    )
+    
+    is_draw = AbilityType.DRAW_CARDS in ability_types
+    
+    is_combat_trick = any(
+        a.timing == EffectTiming.INSTANT or 
+        a.ability_type in {AbilityType.BUFF_TARGET, AbilityType.BUFF_SELF}
+        for a in card.parsed_abilities
+    ) or any(kw in keywords_lower for kw in ['ambush', 'fast'])
+    
+    is_board_wipe = any(
+        a.ability_type == AbilityType.DESTROY and
+        a.effect_target in {EffectTarget.ALL_UNITS, EffectTarget.OPPONENT_UNITS}
+        for a in card.parsed_abilities
+    )
+    
+    # NEW: Check for powerful ETB enablers (for gear)
+    enables_etb = card.card_type == CardType.GEAR and any(
+        a.ability_type in {AbilityType.BUFF_TARGET, AbilityType.BUFF_SELF}
+        for a in card.parsed_abilities
+    )
+    
+    # Fallback to tags if no parsed abilities (shouldn't happen, but safe)
+    if not card.parsed_abilities:
+        is_removal = any(tag in tags_lower for tag in ['removal', 'destroy', 'damage'])
+        is_draw = 'draw' in tags_lower or 'cycle' in tags_lower
+    
+    # === FREE SPELLS (0 cost) ===
     if cost == 0:
-        return True, "Zero-cost spell: free value, always keep."
+        if is_removal:
+            return True, "Zero-cost removal: free answer, always keep."
+        elif is_draw:
+            return True, "Zero-cost card draw: free card advantage, always keep."
+        else:
+            return True, "Zero-cost spell: free value, always keep."
     
-    # 1-cost spells - usually keep
+    # === 1-COST SPELLS ===
     if cost == 1:
         if is_removal:
-            return True, "Cheap removal (cost 1): answers early threats."
+            # Check damage value if available
+            damage_abilities = [
+                a for a in card.parsed_abilities 
+                if a.ability_type == AbilityType.DAMAGE
+            ]
+            if damage_abilities and damage_abilities[0].effect_value:
+                damage = damage_abilities[0].effect_value
+                return True, f"Cheap removal dealing {damage} damage: answers early threats."
+            else:
+                return True, "Cheap removal (cost 1): answers early threats."
+        
         elif is_draw:
-            return True, "Cheap card draw: helps find better cards."
+            draw_count = next(
+                (a.effect_value for a in card.parsed_abilities 
+                 if a.ability_type == AbilityType.DRAW_CARDS),
+                1
+            )
+            if draw_count >= 2:
+                return True, f"Cheap cantrip drawing {draw_count} cards: excellent card advantage."
+            else:
+                return True, "Cheap card draw: helps find better cards."
+        
         elif is_combat_trick:
-            return True, "Fast spell (cost 1): flexible combat trick."
+            return True, "Fast spell (cost 1): flexible combat trick for early trades."
+        
         else:
             return True, "Cheap utility (cost 1): flexible early game."
     
-    # 2-cost spells - conditional
+    # === 2-COST SPELLS ===
     if cost == 2:
         if is_removal:
+            # Check if it's high-quality removal
+            destroy_abilities = [
+                a for a in card.parsed_abilities 
+                if a.ability_type == AbilityType.DESTROY
+            ]
+            
+            if destroy_abilities:
+                return True, "Cheap unconditional removal: critical interaction for any threat."
+            
+            # Check damage value
+            damage_abilities = [
+                a for a in card.parsed_abilities 
+                if a.ability_type == AbilityType.DAMAGE
+            ]
+            
+            if damage_abilities and damage_abilities[0].effect_value:
+                damage = damage_abilities[0].effect_value
+                if damage >= 3:
+                    return True, f"Efficient removal ({damage} damage): handles most early threats."
+            
             return True, "Cheap removal: critical interaction for early board."
         
-        if is_draw and hand_state['spell_count'] <= 2:
-            return True, "Card draw: helps smooth draws and find threats."
+        if is_draw:
+            draw_count = next(
+                (a.effect_value for a in card.parsed_abilities 
+                 if a.ability_type == AbilityType.DRAW_CARDS),
+                1
+            )
+            
+            if hand_state['spell_count'] <= 2:
+                return True, f"Card draw ({draw_count} cards): helps smooth draws and find threats."
+            elif draw_count >= 2:
+                return True, f"Strong card draw ({draw_count} cards): worth keeping despite spell count."
         
         if has_legend_synergy:
             return True, "2-cost spell with legend synergy: enables combos."
         
-        # Gear that buffs units
-        if card.card_type == CardType.GEAR and hand_state['cheap_unit_count'] >= 1:
-            return True, "Cheap gear with units: creates strong early threats."
+        # NEW: Gear evaluation based on parsed abilities
+        if card.card_type == CardType.GEAR:
+            if hand_state['cheap_unit_count'] >= 1:
+                # Check buff value
+                buff_abilities = [
+                    a for a in card.parsed_abilities
+                    if a.ability_type in {AbilityType.BUFF_TARGET, AbilityType.BUFF_SELF}
+                ]
+                
+                if buff_abilities and buff_abilities[0].effect_value:
+                    buff = buff_abilities[0].effect_value
+                    return True, f"Cheap gear (+{buff} buff) with units: creates strong early threats."
+                
+                # Check for keyword grants
+                keyword_grants = []
+                for a in card.parsed_abilities:
+                    if a.keywords_granted:
+                        keyword_grants.extend(a.keywords_granted)
+                
+                if keyword_grants:
+                    keywords_str = ', '.join(keyword_grants[:2])
+                    return True, f"Cheap gear granting {keywords_str}: powerful with early units."
+                
+                return True, "Cheap gear with units: creates strong early threats."
         
         # Too spell-heavy or no board presence?
         if hand_state['spell_count'] >= 2 and hand_state['cheap_unit_count'] == 0:
@@ -285,19 +394,72 @@ def _evaluate_non_unit(
         
         return True, "Cheap utility: acceptable in balanced hand."
     
-    # 3+ cost spells - usually mulligan
+    # === 3+ COST SPELLS ===
+    
+    # Always keep if strong legend synergy
     if has_legend_synergy:
         return True, f"Expensive spell ({cost}) with legend synergy: worth keeping for combo."
     
-    # Critical removal at 3 cost
-    if cost == 3 and is_removal:
+    # NEW: Board wipes are keepable with early game
+    if is_board_wipe and cost <= 4:
+        if hand_state['cheap_unit_count'] >= 2:
+            return True, f"Board wipe ({cost} cost) with early curve: nuclear option against wide boards."
+    
+    # Critical removal at 3-4 cost
+    if cost <= 4 and is_removal:
         if hand_state['cheap_unit_count'] >= 2 and hand_state['removal_count'] == 0:
-            return True, "Mid-cost removal with early curve: handles mid-game threats."
+            # Check removal quality
+            has_destroy = AbilityType.DESTROY in ability_types
+            
+            damage_abilities = [
+                a for a in card.parsed_abilities 
+                if a.ability_type == AbilityType.DAMAGE
+            ]
+            high_damage = any(
+                a.effect_value and a.effect_value >= 4 
+                for a in damage_abilities
+            )
+            
+            if has_destroy:
+                return True, f"Unconditional removal ({cost} cost) with early curve: answers any threat."
+            elif high_damage:
+                damage_val = next(a.effect_value for a in damage_abilities if a.effect_value)
+                return True, f"High-damage removal ({damage_val} damage) with early curve: kills big threats."
+            else:
+                return True, f"Mid-cost removal ({cost} cost) with early curve: handles mid-game threats."
     
     # Combat tricks that can swing combat
     if cost == 3 and is_combat_trick:
         if hand_state['cheap_unit_count'] >= 2:
+            # Check buff value
+            buff_abilities = [
+                a for a in card.parsed_abilities
+                if a.ability_type in {AbilityType.BUFF_TARGET, AbilityType.BUFF_SELF}
+            ]
+            
+            if buff_abilities and buff_abilities[0].effect_value:
+                buff = buff_abilities[0].effect_value
+                return True, f"Combat trick (+{buff} buff) with early units: creates favorable trades."
+            
             return True, "Combat trick with early units: creates favorable trades."
+    
+    # NEW: Card draw at 3+ cost is keepable in specific scenarios
+    if is_draw and cost <= 4:
+        draw_count = next(
+            (a.effect_value for a in card.parsed_abilities 
+             if a.ability_type == AbilityType.DRAW_CARDS),
+            1
+        )
+        
+        if draw_count >= 3:
+            if hand_state['cheap_unit_count'] >= 1:
+                return True, f"Powerful card draw ({draw_count} cards): worth keeping for refill."
+    
+    # NEW: Protection spells
+    has_protection = AbilityType.PROTECTION in ability_types
+    if has_protection and cost <= 3:
+        if hand_state['cheap_unit_count'] >= 2:
+            return True, f"Protection spell ({cost} cost) with early units: keeps threats alive."
     
     # Too top-heavy?
     if hand_state['high_cost_count'] >= 2:
@@ -307,15 +469,27 @@ def _evaluate_non_unit(
     if hand_state['cheap_unit_count'] == 0 and cost >= 3:
         return False, f"Expensive spell without early game: seeking cheaper plays."
     
+    # Expensive gear without targets
+    if card.card_type == CardType.GEAR and hand_state['cheap_unit_count'] == 0:
+        return False, f"Expensive gear ({cost}) without units: need targets first."
+    
     return False, f"Expensive spell/gear ({cost}): too slow for opening hand."
 
 
 def analyze_hand_composition(hand: List[CardInHand]) -> dict:
     """
     Analyze the composition of the hand for mulligan decisions.
+    NOW ENHANCED with ability parsing for accurate card categorization.
     
     Returns dictionary with detailed hand metrics.
     """
+    from ability_parser import AbilityType, EffectTiming
+    
+    # Ensure all cards have parsed abilities
+    for card in hand:
+        if not card.parsed_abilities and card.rules_text:
+            card.parse_abilities()
+    
     unit_count = sum(1 for c in hand if c.card_type == CardType.UNIT)
     cheap_unit_count = sum(
         1 for c in hand 
@@ -325,11 +499,48 @@ def analyze_hand_composition(hand: List[CardInHand]) -> dict:
     gear_count = sum(1 for c in hand if c.card_type == CardType.GEAR)
     high_cost_count = sum(1 for c in hand if c.energy_cost >= 4)
     
-    # Count removal spells
+    # === NEW: Count removal via PARSED ABILITIES (more accurate!) ===
+    removal_types = {
+        AbilityType.DESTROY,
+        AbilityType.DAMAGE,
+        AbilityType.EXILE,
+        AbilityType.BOUNCE
+    }
+    
     removal_count = sum(
         1 for c in hand 
         if c.card_type in [CardType.SPELL, CardType.GEAR] and
-        any(tag.lower() in ['removal', 'destroy', 'damage'] for tag in (c.tags or []))
+        any(a.ability_type in removal_types for a in c.parsed_abilities)
+    )
+    
+    # === NEW: Count card draw ===
+    draw_count = sum(
+        1 for c in hand
+        if any(a.ability_type == AbilityType.DRAW_CARDS for a in c.parsed_abilities)
+    )
+    
+    # === NEW: Count combat tricks (instant-speed interaction) ===
+    combat_trick_count = sum(
+        1 for c in hand
+        if any(
+            a.timing == EffectTiming.INSTANT or
+            (a.ability_type in {AbilityType.BUFF_TARGET, AbilityType.BUFF_SELF} and
+             any(k.lower() in ['fast', 'ambush'] for k in (c.keywords or [])))
+            for a in c.parsed_abilities
+        )
+    )
+    
+    # === NEW: Count ETB units ===
+    etb_unit_count = sum(
+        1 for c in hand
+        if c.card_type == CardType.UNIT and
+        any(a.ability_type == AbilityType.ENTERS_BATTLEFIELD for a in c.parsed_abilities)
+    )
+    
+    # === NEW: Count lord effects (static buffs) ===
+    lord_count = sum(
+        1 for c in hand
+        if any(a.ability_type == AbilityType.STATIC_BUFF for a in c.parsed_abilities)
     )
     
     total_cost = sum(c.energy_cost for c in hand)
@@ -354,6 +565,10 @@ def analyze_hand_composition(hand: List[CardInHand]) -> dict:
         'gear_count': gear_count,
         'high_cost_count': high_cost_count,
         'removal_count': removal_count,
+        'draw_count': draw_count,  # NEW
+        'combat_trick_count': combat_trick_count,  # NEW
+        'etb_unit_count': etb_unit_count,  # NEW
+        'lord_count': lord_count,  # NEW
         'avg_cost': avg_cost,
         'has_curve': has_curve,
         'cost_distribution': cost_distribution,
@@ -618,7 +833,7 @@ def _generate_mulligan_summary(
     mulligan_count: int,
     rune_analysis: dict
 ) -> str:
-    """Generate a human-readable summary of mulligan decisions."""
+    """Generate a human-readable summary of mulligan decisions. NOW ENHANCED."""
     summary_parts = []
     
     # Main decision summary
@@ -641,6 +856,27 @@ def _generate_mulligan_summary(
     else:
         summary_parts.append("seeking early plays")
     
+    # === NEW: Special card type callouts ===
+    special_features = []
+    
+    if composition.get('etb_unit_count', 0) > 0:
+        special_features.append(f"{composition['etb_unit_count']} ETB effect(s)")
+    
+    if composition.get('lord_count', 0) > 0:
+        special_features.append(f"{composition['lord_count']} lord effect(s)")
+    
+    if composition.get('removal_count', 0) > 0:
+        special_features.append(f"{composition['removal_count']} removal")
+    
+    if composition.get('combat_trick_count', 0) > 0:
+        special_features.append(f"{composition['combat_trick_count']} combat trick(s)")
+    
+    if composition.get('draw_count', 0) > 0:
+        special_features.append(f"{composition['draw_count']} card draw")
+    
+    if special_features:
+        summary_parts.append(f"includes {', '.join(special_features)}")
+    
     # Rune curve warning
     if not rune_analysis['castable_on_curve']:
         summary_parts.append("watch rune availability")
@@ -648,9 +884,13 @@ def _generate_mulligan_summary(
     # Hand type classification
     if composition['cheap_unit_count'] >= 3:
         summary_parts.append("aggressive tempo hand")
-    elif composition['removal_count'] >= 2:
+    elif composition.get('lord_count', 0) >= 1 and composition['cheap_unit_count'] >= 1:
+        summary_parts.append("synergy-focused hand")
+    elif composition.get('removal_count', 0) >= 2:
         summary_parts.append("interactive control hand")
     elif composition['spell_count'] >= 2 and composition['cheap_unit_count'] <= 1:
         summary_parts.append("spell-heavy hand")
+    elif composition.get('etb_unit_count', 0) >= 2:
+        summary_parts.append("value-oriented hand")
     
     return " - ".join(summary_parts) + "."

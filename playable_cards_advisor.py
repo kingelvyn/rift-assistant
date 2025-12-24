@@ -1,11 +1,10 @@
-# playable_cards_advisor.py
+# playable_cards_advisor.py 
 
 from typing import List, Optional, Dict, Tuple, Set
 from dataclasses import dataclass
 from card_evaluation import assess_threat_level
 from game_state import CardInHand, CardType, Rune, Phase
 from card_db import CardRecord
-from ability_parser import AbilityType
 from advisor_models import (
     PlayableCardsAdvice,
     PlayableCardRecommendation,
@@ -22,6 +21,7 @@ from battlefield_analysis import (
     build_strategy_summary,
 )
 
+# Import improved legend analysis
 from legend_analysis import (
     analyze_legend_synergy,
     evaluate_legend_state,
@@ -43,7 +43,7 @@ class PlaySequenceStep:
     reason: str
     dependencies: List[str] = None
     battlefield_target: Optional[int] = None
-    legend_synergies: List[str] = None  # Legend synergy descriptions
+    legend_synergies: List[str] = None  # NEW: Legend synergy descriptions
 
 
 @dataclass
@@ -54,7 +54,7 @@ class PlaySequence:
     sequence_reasoning: str
     efficiency_score: float
     risk_level: str
-    legend_integration: Optional[str] = None  # How legend fits into sequence
+    legend_integration: Optional[str] = None  # NEW: How legend fits into sequence
 
 
 def _filter_playable_cards(
@@ -71,7 +71,7 @@ def _filter_playable_cards(
         if card.energy_cost > my_energy:
             continue
         
-        # Check legend exhaustion requirement
+        # NEW: Check legend exhaustion requirement
         if requires_legend_exhaustion(card):
             if not can_exhaust_legend(player_state):
                 continue  # Can't play this card without ready legend
@@ -115,7 +115,7 @@ def _identify_card_dependencies(
     hand: List[CardInHand],
     battlefields: List[BattlefieldState],
     player_state,
-    card_synergies: Dict[str, List]  # Pass in synergies
+    card_synergies: Dict[str, List]  # NEW: Pass in synergies
 ) -> List[str]:
     """
     Identify which other cards should be played before this one.
@@ -207,7 +207,7 @@ def _calculate_play_priority(
     game_phase: str,
     threat_level: str,
     current_phase: str,
-    legend_modifier: float  # Legend synergy value
+    legend_modifier: float  # NEW: Legend synergy value
 ) -> float:
     """
     Calculate priority score for playing a card.
@@ -228,7 +228,7 @@ def _calculate_play_priority(
         if battlefield_analysis['empty_battlefields'] > 0:
             priority += 15
         
-        if 'shield' in [k.lower() for k in (card.keywords or [])]:
+        if 'guard' in [k.lower() for k in (card.keywords or [])]:
             if threat_level in ['high', 'critical']:
                 priority += 10
         
@@ -280,7 +280,7 @@ def _calculate_play_priority(
 def _build_optimal_sequence(
     cards: List[CardInHand],
     card_values: Dict[str, float],
-    card_synergies: Dict[str, List],  # Card legend synergies
+    card_synergies: Dict[str, List],  # NEW: Card legend synergies
     battlefield_analysis: dict,
     game_phase: str,
     threat_level: str,
@@ -366,7 +366,7 @@ def _build_optimal_sequence(
                 reason = _generate_step_reason(
                     card, deps, step_number, 
                     battlefield_analysis, threat_level,
-                    synergies  # Pass synergies
+                    synergies  # NEW: Pass synergies
                 )
                 
                 step = PlaySequenceStep(
@@ -378,7 +378,7 @@ def _build_optimal_sequence(
                     reason=reason,
                     dependencies=deps,
                     battlefield_target=battlefield_target,
-                    legend_synergies=synergy_descriptions 
+                    legend_synergies=synergy_descriptions  # NEW
                 )
                 
                 sequence_steps.append(step)
@@ -404,7 +404,7 @@ def _build_optimal_sequence(
     sequence_reasoning = _generate_sequence_reasoning(
         sequence_steps, efficiency_score, risk_level, 
         battlefield_analysis, threat_level,
-        legend_integration  
+        legend_integration  # NEW
     )
     
     return PlaySequence(
@@ -413,7 +413,7 @@ def _build_optimal_sequence(
         sequence_reasoning=sequence_reasoning,
         efficiency_score=efficiency_score,
         risk_level=risk_level,
-        legend_integration=legend_integration  
+        legend_integration=legend_integration  # NEW
     )
 
 
@@ -513,7 +513,7 @@ def _generate_step_reason(
     step_number: int,
     battlefield_analysis: dict,
     threat_level: str,
-    synergies: List = None  
+    synergies: List = None  # NEW
 ) -> str:
     """Generate human-readable reason for this play step."""
     
@@ -581,7 +581,7 @@ def _generate_sequence_reasoning(
     risk_level: str,
     battlefield_analysis: dict,
     threat_level: str,
-    legend_integration: Optional[str] = None  
+    legend_integration: Optional[str] = None  # NEW
 ) -> str:
     """Generate reasoning explanation for the sequence."""
     
@@ -633,7 +633,7 @@ def _generate_sequence_reasoning(
 def _generate_alternative_sequences(
     cards: List[CardInHand],
     card_values: Dict[str, float],
-    card_synergies: Dict[str, List],  
+    card_synergies: Dict[str, List],  # NEW
     battlefield_analysis: dict,
     game_phase: str,
     threat_level: str,
@@ -754,18 +754,13 @@ def _calculate_card_value(
     if card.keywords:
         keyword_values = {
             "assault": 4,
-            "shield": 3,
-            "action": 3,
-            "reaction": 3,
-            "ganking": 3,
-            "deathknell": 2,
-            "accelerate": 3,
-            "deflect": 5,
-            "hidden": 2,
-            "legion": 2,
-            "tank": 2,
-            "temporary": 1,
-            "vision": 3,
+            "guard": 3,
+            "flying": 3,
+            "ambush": 2,
+            "overwhelm": 4,
+            "lifesteal": 2,
+            "quick": 3,
+            "double strike": 5,
         }
         for keyword in card.keywords:
             value += keyword_values.get(keyword.lower(), 1)
@@ -805,40 +800,7 @@ def _calculate_card_value(
         if battlefield_analysis['contested_battlefields'] > 0:
             value += 3
     
-
-    # ability based value
-    for ability in card.parsed_abilities:
-        # ETB effects are valuable
-        if ability.ability_type == AbilityType.ENTERS_BATTLEFIELD:
-            value += 3.0
-            
-            # Extra value if it's removal
-            if ability.ability_type in {AbilityType.DESTROY, AbilityType.DAMAGE}:
-                value += 2.0
-        
-        # Static buffs are valuable with board presence
-        if ability.ability_type == AbilityType.STATIC_BUFF:
-            value += battlefield_analysis['my_units'] * 1.5
-        
-        # Cost reduction is very valuable
-        if ability.ability_type == AbilityType.COST_REDUCTION:
-            value += 4.0
-        
-        # Card draw
-        if ability.ability_type == AbilityType.DRAW_CARDS:
-            draw_amount = ability.effect_value or 1
-            value += draw_amount * 2.0
-        
-        # Removal scales with opponent threats
-        if ability.ability_type in {AbilityType.DESTROY, AbilityType.DAMAGE}:
-            damage_value = ability.effect_value or 0
-            if damage_value >= battlefield_analysis['highest_opponent_might']:
-                value += 5.0  # Can kill their biggest threat
-            else:
-                value += 2.0
-
-
-    # === Legend synergy integration ===
+    # === NEW: Legend synergy integration ===
     synergies, legend_modifier = analyze_legend_synergy(
         card, 
         player_state, 
@@ -866,8 +828,8 @@ def analyze_playable_cards(
     going_first: bool = True,
     my_score: Optional[int] = None,
     opponent_score: Optional[int] = None,
-    player_state = None,  # Full player state for legend analysis
-    opponent_state = None,  # Full opponent state
+    player_state = None,  # NEW: Full player state for legend analysis
+    opponent_state = None,  # NEW: Full opponent state
 ) -> PlayableCardsAdvice:
     """
     Analyze playable cards for Riftbound 1v1 with legend integration.
@@ -932,7 +894,7 @@ def analyze_playable_cards(
         battlefield_analysis, opponent_score, my_score
     )
     
-    # === Evaluate legend state ===
+    # === NEW: Evaluate legend state ===
     legend_evaluation = evaluate_legend_state(player_state)
     
     # Calculate card values WITH legend synergies
