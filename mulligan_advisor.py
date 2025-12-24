@@ -150,12 +150,26 @@ def _evaluate_unit(
     is_rune_dead: bool
 ) -> Tuple[bool, str]:
     """Evaluate unit cards for mulligan."""
+    from ability_parser import AbilityType
+    
+    # Ensure abilities are parsed
+    if not card.parsed_abilities and card.rules_text:
+        card.parse_abilities()
+    
     cost = card.energy_cost
     might = card.might or 0
-
-
+    
     # Cheap units (0-2 cost) - highest priority keeps
     if cost <= 2:
+        # NEW: Check for ETB abilities (extra valuable)
+        has_etb = any(
+            a.ability_type == AbilityType.ENTERS_BATTLEFIELD
+            for a in card.parsed_abilities
+        )
+        
+        if has_etb:
+            return True, f"Cheap unit with enters-battlefield effect: excellent early value."
+        
         # Check for premium keywords
         premium_keywords = _get_premium_keywords(card.keywords)
         
@@ -171,6 +185,15 @@ def _evaluate_unit(
     # 3-cost units - keep first one, mulligan rest
     elif cost == 3:
         if not hand_state['kept_any_3_cost_unit']:
+            # NEW: Check for static buffs (lord effects)
+            has_lord_effect = any(
+                a.ability_type == AbilityType.STATIC_BUFF
+                for a in card.parsed_abilities
+            )
+            
+            if has_lord_effect:
+                return True, "3-cost lord effect: builds around other units - keep for synergy."
+            
             # Evaluate quality of the 3-drop
             if might >= 3:
                 return True, "Strong 3-cost unit: solid curve topper with good stats."
@@ -340,6 +363,62 @@ def analyze_hand_composition(hand: List[CardInHand]) -> dict:
     }
 
 
+def analyze_rune_curve(hand: List[CardInHand], legend_card: Optional[CardRecord]) -> dict:
+    """
+    Analyze whether the hand has good rune curve.
+    
+    In Riftbound, you need matching domain/rune cards to generate runes.
+    A card is "dead" if you can't reliably cast it on curve.
+    
+    Returns:
+        - dead_cards: List of card IDs that are off-domain and expensive
+        - rune_sources: Count of cards that generate each rune type
+        - castable_on_curve: Whether hand has good rune distribution
+    """
+    legend_domain = legend_card.domain if legend_card else None
+    
+    # Count rune sources by domain
+    rune_sources = {}
+    for card in hand:
+        domain = card.domain
+        if domain not in rune_sources:
+            rune_sources[domain] = 0
+        rune_sources[domain] += 1
+    
+    # Add legend's domain
+    if legend_domain:
+        if legend_domain not in rune_sources:
+            rune_sources[legend_domain] = 0
+        rune_sources[legend_domain] += 1
+    
+    # Identify cards that are hard to cast (off-domain + expensive)
+    dead_cards = []
+    for card in hand:
+        if card.energy_cost >= 3:
+            # Check if we have rune sources for this card
+            card_rune_sources = rune_sources.get(card.domain, 0)
+            
+            # If this card is our only source of its domain, it might be dead
+            if card_rune_sources <= 1:
+                dead_cards.append(card.card_id)
+    
+    # Assess overall castability
+    total_rune_sources = sum(rune_sources.values())
+    unique_domains = len(rune_sources)
+    
+    castable_on_curve = (
+        total_rune_sources >= 3 and  # Enough rune generation
+        (unique_domains <= 2 or total_rune_sources >= 4)  # Not too spread out
+    )
+    
+    return {
+        'dead_cards': dead_cards,
+        'rune_sources': rune_sources,
+        'castable_on_curve': castable_on_curve,
+        'unique_domains': unique_domains,
+    }
+
+
 def identify_legend_synergies(
     hand: List[CardInHand], 
     legend_card: Optional[CardRecord]
@@ -391,6 +470,15 @@ def identify_legend_synergies(
     return synergy_cards
 
 
+def _get_premium_keywords(keywords: List[str]) -> List[str]:
+    """Extract premium keywords that significantly impact mulligan value."""
+    if not keywords:
+        return []
+    
+    premium = ['assault', 'guard', 'ambush', 'flying', 'lifesteal', 'double strike']
+    return [k for k in keywords if k.lower() in premium]
+
+
 def _enforce_mulligan_limit(
     decisions: List[MulliganCardDecision],
     hand: List[CardInHand],
@@ -434,6 +522,45 @@ def _enforce_mulligan_limit(
             f"Originally suggested mulligan, but kept due to 2-card limit. "
             f"Less critical to replace than other mulliganed cards."
         )
+    
+    return decisions
+
+
+def _ensure_keep_at_least_one(
+    decisions: List[MulliganCardDecision],
+    hand: List[CardInHand]
+) -> List[MulliganCardDecision]:
+    """
+    Ensure at least one card is kept (never mulligan all 4).
+    If all 4 are marked for mulligan, keep the best one.
+    """
+    to_keep = [d for d in decisions if d.keep]
+    
+    # If we're keeping at least one card, we're good
+    if len(to_keep) > 0:
+        return decisions
+    
+    # All 4 marked for mulligan - keep the best one
+    # Calculate "keep priority" (inverse of mulligan priority)
+    keep_priority = []
+    for decision in decisions:
+        card = next((c for c in hand if c.card_id == decision.card_id), None)
+        if not card:
+            continue
+        
+        priority = -_calculate_mulligan_priority(card)  # Invert for keeping
+        keep_priority.append((priority, decision, card))
+    
+    # Sort by priority (highest = best card to keep)
+    keep_priority.sort(key=lambda x: x[0], reverse=True)
+    
+    # Keep the best card
+    best_priority, best_decision, best_card = keep_priority[0]
+    best_decision.keep = True
+    best_decision.reason = (
+        f"Keeping {best_card.name} as best option. "
+        f"(Cannot mulligan all 4 cards per game rules)."
+    )
     
     return decisions
 
@@ -527,108 +654,3 @@ def _generate_mulligan_summary(
         summary_parts.append("spell-heavy hand")
     
     return " - ".join(summary_parts) + "."
-
-
-def analyze_rune_curve(hand: List[CardInHand], legend_card: Optional[CardRecord]) -> dict:
-    """
-    Analyze whether the hand has good rune curve.
-    
-    In Riftbound, you need matching domain/rune cards to generate runes.
-    A card is "dead" if you can't reliably cast it on curve.
-    
-    Returns:
-        - dead_cards: List of card IDs that are off-domain and expensive
-        - rune_sources: Count of cards that generate each rune type
-        - castable_on_curve: Whether hand has good rune distribution
-    """
-    legend_domain = legend_card.domain if legend_card else None
-    
-    # Count rune sources by domain
-    rune_sources = {}
-    for card in hand:
-        domain = card.domain
-        if domain not in rune_sources:
-            rune_sources[domain] = 0
-        rune_sources[domain] += 1
-    
-    # Add legend's domain
-    if legend_domain:
-        if legend_domain not in rune_sources:
-            rune_sources[legend_domain] = 0
-        rune_sources[legend_domain] += 1
-    
-    # Identify cards that are hard to cast (off-domain + expensive)
-    dead_cards = []
-    for card in hand:
-        if card.energy_cost >= 3:
-            # Check if we have rune sources for this card
-            card_rune_sources = rune_sources.get(card.domain, 0)
-            
-            # If this card is our only source of its domain, it might be dead
-            if card_rune_sources <= 1:
-                dead_cards.append(card.card_id)
-    
-    # Assess overall castability
-    total_rune_sources = sum(rune_sources.values())
-    unique_domains = len(rune_sources)
-    
-    castable_on_curve = (
-        total_rune_sources >= 3 and  # Enough rune generation
-        (unique_domains <= 2 or total_rune_sources >= 4)  # Not too spread out
-    )
-    
-    return {
-        'dead_cards': dead_cards,
-        'rune_sources': rune_sources,
-        'castable_on_curve': castable_on_curve,
-        'unique_domains': unique_domains,
-    }
-
-
-def _get_premium_keywords(keywords: List[str]) -> List[str]:
-    """Extract premium keywords that significantly impact mulligan value."""
-    if not keywords:
-        return []
-    
-    premium = ['assault', 'guard', 'ambush', 'flying', 'lifesteal', 'double strike']
-    return [k for k in keywords if k.lower() in premium]
-
-
-def _ensure_keep_at_least_one(
-    decisions: List[MulliganCardDecision],
-    hand: List[CardInHand]
-) -> List[MulliganCardDecision]:
-    """
-    Ensure at least one card is kept (never mulligan all 4).
-    If all 4 are marked for mulligan, keep the best one.
-    """
-    to_keep = [d for d in decisions if d.keep]
-    
-    # If we're keeping at least one card, we're good
-    if len(to_keep) > 0:
-        return decisions
-    
-    # All 4 marked for mulligan - keep the best one
-    # Calculate "keep priority" (inverse of mulligan priority)
-    keep_priority = []
-    for decision in decisions:
-        card = next((c for c in hand if c.card_id == decision.card_id), None)
-        if not card:
-            continue
-        
-        priority = -_calculate_mulligan_priority(card)  # Invert for keeping
-        keep_priority.append((priority, decision, card))
-    
-    # Sort by priority (highest = best card to keep)
-    keep_priority.sort(key=lambda x: x[0], reverse=True)
-    
-    # Keep the best card
-    best_priority, best_decision, best_card = keep_priority[0]
-    best_decision.keep = True
-    best_decision.reason = (
-        f"Keeping {best_card.name} as best option. "
-        f"(Cannot mulligan all 4 cards per game rules)."
-    )
-    
-    return decisions
-
